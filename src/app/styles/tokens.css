@@ -1,0 +1,27 @@
+/*
+ * Design tokens from Figma (제목 없음, node 1:7 "color").
+ * sub-01 / sub-02: the hex label text in the Figma frame doesn't match the actual
+ * swatch fill (#313DF6 vs #B196DC, #005BAC vs #F5F0FC) — using the actual fill color.
+ * Gray05~07 not yet pulled from Figma (MCP rate limit) — add them here once available.
+ */
+@theme {
+  --color-main: #e0d3f6;
+  --color-sub-01: #b196dc;
+  --color-sub-02: #f5f0fc;
+  --color-gray-01: #14181d;
+  --color-gray-02: #35393d;
+  --color-gray-03: #53575c;
+  --color-gray-04: #666b6f;
+
+  /* Font file for BM JUA still needs to be added (e.g. @font-face or a CDN import). */
+  --font-jua: 'BM JUA', 'Apple SD Gothic Neo', sans-serif;
+
+  --text-head-00: 44px;
+  --text-head-01: 32px;
+  --text-head-02: 28px;
+  --text-head-03: 24px; /* Bold in Figma — pair with font-bold */
+  --text-body-01: 20px;
+  --text-body-02: 18px;
+  --text-body-03: 16px;
+  --text-body-04: 14px;
+}
