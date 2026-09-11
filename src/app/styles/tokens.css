@@ -1,27 +1,80 @@
-/*
- * Design tokens from Figma (제목 없음, node 1:7 "color").
- * sub-01 / sub-02: the hex label text in the Figma frame doesn't match the actual
- * swatch fill (#313DF6 vs #B196DC, #005BAC vs #F5F0FC) — using the actual fill color.
- * Gray05~07 not yet pulled from Figma (MCP rate limit) — add them here once available.
+/**
+ * 1) PRIMITIVE — 색상표 원본. 컴포넌트에서 직접 사용 금지, semantic에서만 참조.
+ * 2) SEMANTIC  — 컴포넌트는 여기서부터만 사용 (Tailwind 유틸리티로 노출됨: bg-primary 등)
+ * 3) TYPOGRAPHY / RADIUS — 그 외 스케일
+ *
+ * 네이밍: 회색은 숫자가 클수록 어두움 (Tailwind 기본 gray 스케일과 같은 방향)
+ * 출처: Figma "제목 없음" 파일 node 1:7 (색상/타이포), design.md (spacing/radius)
+ *
+ * SPACING: design.md의 4/8/12/16/24/32/48px 스케일은 Tailwind 기본 스케일(4px 단위)과
+ * 정확히 일치해서(1=4px,2=8px,3=12px,4=16px,6=24px,8=32px,12=48px) 별도 토큰 없이
+ * p-1/p-2/p-3/p-4/p-6/p-8/p-12 그대로 씁니다.
  */
-@theme {
-  --color-main: #e0d3f6;
-  --color-sub-01: #b196dc;
-  --color-sub-02: #f5f0fc;
-  --color-gray-01: #14181d;
-  --color-gray-02: #35393d;
-  --color-gray-03: #53575c;
-  --color-gray-04: #666b6f;
 
-  /* Font file for BM JUA still needs to be added (e.g. @font-face or a CDN import). */
+@font-face {
+  font-family: 'BM JUA';
+  src: url('/fonts/BMJUA.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---- 1) PRIMITIVE ---- */
+
+  /* purple (Figma: MainColor01 / SubColor01 / SubColor02) */
+  --purple-100: #f5f0fc; 
+  --purple-300: #b196dc; 
+  --purple-500: #e0d3f6; 
+
+  /* gray — 숫자가 클수록 어두움. 05~07은 Figma MCP 레이트리밋으로 아직 미확보 (TODO) */
+  --gray-900: #14181d; /* Gray01 */
+  --gray-800: #35393d; /* Gray02 */
+  --gray-700: #53575c; /* Gray03 */
+  --gray-600: #666b6f; /* Gray04 */
+  /* --gray-500 ~ --gray-200 : TODO — Figma Gray05~07 확보되면 채우기 */
+
+  --white: #ffffff;
+}
+
+@theme {
+  /* ---- 2) SEMANTIC — 컴포넌트는 여기서부터만 사용 ----
+   * 아직 실제로 붙는 컴포넌트가 없어서 "어디에 쓰이는지"는 확정이 아니라 1차 추정입니다.
+   * 컴포넌트 만들면서 실제 쓰임이 정해지면 이 주석을 갱신하세요.
+   */
+
+  /* Brand / Action */
+  --color-primary: var(--purple-300); /* 채도 높은 쪽을 액션 컬러로 1차 추정 (버튼 등) */
+  --color-primary-tint: var(--purple-500); /* 파스텔 카드/배경 강조 (design.md의 "라벤더 SaaS 카드") */
+  --color-primary-subtle: var(--purple-100); /* 옅은 배경 틴트 */
+
+  /* Text */
+  --color-text-strong: var(--gray-900);
+  --color-text: var(--gray-800);
+  --color-text-muted: var(--gray-700);
+  --color-text-subtle: var(--gray-600);
+
+  /* Surface */
+  --color-bg: var(--white);
+
+  /* Border — 실제 Figma 값 없음, 임시로 가장 옅은 확보 그레이 사용 (TODO: 확정되면 교체) */
+  --color-border: var(--gray-600);
+
+  /* ---- 3) TYPOGRAPHY ---- */
   --font-jua: 'BM JUA', 'Apple SD Gothic Neo', sans-serif;
 
-  --text-head-00: 44px;
-  --text-head-01: 32px;
-  --text-head-02: 28px;
-  --text-head-03: 24px; /* Bold in Figma — pair with font-bold */
-  --text-body-01: 20px;
-  --text-body-02: 18px;
-  --text-body-03: 16px;
-  --text-body-04: 14px;
+  --text-head-00: 44px; /* Regular */
+  --text-head-01: 32px; /* Regular */
+  --text-head-02: 28px; /* Regular */
+  --text-head-03: 24px; /* Bold — font-bold와 같이 사용 */
+  --text-body-01: 20px; /* Regular */
+  --text-body-02: 18px; /* Regular */
+  --text-body-03: 16px; /* Regular */
+  --text-body-04: 14px; /* Regular */
+
+  /* ---- 4) RADIUS (출처: design.md) ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
 }
