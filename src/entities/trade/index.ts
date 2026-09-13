@@ -1,1 +1,1 @@
-export type { TradeRequest, TradeRequestStatus } from './model/types'
+export type { Trade, TradeRequest, TradeRequestStatus } from './model/types'

@@ -13,3 +13,17 @@ export interface TradeRequest {
   createdAt: string
   updatedAt: string
 }
+
+// Backend table: trades — created once a trade_request is accepted and actually completed.
+// Distinguishing sale/giveaway/rental/exchange for a Trade still requires the related
+// Product.tradeType (via itemId) and TradeRequest.swapItemId (via tradeRequestId); neither
+// is duplicated onto this table.
+export interface Trade {
+  tradeId: number
+  tradeRequestId: number
+  itemId: number
+  buyerId: number
+  sellerId: number
+  completedAt: string | null
+  createdAt: string
+}
