@@ -1,19 +1,14 @@
-/**
- * 1) PRIMITIVE — 색상표 원본. 컴포넌트에서 직접 사용 금지, semantic에서만 참조.
- * 2) SEMANTIC  — 컴포넌트는 여기서부터만 사용 (Tailwind 유틸리티로 노출됨: bg-primary 등)
- * 3) TYPOGRAPHY / RADIUS — 그 외 스케일
- *
- * 네이밍: 회색은 숫자가 클수록 어두움 (Tailwind 기본 gray 스케일과 같은 방향)
- * 출처: Figma "제목 없음" 파일 node 1:7 (색상/타이포), design.md (spacing/radius)
- *
- * SPACING: design.md의 4/8/12/16/24/32/48px 스케일은 Tailwind 기본 스케일(4px 단위)과
- * 정확히 일치해서(1=4px,2=8px,3=12px,4=16px,6=24px,8=32px,12=48px) 별도 토큰 없이
- * p-1/p-2/p-3/p-4/p-6/p-8/p-12 그대로 씁니다.
- */
-
 @font-face {
   font-family: 'BM JUA';
   src: url('/fonts/BMJUA.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Moneygraphy Pixel';
+  src: url('/fonts/Moneygraphy-Pixel.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -27,14 +22,35 @@
   --purple-300: #b196dc; 
   --purple-500: #e0d3f6; 
 
-  /* gray — 숫자가 클수록 어두움. 05~07은 Figma MCP 레이트리밋으로 아직 미확보 (TODO) */
+  /* gray — 숫자가 클수록 어두움. 나머지는 Figma MCP 레이트리밋으로 아직 미확보 (TODO) */
   --gray-900: #14181d; /* Gray01 */
   --gray-800: #35393d; /* Gray02 */
   --gray-700: #53575c; /* Gray03 */
   --gray-600: #666b6f; /* Gray04 */
-  /* --gray-500 ~ --gray-200 : TODO — Figma Gray05~07 확보되면 채우기 */
+  --gray-500: #8e9397; /* Gray05 */
+  --gray-400: #AEB3B9; /* Gray06 */
+  --gray-300: #D2D7DD; /* Gray07 */
+  --gray-200: #E3E7ED; /* Gray08 */
+
+  /* --gray-400 ~ --gray-200 : TODO — Figma 레이트리밋 풀리면 나머지 3개 마저 확보 */
 
   --white: #ffffff;
+
+  /* 카테고리 칩 색상 — Figma에 없어서 design.md 규칙(중간 명도, 파스텔 톤 구분)에 맞춰 새로 정의.
+   * design.md: "카테고리는 아이콘이 아니라 배경 칩 색으로 구분" */
+  --mint-100: #e5efe9;
+  --mint-600: #638571;
+  --peach-100: #faeae3;
+  --peach-600: #ac7563;
+  --blue-100: #e5edf8;
+  --blue-600: #6b84a3;
+
+  /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
+  --cosmic-950: #100c2c;
+  --cosmic-600: #6b6be1;
+  --cosmic-400: #a9a9ee;
+  --cosmic-300: #c2c2f3;
+  --cosmic-100: #dfdffa;
 }
 
 @theme {
@@ -56,12 +72,41 @@
 
   /* Surface */
   --color-bg: var(--white);
+  --color-bg-subtle: var(--gray-200);
 
   /* Border — 실제 Figma 값 없음, 임시로 가장 옅은 확보 그레이 사용 (TODO: 확정되면 교체) */
-  --color-border: var(--gray-600);
+  --color-border: var(--gray-300);
+
+  /* Category chips (design.md) */
+  --color-mint: var(--mint-600);
+  --color-mint-subtle: var(--mint-100);
+  --color-peach: var(--peach-600);
+  --color-peach-subtle: var(--peach-100);
+  --color-blue: var(--blue-600);
+  --color-blue-subtle: var(--blue-100);
+
+  /* 우주 임팩트 배경 전용 (design.md 6장 예외 조항 — 화면당 배경 1곳까지) */
+  --color-cosmic-bg: var(--cosmic-950);
+  --color-cosmic: var(--cosmic-600);
+  --color-cosmic-tint: var(--cosmic-400);
+  --color-cosmic-subtle: var(--cosmic-300);
 
   /* ---- 3) TYPOGRAPHY ---- */
+  /* 전역 기본 폰트 — Tailwind의 font-sans + 기본 body 폰트를 덮어씀 (클래스 없이 전체 적용) */
+  --font-sans: 'Moneygraphy Pixel', 'Apple SD Gothic Neo', sans-serif;
   --font-jua: 'BM JUA', 'Apple SD Gothic Neo', sans-serif;
+
+  /* 기본 사이즈 스케일 — Tailwind 기본값(rem 소수점)을 깔끔한 px 값으로 재정의.
+   * text-xs ~ text-5xl 그대로 사용하면 됨 (BM JUA 헤드라인 스케일처럼 별도 이름 안 외워도 됨). */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
 
   --text-head-00: 44px; /* Regular */
   --text-head-01: 32px; /* Regular */
