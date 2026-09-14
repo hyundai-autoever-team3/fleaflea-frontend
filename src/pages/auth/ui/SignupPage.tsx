@@ -1,3 +1,5 @@
+import { SignupForm } from '../../../features/auth'
+
 export function SignupPage() {
-  return <div>Signup</div>
+  return <SignupForm />
 }

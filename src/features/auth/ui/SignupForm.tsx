@@ -5,26 +5,14 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 import { StarField } from '../../../shared/ui/star-field'
 
-export function LoginForm() {
+export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(true)
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  // TODO: 로그인 API 연동 시 setError로 실패 메시지 채우기 (아이디/비밀번호 불일치 등)
+  // TODO: 회원가입 API 연동 시 setError로 실패 메시지 채우기
   const [error] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const email = String(formData.get('email') ?? '').trim()
-    const password = String(formData.get('password') ?? '')
-
-    const nextErrors: typeof fieldErrors = {}
-    if (!email) nextErrors.email = '이메일을 입력해 주세요.'
-    if (!password) nextErrors.password = '비밀번호를 입력해 주세요.'
-    setFieldErrors(nextErrors)
-    if (Object.keys(nextErrors).length > 0) return
-
-    // TODO: 로그인 API 연동 — 성공 시 entities/session의 setSession(token, user, rememberMe) 호출
+    // TODO: 회원가입 API 연동, 실패 시 setError(...)
   }
 
   return (
@@ -40,11 +28,27 @@ export function LoginForm() {
           </div>
 
           <div className="flex flex-1 flex-col justify-center">
-            <h1 className="text-head-02 font-bold text-text-strong">로그인</h1>
-            <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
+            <h1 className="text-head-02 font-bold text-text-strong">회원가입</h1>
+            <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정을 만들어보세요</p>
 
-            <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-6">
-            <div>
+            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
+              <div className="relative">
+                <label
+                  htmlFor="nickname"
+                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+                >
+                  닉네임
+                </label>
+                <input
+                  id="nickname"
+                  name="nickname"
+                  type="text"
+                  placeholder=" 서비스에서 사용할 닉네임"
+                  required
+                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03"
+                />
+              </div>
+
               <div className="relative">
                 <label
                   htmlFor="email"
@@ -57,16 +61,11 @@ export function LoginForm() {
                   name="email"
                   type="email"
                   placeholder=" flee@example.com"
-                  aria-invalid={Boolean(fieldErrors.email)}
+                  required
                   className="h-14 w-full rounded-lg border border-border px-3 text-body-03"
                 />
               </div>
-              {fieldErrors.email && (
-                <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.email}</p>
-              )}
-            </div>
 
-            <div>
               <div className="relative">
                 <label
                   htmlFor="password"
@@ -79,7 +78,7 @@ export function LoginForm() {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder=" 비밀번호를 입력해 주세요"
-                  aria-invalid={Boolean(fieldErrors.password)}
+                  required
                   className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
                 />
                 <button
@@ -91,36 +90,39 @@ export function LoginForm() {
                   {showPassword ? <EyeSlashIcon className="size-5" /> : <EyeIcon className="size-5" />}
                 </button>
               </div>
-              {fieldErrors.password && (
-                <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.password}</p>
-              )}
-            </div>
 
-            <label className="ml-1 flex items-center gap-2 text-body-04 text-text-muted">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="size-4 rounded border-border"
-              />
-              로그인 상태 유지
-            </label>
+              <div className="relative">
+                <label
+                  htmlFor="passwordConfirm"
+                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+                >
+                  비밀번호 확인
+                </label>
+                <input
+                  id="passwordConfirm"
+                  name="passwordConfirm"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder=" 비밀번호를 다시 입력해 주세요"
+                  required
+                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03"
+                />
+              </div>
 
-            <button
-              type="submit"
-              className="h-14 rounded-lg bg-primary text-body-03 font-bold text-white"
-            >
-              로그인
-            </button>
-
-            {error && <p className="text-body-04 text-red-600">{error}</p>}
-
-            <p className="text-center text-body-04 text-text-muted">
-              계정이 없으신가요?{' '}
-              <Link to="/signup" className="font-bold text-primary">
+              <button
+                type="submit"
+                className="h-14 rounded-lg bg-primary text-body-03 font-bold text-white"
+              >
                 회원가입
-              </Link>
-            </p>
+              </button>
+
+              {error && <p className="text-body-04 text-red-600">{error}</p>}
+
+              <p className="text-center text-body-04 text-text-muted">
+                이미 계정이 있으신가요?{' '}
+                <Link to="/login" className="font-bold text-primary">
+                  로그인
+                </Link>
+              </p>
             </form>
           </div>
         </div>
