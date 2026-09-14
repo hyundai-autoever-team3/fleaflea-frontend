@@ -7,12 +7,24 @@ import { StarField } from '../../../shared/ui/star-field'
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  // TODO: 로그인 API 연동 시 setError로 실패 메시지 채우기
+  const [rememberMe, setRememberMe] = useState(true)
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
+  // TODO: 로그인 API 연동 시 setError로 실패 메시지 채우기 (아이디/비밀번호 불일치 등)
   const [error] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    // TODO: 로그인 API 연동, 실패 시 setError(...)
+    const formData = new FormData(event.currentTarget)
+    const email = String(formData.get('email') ?? '').trim()
+    const password = String(formData.get('password') ?? '')
+
+    const nextErrors: typeof fieldErrors = {}
+    if (!email) nextErrors.email = '이메일을 입력해 주세요.'
+    if (!password) nextErrors.password = '비밀번호를 입력해 주세요.'
+    setFieldErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
+
+    // TODO: 로그인 API 연동 — 성공 시 entities/session의 setSession(token, user, rememberMe) 호출
   }
 
   return (
@@ -31,58 +43,68 @@ export function LoginForm() {
             <h1 className="text-head-02 font-bold text-text-strong">로그인</h1>
             <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
 
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
-            <div className="relative">
-              <label
-                htmlFor="email"
-                className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
-              >
-                이메일
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder=" flee@example.com"
-                required
-                className="h-14 w-full rounded-lg border border-border px-3 text-body-03"
-              />
+            <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-6">
+            <div>
+              <div className="relative">
+                <label
+                  htmlFor="email"
+                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+                >
+                  이메일
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder=" flee@example.com"
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03"
+                />
+              </div>
+              {fieldErrors.email && (
+                <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.email}</p>
+              )}
             </div>
 
-            <div className="relative">
-              <label
-                htmlFor="password"
-                className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
-              >
-                비밀번호
-              </label>
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder=" 비밀번호를 입력해 주세요"
-                required
-                className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((value) => !value)}
-                aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
-              >
-                {showPassword ? <EyeSlashIcon className="size-5" /> : <EyeIcon className="size-5" />}
-              </button>
+            <div>
+              <div className="relative">
+                <label
+                  htmlFor="password"
+                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+                >
+                  비밀번호
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder=" 비밀번호를 입력해 주세요"
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
+                >
+                  {showPassword ? <EyeSlashIcon className="size-5" /> : <EyeIcon className="size-5" />}
+                </button>
+              </div>
+              {fieldErrors.password && (
+                <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.password}</p>
+              )}
             </div>
 
-            <div className="flex items-center justify-between text-body-04">
-              <label className="flex items-center gap-2 text-text-muted">
-                <input type="checkbox" className="size-4 rounded border-border" />
-                로그인 상태 유지
-              </label>
-              <a href="#" className="font-bold text-primary">
-                비밀번호를 잊으셨나요?
-              </a>
-            </div>
+            <label className="ml-1 flex items-center gap-2 text-body-04 text-text-muted">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+                className="size-4 rounded border-border"
+              />
+              로그인 상태 유지
+            </label>
 
             <button
               type="submit"
