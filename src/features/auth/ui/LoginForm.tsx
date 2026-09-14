@@ -115,6 +115,12 @@ export function LoginForm() {
 
             {error && <p className="text-body-04 text-red-600">{error}</p>}
 
+            <div className="flex items-center gap-3">
+              <hr className="flex-1 border-border" />
+              <span className="text-body-04 text-text-muted">또는</span>
+              <hr className="flex-1 border-border" />
+            </div>
+
             <p className="text-center text-body-04 text-text-muted">
               계정이 없으신가요?{' '}
               <Link to="/signup" className="font-bold text-primary">

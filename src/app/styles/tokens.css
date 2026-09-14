@@ -18,9 +18,12 @@
   /* ---- 1) PRIMITIVE ---- */
 
   /* purple (Figma: MainColor01 / SubColor01 / SubColor02) */
-  --purple-100: #f5f0fc; 
-  --purple-300: #b196dc; 
-  --purple-500: #e0d3f6; 
+  --purple-100: #f5f0fc;
+  --purple-300: #b196dc;
+  --purple-500: #e0d3f6;
+
+  /* 보라 그라데이션 보더 — background-clip 트릭(padding-box + border-box)으로 쓰는 용도라 Tailwind 컬러 유틸이 아닌 순수 CSS 변수로 둠 */
+  --gradient-primary-border: linear-gradient(135deg, var(--purple-100), var(--purple-300));
 
   /* gray — 숫자가 클수록 어두움. 나머지는 Figma MCP 레이트리밋으로 아직 미확보 (TODO) */
   --gray-900: #14181d; /* Gray01 */
@@ -36,21 +39,23 @@
 
   --white: #ffffff;
 
-  /* 카테고리 칩 색상 — Figma에 없어서 design.md 규칙(중간 명도, 파스텔 톤 구분)에 맞춰 새로 정의.
-   * design.md: "카테고리는 아이콘이 아니라 배경 칩 색으로 구분" */
-  --mint-100: #e5efe9;
-  --mint-600: #638571;
-  --peach-100: #faeae3;
-  --peach-600: #ac7563;
+  /* 인트로 섹션 배경 그라데이션용 (design.md "카테고리 칩" 규칙 중 blue만 실사용) */
   --blue-100: #e5edf8;
-  --blue-600: #6b84a3;
 
   /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
   --cosmic-950: #100c2c;
   --cosmic-600: #6b6be1;
   --cosmic-400: #a9a9ee;
-  --cosmic-300: #c2c2f3;
-  --cosmic-100: #dfdffa;
+
+  /* 글래스모피즘 표면(반투명 흰 배경) 위에 올라가는 텍스트 전용 남색. 투명도는 Tailwind opacity modifier(/92, /58)로 조절. */
+  --navy-900: #1c1e32;
+
+  /* 핀테크 앱 카드 배경 느낌의 부드러운 다색 블러 그라데이션(살구/하늘/라벤더 3개 블롭). 카드/플레이스홀더 배경용. */
+  --gradient-mesh-soft:
+    radial-gradient(120% 120% at 15% 10%, #f7ddc7 0%, transparent 55%),
+    radial-gradient(120% 120% at 85% 25%, #c9dbf5 0%, transparent 55%),
+    radial-gradient(120% 120% at 50% 100%, #e3d6f5 0%, transparent 60%),
+    linear-gradient(#f4f1ee, #f4f1ee);
 }
 
 @theme {
@@ -68,7 +73,6 @@
   --color-text-strong: var(--gray-900);
   --color-text: var(--gray-800);
   --color-text-muted: var(--gray-700);
-  --color-text-subtle: var(--gray-600);
 
   /* Surface */
   --color-bg: var(--white);
@@ -77,19 +81,15 @@
   /* Border — 실제 Figma 값 없음, 임시로 가장 옅은 확보 그레이 사용 (TODO: 확정되면 교체) */
   --color-border: var(--gray-300);
 
-  /* Category chips (design.md) */
-  --color-mint: var(--mint-600);
-  --color-mint-subtle: var(--mint-100);
-  --color-peach: var(--peach-600);
-  --color-peach-subtle: var(--peach-100);
-  --color-blue: var(--blue-600);
   --color-blue-subtle: var(--blue-100);
 
   /* 우주 임팩트 배경 전용 (design.md 6장 예외 조항 — 화면당 배경 1곳까지) */
   --color-cosmic-bg: var(--cosmic-950);
   --color-cosmic: var(--cosmic-600);
   --color-cosmic-tint: var(--cosmic-400);
-  --color-cosmic-subtle: var(--cosmic-300);
+
+  /* 글래스모피즘 카드/모달 전용 텍스트 색 — text-glass-ink/92, text-glass-ink/58 처럼 opacity modifier로 사용 */
+  --color-glass-ink: var(--navy-900);
 
   /* ---- 3) TYPOGRAPHY ---- */
   /* 전역 기본 폰트 — Tailwind의 font-sans + 기본 body 폰트를 덮어씀 (클래스 없이 전체 적용) */
