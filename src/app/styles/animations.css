@@ -1,0 +1,69 @@
+/**
+ * 스크롤 등장/카드 순차 등장/버튼 호버 애니메이션.
+ * data-reveal, data-reveal-item, data-hover-lift 클래스로 어떤 요소에도 재사용 가능.
+ * 트리거 로직은 shared/lib/useScrollReveal.ts, useStaggerReveal.ts 참고.
+ */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+[data-reveal].is-visible {
+  animation: reveal-up 0.75s ease forwards;
+}
+
+[data-reveal-item] {
+  opacity: 0;
+  transform: translateY(15px);
+}
+[data-reveal-item].is-visible {
+  animation: card-rise 0.7s cubic-bezier(0.2, 0.7, 0.3, 1.15) forwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+[data-hover-lift] {
+  transition:
+    transform 0.2s,
+    background-color 0.2s,
+    box-shadow 0.2s;
+}
+[data-hover-lift]:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  [data-hover-lift] {
+    transition: none;
+  }
+  [data-hover-lift]:hover {
+    transform: none;
+  }
+}
