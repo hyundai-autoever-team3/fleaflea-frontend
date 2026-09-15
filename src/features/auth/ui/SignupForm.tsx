@@ -56,7 +56,7 @@ export function SignupForm() {
             const { data } = await login({ email, password })
             useSessionStore.getState().setSession(data)
             useToastStore.getState().showToast('가입을 환영해요!')
-            navigate('/home')
+            navigate('/market', { replace: true })
         } catch {
             setError('회원가입에 실패했습니다. 입력 정보를 확인해 주세요.')
         }

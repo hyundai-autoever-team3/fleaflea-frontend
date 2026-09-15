@@ -11,6 +11,6 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 
 export function RequireGuest({ children }: { children: ReactNode }) {
   const accessToken = useSessionStore((state) => state.accessToken)
-  if (accessToken) return <Navigate to="/home" replace />
+  if (accessToken) return <Navigate to="/market" replace />
   return children
 }
