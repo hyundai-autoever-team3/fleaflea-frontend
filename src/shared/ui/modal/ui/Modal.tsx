@@ -62,7 +62,8 @@ export function Modal({ open, onRequestClose, labelledBy, children }: ModalProps
       onTransitionEnd={(event) => {
         if (!open && event.target === event.currentTarget && event.propertyName === 'opacity') setShownChildren(null)
       }}
-      className="m-auto max-h-[calc(100dvh-48px)] w-[min(600px,calc(100vw-36px))] overflow-y-auto rounded-2xl p-10 shadow-lg"
+      // 내용이 길면 스크롤은 되지만 스크롤바는 숨김. 열릴 때 창 자체에 생기는 포커스 테두리도 제거
+      className="m-auto max-h-[calc(100dvh-48px)] w-[min(600px,calc(100vw-36px))] overflow-y-auto overscroll-contain rounded-2xl p-10 shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <button type="button" onClick={onRequestClose} aria-label="닫기" className="absolute right-4 top-4">
         <XMarkIcon className="size-6" />
