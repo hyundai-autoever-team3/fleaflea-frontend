@@ -459,6 +459,7 @@ export function LandingPage() {
           아직 계정이 없으신가요?{' '}
           <Link
             to="/signup"
+            viewTransition
             onClick={() => dialogRef.current?.close()}
             className="font-bold text-primary"
           >

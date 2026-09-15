@@ -1,3 +1,10 @@
+import { Header } from '../../../widgets/header'
+
 export function HomePage() {
-  return <div>Home</div>
+  return (
+    <div>
+      <Header />
+      <div>Home</div>
+    </div>
+  )
 }

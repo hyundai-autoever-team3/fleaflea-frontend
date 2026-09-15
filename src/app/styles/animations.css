@@ -67,3 +67,62 @@
     transform: none;
   }
 }
+
+/* <dialog> 열고 닫힐 때 페이드 + 살짝 스케일업 — @starting-style로 열리는 순간의 시작 상태를 지정 */
+dialog {
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    overlay 0.25s ease allow-discrete,
+    display 0.25s ease allow-discrete;
+}
+dialog[open] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0);
+  transition:
+    background 0.25s ease,
+    overlay 0.25s ease allow-discrete,
+    display 0.25s ease allow-discrete;
+}
+dialog[open]::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+@starting-style {
+  dialog[open]::backdrop {
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog,
+  dialog::backdrop {
+    transition: none;
+  }
+}
+
+/* react-router의 navigate(..., { viewTransition: true }) / <Link viewTransition>이
+   페이지 전환 시 트리거하는 브라우저 네이티브 크로스페이드. 지원 안 하는 브라우저는 그냥 즉시 전환됨. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

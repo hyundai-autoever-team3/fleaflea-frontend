@@ -56,6 +56,10 @@
     radial-gradient(120% 120% at 85% 25%, #c9dbf5 0%, transparent 55%),
     radial-gradient(120% 120% at 50% 100%, #e3d6f5 0%, transparent 60%),
     linear-gradient(#f4f1ee, #f4f1ee);
+
+  /* 몽환적인 파스텔 구름 느낌 — 핑크 → 라벤더 → 하늘색 대각선 그라데이션. 배너/히어로 배경용. */
+  --pink-100: #fbe1ef;
+  --gradient-dreamy: linear-gradient(135deg, var(--pink-100) 0%, var(--purple-500) 50%, var(--blue-100) 100%);
 }
 
 @theme {

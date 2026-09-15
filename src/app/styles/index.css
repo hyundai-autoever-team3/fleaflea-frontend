@@ -1,3 +1,13 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './animations.css';
+
+/* 브라우저 자동완성 시 강제로 입혀지는 배경색 제거 — box-shadow로 흰 배경을 덮어씀 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-bg) inset;
+  box-shadow: 0 0 0px 1000px var(--color-bg) inset;
+  -webkit-text-fill-color: var(--color-text-strong);
+  transition: background-color 9999s ease-in-out 0s;
+}
