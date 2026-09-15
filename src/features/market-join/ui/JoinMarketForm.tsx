@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 
 import { parseInviteCode } from '../../../shared/lib/invite'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { getJoinErrorMessage, joinMarket, type JoinMarketResponse } from '../api/market-join-api'
 
 interface JoinMarketFormProps {
@@ -39,22 +40,24 @@ export function JoinMarketForm({ onJoined }: JoinMarketFormProps) {
       <label htmlFor="join-invite-input" className="text-body-04 font-bold text-text-strong">
         초대 링크 또는 코드
       </label>
-      <input
-        id="join-invite-input"
-        value={value}
-        onChange={(event) => {
-          setValue(event.target.value)
-          setError('')
-        }}
-        placeholder="초대 링크 또는 코드 붙여넣기"
-        maxLength={2048}
-        autoComplete="off"
-        autoCapitalize="none"
-        spellCheck={false}
-        aria-invalid={Boolean(error)}
-        style={{ clipPath: pixelBox() }}
-        className="mt-2 h-12 w-full bg-primary-subtle px-4 text-body-03 text-text-strong outline-none transition-colors placeholder:text-text-muted/50 focus:bg-white focus:shadow-[inset_0_0_0_2px_var(--color-primary-tint)]"
-      />
+      <PixelField invalid={Boolean(error)} className="mt-2">
+        <input
+          id="join-invite-input"
+          value={value}
+          onChange={(event) => {
+            setValue(event.target.value)
+            setError('')
+          }}
+          placeholder="초대 링크 또는 코드 붙여넣기"
+          maxLength={2048}
+          autoComplete="off"
+          autoCapitalize="none"
+          spellCheck={false}
+          aria-invalid={Boolean(error)}
+          style={pixelInputStyle}
+          className={`h-12 ${pixelInputClass}`}
+        />
+      </PixelField>
       {error && <p className="mt-2 text-body-04 text-red-600">{error}</p>}
 
       <button

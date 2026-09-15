@@ -4,15 +4,11 @@ import type { ChangeEvent, FormEvent } from 'react'
 import { FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { createMarket, type CreateMarketResponse } from '../api/market-api'
 
 const TITLE_MAX = FIELD_LIMITS.marketTitle.max
 const DESCRIPTION_MAX = FIELD_LIMITS.marketDescription.max
-
-// 카드와 같은 픽셀 모서리 입력칸. 포커스 표시는 clip-path에 잘리지 않게 안쪽 그림자로 줌
-const fieldClass =
-  'w-full bg-primary-subtle px-4 text-body-03 text-text-strong outline-none transition-colors placeholder:text-text-muted/50 focus:bg-white focus:shadow-[inset_0_0_0_2px_var(--color-primary-tint)]'
-const inputClass = `h-12 ${fieldClass}`
 
 interface CreateMarketFormProps {
   onCreated: (market: CreateMarketResponse) => void
@@ -89,19 +85,21 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             {title.length}/{TITLE_MAX}
           </span>
         </div>
-        <input
-          id="market-title"
-          value={title}
-          onChange={(event) => {
-            setTitle(event.target.value)
-            setTitleError('')
-          }}
-          maxLength={TITLE_MAX}
-          placeholder="우리 동아리 가을 마켓"
-          aria-invalid={Boolean(titleError)}
-          style={{ clipPath: pixelBox() }}
-          className={`mt-2 ${inputClass}`}
-        />
+        <PixelField invalid={Boolean(titleError)} className="mt-2">
+          <input
+            id="market-title"
+            value={title}
+            onChange={(event) => {
+              setTitle(event.target.value)
+              setTitleError('')
+            }}
+            maxLength={TITLE_MAX}
+            placeholder="우리 동아리 가을 마켓"
+            aria-invalid={Boolean(titleError)}
+            style={pixelInputStyle}
+            className={`h-12 ${pixelInputClass}`}
+          />
+        </PixelField>
         {titleError && <p className="mt-2 text-body-04 text-red-600">{titleError}</p>}
       </div>
 
@@ -114,16 +112,18 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             {description.length}/{DESCRIPTION_MAX}
           </span>
         </div>
-        <textarea
-          id="market-description"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          maxLength={DESCRIPTION_MAX}
-          rows={4}
-          placeholder="서로의 물건에 새로운 주인을 찾아줘요."
-          style={{ clipPath: pixelBox() }}
-          className={`mt-2 resize-none py-3 ${fieldClass}`}
-        />
+        <PixelField className="mt-2">
+          <textarea
+            id="market-description"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            maxLength={DESCRIPTION_MAX}
+            rows={4}
+            placeholder="서로의 물건에 새로운 주인을 찾아줘요."
+            style={pixelInputStyle}
+            className={`resize-none py-3 ${pixelInputClass}`}
+          />
+        </PixelField>
       </div>
 
       <div>
