@@ -1,12 +1,10 @@
 // 백엔드 Swagger(/v3/api-docs) 응답 형식 기준
-export interface PageResponse<T> {
-  content: T[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-  first: boolean
-  last: boolean
+export type { PageResponse } from '../../../shared/api/page-response'
+
+// GET /markets/{marketId}/invitation (호스트만 조회 가능)
+export interface MarketInvitation {
+  marketId: number
+  inviteCode: string
 }
 
 // GET /markets

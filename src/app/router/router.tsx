@@ -9,6 +9,7 @@ import { MarketJoinPage, MarketPage } from '../../pages/market'
 import { MarketDetailPage } from '../../pages/market-detail'
 import { MyPage } from '../../pages/my-page'
 import { ProductPage } from '../../pages/product'
+import { ProductCreatePage } from '../../pages/product-create'
 import { RequireAuth, RequireGuest } from './guards'
 
 export const router = createBrowserRouter([
@@ -44,6 +45,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <HomePage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/market/:marketId/items/new',
+    element: (
+      <RequireAuth>
+        <ProductCreatePage />
       </RequireAuth>
     ),
   },

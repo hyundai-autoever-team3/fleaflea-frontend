@@ -20,3 +20,14 @@ export interface Product {
   createdAt: string
   updatedAt: string
 }
+
+// GET/POST /api/v1/markets/{marketId}/items 응답 (Swagger ItemSummaryResponse). API에서 price는 숫자
+export interface ProductSummary {
+  itemId: number
+  title: string
+  tradeType: TradeType
+  price: number | null
+  status: ProductStatus
+  imageUrl: string | null
+  createdAt: string
+}

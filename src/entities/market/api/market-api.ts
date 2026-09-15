@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { api } from '../../../shared/api/axios'
-import type { MarketDetail, MarketMember, MarketSummary, PageResponse } from '../model/types'
+import type { MarketDetail, MarketInvitation, MarketMember, MarketSummary, PageResponse } from '../model/types'
 
 // 검색을 프론트에서 하므로 한 번에 넉넉히 받아옴
 const LIST_SIZE = 100
@@ -61,6 +61,20 @@ export function useMarketMembers(marketId: number) {
     queryKey: marketKeys.members(marketId),
     queryFn: async () => (await getMarketMembers(marketId)).data.content,
     enabled: isValidMarketId(marketId),
+    retry: retryUnlessForbiddenOrMissing,
+  })
+}
+
+export function getMarketInvitation(marketId: number) {
+  return api.get<MarketInvitation>(`/markets/${marketId}/invitation`)
+}
+
+// 호스트가 아니면 403이라 enabled로 호스트일 때만 조회
+export function useMarketInvitation(marketId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: [...marketKeys.detail(marketId), 'invitation'],
+    queryFn: async () => (await getMarketInvitation(marketId)).data,
+    enabled: enabled && isValidMarketId(marketId),
     retry: retryUnlessForbiddenOrMissing,
   })
 }
