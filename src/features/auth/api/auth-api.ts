@@ -4,7 +4,7 @@ export interface SignupPayload {
     email: string
     password: string
     nickname : string
-    profileImageUrl?: string
+    profileImageUrl?: null
 }
 
 export interface LoginPayload {
