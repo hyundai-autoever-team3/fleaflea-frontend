@@ -6,6 +6,7 @@ export interface Market {
   hostId: number
   title: string
   description: string | null
+  imageUrl: string | null
   startDate: string
   endDate: string
   status: MarketStatus
