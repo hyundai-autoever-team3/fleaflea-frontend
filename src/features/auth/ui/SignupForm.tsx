@@ -3,6 +3,7 @@ import type {FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router'
 import {EyeIcon, EyeSlashIcon} from '@heroicons/react/24/outline'
 
+import {EMAIL_PATTERN, FIELD_LIMITS} from '../../../shared/config/field-limits'
 import {StarField} from '../../../shared/ui/star-field'
 import {useToastStore} from '../../../shared/ui/toast'
 import {login, signup} from '../api/auth-api'
@@ -21,6 +22,23 @@ export function SignupForm() {
         const password = String(formData.get('password') ?? '')
         const nickname = String(formData.get('nickname') ?? '').trim()
         const passwordConfirm = String(formData.get('passwordConfirm') ?? '')
+
+        const {nickname: nicknameLimit, password: passwordLimit} = FIELD_LIMITS
+
+        if (nickname.length < nicknameLimit.min || nickname.length > nicknameLimit.max) {
+            setError(`닉네임은 ${nicknameLimit.min}~${nicknameLimit.max}자로 입력해 주세요.`)
+            return
+        }
+
+        if (!EMAIL_PATTERN.test(email)) {
+            setError('올바른 이메일 형식이 아니에요.')
+            return
+        }
+
+        if (password.length < passwordLimit.min || password.length > passwordLimit.max) {
+            setError(`비밀번호는 ${passwordLimit.min}~${passwordLimit.max}자로 입력해 주세요.`)
+            return
+        }
 
         if (/\s/.test(password)) {
             setError('비밀번호에는 공백을 사용할 수 없습니다.')
@@ -73,7 +91,8 @@ export function SignupForm() {
                                     name="nickname"
                                     type="text"
                                     autoComplete="username"
-                                    placeholder=" 서비스에서 사용할 닉네임"
+                                    maxLength={FIELD_LIMITS.nickname.max}
+                                    placeholder=" 서비스에서 사용할 닉네임 (2~20자)"
                                     required
                                     className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
                                 />
@@ -109,7 +128,8 @@ export function SignupForm() {
                                     name="password"
                                     type={showPassword ? 'text' : 'password'}
                                     autoComplete="new-password"
-                                    placeholder=" 비밀번호를 입력해 주세요"
+                                    maxLength={FIELD_LIMITS.password.max}
+                                    placeholder=" 비밀번호를 입력해 주세요 (8~20자)"
                                     required
                                     className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03 text-text-muted"
                                 />
@@ -136,6 +156,7 @@ export function SignupForm() {
                                     name="passwordConfirm"
                                     type={showPasswordConfirm ? 'text' : 'password'}
                                     autoComplete="new-password"
+                                    maxLength={FIELD_LIMITS.password.max}
                                     placeholder=" 비밀번호를 다시 입력해 주세요"
                                     required
                                     className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03 text-text-muted"

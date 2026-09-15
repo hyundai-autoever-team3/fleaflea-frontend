@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
+import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { StarField } from '../../../shared/ui/star-field'
 import { login } from '../api/auth-api'
 import { useSessionStore } from '../../../entities/session'
@@ -21,15 +22,18 @@ export function LoginForm() {
     const password = String(formData.get('password') ?? '')
 
     const nextErrors: typeof fieldErrors = {}
+    const { min, max } = FIELD_LIMITS.password
     if (!email) nextErrors.email = '이메일을 입력해 주세요.'
+    else if (!EMAIL_PATTERN.test(email)) nextErrors.email = '올바른 이메일 형식이 아니에요.'
     if (!password) nextErrors.password = '비밀번호를 입력해 주세요.'
+    else if (password.length < min || password.length > max) nextErrors.password = `비밀번호는 ${min}~${max}자로 입력해 주세요.`
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
     try {
       const { data } = await login({ email, password })
       useSessionStore.getState().setSession(data, rememberMe)
-      navigate('/')
+      navigate('/market', { replace: true })
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
     }
@@ -88,6 +92,7 @@ export function LoginForm() {
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
+                  maxLength={FIELD_LIMITS.password.max}
                   placeholder=" 비밀번호를 입력해 주세요"
                   aria-invalid={Boolean(fieldErrors.password)}
                   className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
