@@ -6,6 +6,7 @@ import { HomePage } from '../../pages/home'
 import { ItemDexPage } from '../../pages/item-dex'
 import { LandingPage } from '../../pages/landing'
 import { MarketJoinPage, MarketPage } from '../../pages/market'
+import { MarketDetailPage } from '../../pages/market-detail'
 import { MyPage } from '../../pages/my-page'
 import { ProductPage } from '../../pages/product'
 import { RequireAuth, RequireGuest } from './guards'
@@ -43,6 +44,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <HomePage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/market/:marketId',
+    element: (
+      <RequireAuth>
+        <MarketDetailPage />
       </RequireAuth>
     ),
   },
