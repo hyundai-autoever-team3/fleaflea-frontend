@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import type { StateStorage } from 'zustand/middleware'
 
+import { queryClient } from '../../../shared/api/query-client'
 import type { User } from '../../user'
 
 interface SessionTokens {
@@ -66,6 +67,8 @@ export const useSessionStore = create<SessionState>()(
                 rememberMe = remember,
             ) => {
                 remember = rememberMe
+                // 이전 세션(가짜·만료 토큰, 다른 계정)의 조회 결과와 에러가 새 로그인에 남지 않도록 캐시 비움
+                queryClient.clear()
                 set({ accessToken, refreshToken })
             },
 
@@ -74,6 +77,8 @@ export const useSessionStore = create<SessionState>()(
             },
 
             clearSession: () => {
+                // 로그아웃 뒤 다른 계정으로 로그인했을 때 이전 사용자의 데이터가 보이지 않도록 캐시 비움
+                queryClient.clear()
                 // 메모리 상태를 먼저 초기화한 뒤 저장된 데이터도 삭제
                 set({
                     accessToken: null,

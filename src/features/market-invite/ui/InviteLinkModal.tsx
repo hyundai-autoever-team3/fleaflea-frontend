@@ -11,7 +11,7 @@ interface InviteLinkModalProps {
 export function InviteLinkModal({ open, marketTitle, inviteCode, onClose }: InviteLinkModalProps) {
   return (
     <Modal open={open} onRequestClose={onClose} labelledBy="invite-link-title">
-      <InviteLinkContent titleId="invite-link-title" marketTitle={marketTitle} inviteCode={inviteCode} onDone={onClose} />
+      <InviteLinkContent titleId="invite-link-title" marketTitle={marketTitle} inviteCode={inviteCode} />
     </Modal>
   )
 }

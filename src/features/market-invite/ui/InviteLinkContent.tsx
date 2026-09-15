@@ -6,11 +6,10 @@ import { pixelBox } from '../../../shared/lib/pixel'
 interface InviteLinkContentProps {
   marketTitle: string
   inviteCode: string
-  onDone: () => void
   titleId?: string
 }
 
-export function InviteLinkContent({ marketTitle, inviteCode, onDone, titleId }: InviteLinkContentProps) {
+export function InviteLinkContent({ marketTitle, inviteCode, titleId }: InviteLinkContentProps) {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const inviteLink = `${window.location.origin}/invite/${encodeURIComponent(inviteCode)}`
 
@@ -57,21 +56,6 @@ export function InviteLinkContent({ marketTitle, inviteCode, onDone, titleId }: 
         {copyState === 'copied' && <span className="text-primary">✓ 링크를 복사했어요.</span>}
         {copyState === 'failed' && <span className="text-red-600">복사하지 못했어요. 링크를 직접 복사해 주세요.</span>}
       </p>
-
-      {/* 픽셀 테두리: 바깥 연보라 판 + 안쪽 버튼 면 */}
-      <button
-        type="button"
-        onClick={onDone}
-        style={{ clipPath: pixelBox(4) }}
-        className="group mx-auto mt-3 block bg-primary-tint p-[2px]"
-      >
-        <span
-          style={{ clipPath: pixelBox(4) }}
-          className="block bg-primary-subtle px-8 py-2.5 text-body-04 font-bold text-text-strong transition-colors duration-200 group-hover:bg-white"
-        >
-          마켓으로 이동
-        </span>
-      </button>
 
       <div style={{ clipPath: pixelBox(4) }} className="mt-6 flex items-center gap-3 bg-primary-subtle px-4 py-3 text-left">
         <img src={MASCOTS.star} alt="" className="size-9 shrink-0 object-contain [image-rendering:pixelated]" />

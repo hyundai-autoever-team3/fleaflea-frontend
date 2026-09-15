@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
@@ -47,16 +47,21 @@ export function MarketPage() {
 
   const [tab, setTab] = useState<TabKey>('hosted')
   const [keyword, setKeyword] = useState('')
+  // 한글 조합 중(예: '맠')에는 필터를 바꾸지 않아 카드가 깜빡이지 않도록, 조합이 끝난 글자만 검색에 반영
+  const [appliedKeyword, setAppliedKeyword] = useState('')
+  const isComposingRef = useRef(false)
   const [modal, setModal] = useState<ModalKind>(null)
   const [isFormDirty, setIsFormDirty] = useState(false)
   const [createdMarket, setCreatedMarket] = useState<CreateMarketResponse | null>(null)
   const isHostTab = tab === 'hosted'
 
   // 내 정보 조회가 401/403이면 토큰이 가짜거나 만료된 것 → 세션을 지워 RequireAuth가 로그인으로 보내게 함
+  // 다시 조회하는 중에는 이전 요청의 에러가 남아 보이므로, 새 요청 결과가 401/403일 때만 판단
   useEffect(() => {
+    if (meQuery.isFetching) return
     const status = isAxiosError(meQuery.error) ? meQuery.error.response?.status : undefined
     if (status === 401 || status === 403) useSessionStore.getState().clearSession()
-  }, [meQuery.error])
+  }, [meQuery.error, meQuery.isFetching])
 
   const isLoading = marketsQuery.isPending || meQuery.isPending
   const isError = marketsQuery.isError || meQuery.isError
@@ -69,7 +74,7 @@ export function MarketPage() {
 
   const hasAnyMarket = allMarkets.length > 0
   const tabMarkets = isHostTab ? hostedMarkets : joinedMarkets
-  const query = keyword.trim().toLowerCase()
+  const query = appliedKeyword.trim().toLowerCase()
   const markets = tabMarkets.filter(
     (market) =>
       market.title.toLowerCase().includes(query) ||
@@ -180,6 +185,7 @@ export function MarketPage() {
                   onClick={() => {
                     setTab(key)
                     setKeyword('')
+                    setAppliedKeyword('')
                   }}
                   style={{ clipPath: pixelBox() }}
                   className={`mr-2 mt-10 px-5 py-2.5 text-body-03 font-semibold transition-colors duration-200 ${
@@ -203,7 +209,17 @@ export function MarketPage() {
                 <input
                   type="search"
                   value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
+                  onChange={(e) => {
+                    setKeyword(e.target.value)
+                    if (!isComposingRef.current) setAppliedKeyword(e.target.value)
+                  }}
+                  onCompositionStart={() => {
+                    isComposingRef.current = true
+                  }}
+                  onCompositionEnd={(e) => {
+                    isComposingRef.current = false
+                    setAppliedKeyword(e.currentTarget.value)
+                  }}
                   placeholder={isHostTab ? '내가 만든 마켓 이름이나 설명으로 검색' : '참여 중인 마켓 이름이나 설명으로 검색'}
                   aria-label={isHostTab ? '내가 만든 마켓 검색' : '참여 중인 마켓 검색'}
                   className="w-full bg-transparent text-body-03 text-text-strong outline-none placeholder:text-text-muted/50"
@@ -219,7 +235,7 @@ export function MarketPage() {
               {tabMarkets.length === 0 && <EmptyState image="/mascot/flea4.png" {...TAB_EMPTY[tab]} />}
               {tabMarkets.length > 0 && markets.length === 0 && (
                 <p className="w-full py-12 text-center text-body-03 text-text-muted">
-                  '{keyword.trim()}'에 맞는 마켓이 없어요
+                  '{appliedKeyword.trim()}'에 맞는 마켓이 없어요
                 </p>
               )}
             </div>
@@ -259,11 +275,6 @@ export function MarketPage() {
               titleId="market-modal-title"
               marketTitle={createdMarket.title}
               inviteCode={createdMarket.inviteCode}
-              onDone={() => {
-                const { marketId } = createdMarket
-                closeModal()
-                navigate(`/market/${marketId}`)
-              }}
             />
           ) : (
             <>
