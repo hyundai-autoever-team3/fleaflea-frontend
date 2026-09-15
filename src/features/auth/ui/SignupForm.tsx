@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import type {FormEvent} from 'react'
 import {Link, useNavigate} from 'react-router'
+import {isAxiosError} from 'axios'
 import {EyeIcon, EyeSlashIcon} from '@heroicons/react/24/outline'
 
 import {EMAIL_PATTERN, FIELD_LIMITS} from '../../../shared/config/field-limits'
@@ -8,6 +9,19 @@ import {StarField} from '../../../shared/ui/star-field'
 import {useToastStore} from '../../../shared/ui/toast'
 import {login, signup} from '../api/auth-api'
 import {useSessionStore} from '../../../entities/session'
+
+function getSignupErrorMessage(error: unknown) {
+    if (isAxiosError<{ code?: string; message?: string }>(error)) {
+        const status = error.response?.status
+        const body = error.response?.data
+        if (status === 409) {
+            if (body?.code === 'DUPLICATE_EMAIL') return '이미 가입된 이메일이에요. 로그인해 주세요.'
+            return body?.message ?? '이미 사용 중인 정보예요.'
+        }
+        if (status === 400) return '입력 정보를 다시 확인해 주세요.'
+    }
+    return '회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.'
+}
 
 export function SignupForm() {
     const navigate = useNavigate()
@@ -52,13 +66,21 @@ export function SignupForm() {
 
         try {
             await signup({ email, password, nickname })
+        } catch (signupError) {
+            setError(getSignupErrorMessage(signupError))
+            return
+        }
+
+        try {
             // 회원가입 응답엔 토큰이 없어서, 방금 입력한 정보로 바로 로그인까지 이어서 처리
             const { data } = await login({ email, password })
             useSessionStore.getState().setSession(data)
             useToastStore.getState().showToast('가입을 환영해요!')
             navigate('/market', { replace: true })
         } catch {
-            setError('회원가입에 실패했습니다. 입력 정보를 확인해 주세요.')
+            // 가입은 이미 끝나서 다시 가입하면 409가 나므로, 자동 로그인만 실패한 경우 로그인 화면으로 안내
+            useToastStore.getState().showToast('가입은 완료됐어요. 로그인해 주세요.')
+            navigate('/login', { replace: true })
         }
     }
 
