@@ -31,7 +31,7 @@ export function MarketPage() {
     <div>
       <Header />
 
-      <div className="mx-auto max-w-*** px-6 py-8">
+      <div className="mx-auto w-full max-w-6xl px-6 py-8">
         {/* 히어로 — 마스코트 + 말풍선 */}
         <div className="relative min-h-96 overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-12">
           <h1 className="mt-20 max-w-[60%] text-head-00 font-bold text-text-strong">
