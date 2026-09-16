@@ -210,19 +210,19 @@ export function ProductDetailPage() {
 
       {/* 삭제 확인 */}
       <Modal open={isDeleteOpen} onRequestClose={() => setIsDeleteOpen(false)} labelledBy="delete-product-title">
-        <div className="text-center">
-          <img src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
-          <h2 id="delete-product-title" className="mt-4 text-body-02 font-bold text-text-strong">
+        <div className="py-8 text-center">
+          <img src={MASCOTS.surprised} alt="" className="mx-auto h-28 object-contain [image-rendering:pixelated]" />
+          <h2 id="delete-product-title" className="mt-6 text-head-03 font-bold text-text-strong">
             이 상품을 삭제할까요?
           </h2>
-          <p className="mt-1 text-body-04 text-text-muted">삭제하면 되돌릴 수 없어요.</p>
+          <p className="mt-2 text-body-03 text-text-muted">삭제하면 되돌릴 수 없어요.</p>
           {deleteError && <p className="mt-3 text-body-04 text-red-600">{deleteError}</p>}
-          <div className="mt-6 flex gap-2">
+          <div className="mt-10 flex gap-3">
             <button
               type="button"
               onClick={() => setIsDeleteOpen(false)}
               style={{ clipPath: pixelBox(4) }}
-              className="flex-1 bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+              className="flex-1 bg-primary-subtle py-4 text-body-03 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
             >
               취소
             </button>
@@ -231,7 +231,7 @@ export function ProductDetailPage() {
               onClick={handleDelete}
               disabled={isDeleting}
               style={{ clipPath: pixelBox(4) }}
-              className="flex-1 bg-red-500 py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-red-600 disabled:bg-red-300"
+              className="flex-1 bg-red-500 py-4 text-body-03 font-bold text-white transition-colors duration-200 hover:bg-red-600 disabled:bg-red-300"
             >
               {isDeleting ? '삭제하는 중...' : '삭제하기'}
             </button>
