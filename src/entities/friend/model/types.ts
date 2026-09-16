@@ -1,12 +1,18 @@
-// Backend table: friendships. Request/accept model (not mutual-follow) — one row per
-// friend request, status flips to ACCEPTED when the addressee accepts.
-export type FriendshipStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED'
+// Swagger FriendshipResponse — 친구 목록(GET /api/v1/members/me/friendship)과
+// 친구 요청 목록(GET /api/v1/friend-requests)이 같은 형태를 씀.
+// 요청 → 수락 모델이라 맞팔로우가 아니며, 상태는 로그인한 사용자 기준으로 내려옴
+export type RelationshipStatus =
+  | 'REQUESTED' // 내가 상대에게 요청을 보낸 상태
+  | 'REQUEST_RECEIVED' // 상대가 나에게 요청을 보낸 상태
+  | 'FRIEND' // 서로 친구
 
 export interface Friendship {
   friendshipId: number
-  requesterId: number
-  addresseeId: number
-  status: FriendshipStatus
-  createdAt: string
-  updatedAt: string
+  memberId: number
+  nickname: string
+  profileImageUrl: string | null
+  relationshipStatus: RelationshipStatus
 }
+
+// GET /api/v1/friend-requests 의 direction 쿼리 값
+export type FriendRequestDirection = 'SENT' | 'RECEIVED'
