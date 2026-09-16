@@ -10,6 +10,18 @@ body {
   text-wrap: pretty;
 }
 
+/* 버튼과 링크의 커서를 화살표로 통일.
+   Tailwind v4는 버튼에 cursor:pointer를 넣지 않는데 링크(<a>)는 브라우저 기본이 손가락이라,
+   같아 보이는 '입장하기'(Link)와 '플리마켓 만들기'(button)의 커서가 달랐음.
+   링크 쪽을 화살표로 맞춰 해소 */
+@layer base {
+  a,
+  button,
+  [role='button'] {
+    cursor: default;
+  }
+}
+
 /* 브라우저 자동완성 시 강제로 입혀지는 배경색 제거 — box-shadow로 흰 배경을 덮어씀 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
