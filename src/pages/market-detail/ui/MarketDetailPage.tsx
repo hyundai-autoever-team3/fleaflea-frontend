@@ -45,7 +45,7 @@ export function MarketDetailPage() {
       <Header />
 
       <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
-        <Link to="/market" className="text-body-04 text-text-muted hover:text-text-strong">
+        <Link to="/market" viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
           ← 내 마켓
         </Link>
 
@@ -65,7 +65,12 @@ export function MarketDetailPage() {
               <div className="flex min-w-0 items-center gap-2">
                 <h1 className="truncate text-head-02 font-bold text-text-strong">{market.title}</h1>
                 {isHost && (
-                  <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">HOST</span>
+                  <span
+                    style={{ clipPath: pixelBox(2) }}
+                    className="shrink-0 bg-primary-subtle px-2 py-1 text-xs font-bold text-text-muted"
+                  >
+                    HOST
+                  </span>
                 )}
               </div>
               <div className="flex gap-3">
@@ -75,25 +80,30 @@ export function MarketDetailPage() {
                     onClick={() => setIsInviteOpen(true)}
                     disabled={!invitationQuery.data}
                     style={{ clipPath: pixelBox(4) }}
-                    className="group bg-primary-tint p-[2px] disabled:opacity-50"
+                    className="group h-11 bg-primary-tint p-[2px] disabled:opacity-50"
                   >
                     <span
                       style={{ clipPath: pixelBox(4) }}
-                      className="block bg-primary-subtle px-5 py-2.5 text-body-04 font-bold text-text-strong transition-colors duration-200 group-enabled:group-hover:bg-white"
+                      className="flex h-full items-center bg-primary-subtle px-5 text-body-04 font-bold text-text-muted transition-colors duration-200 group-enabled:group-hover:bg-white"
                     >
-                      {invitationQuery.isError ? '초대 링크를 불러오지 못했어요' : '초대 링크'}
+                      초대 링크
                     </span>
                   </button>
                 )}
                 <Link
                   to={newProductPath}
+                  viewTransition
                   style={{ clipPath: pixelBox(4) }}
-                  className="bg-primary px-5 py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                  className="flex h-11 items-center bg-primary px-5 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
                 >
                   + 상품 등록
                 </Link>
               </div>
             </div>
+            {/* 에러 문구는 버튼 밖에 둬서 버튼 길이가 바뀌지 않게 함 */}
+            {isHost && invitationQuery.isError && (
+              <p className="mt-2 text-right text-body-04 text-text-muted">초대 링크를 불러오지 못했어요.</p>
+            )}
 
             {/* 마켓 정보 */}
             <section className="mt-8 flex flex-col gap-8 md:flex-row md:items-center">
@@ -101,7 +111,7 @@ export function MarketDetailPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-body-02 text-text-muted">{market.description || '소개글이 없어요'}</p>
                 {/* 호스트 · 참여자 · 개설일 정보 칸 */}
-                <dl className="mt-5 flex flex-wrap gap-3">
+                <dl className="mt-4 flex flex-wrap gap-2">
                   {[
                     { label: '호스트', value: market.hostNickname },
                     { label: '참여자', value: `${market.memberCount}명` },
@@ -110,10 +120,10 @@ export function MarketDetailPage() {
                     <div
                       key={label}
                       style={{ clipPath: pixelBox(4) }}
-                      className="min-w-28 bg-primary-subtle px-4 py-3"
+                      className="min-w-20 bg-primary-subtle px-3 py-2"
                     >
-                      <dt className="text-xs font-semibold text-text-muted">{label}</dt>
-                      <dd className="mt-1 text-body-03 font-bold text-text-strong">{value}</dd>
+                      <dt className="text-[11px] font-semibold text-text-muted text-gray-400">{label}</dt>
+                      <dd className="mt-0.5 text-body-04 font-bold text-text-strong text-gray-400">{value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -141,6 +151,7 @@ export function MarketDetailPage() {
                   <p className="mt-1 text-body-04 text-text-muted">첫 상품을 올려서 마켓을 채워보세요!</p>
                   <Link
                     to={newProductPath}
+                    viewTransition
                     style={{ clipPath: pixelBox(4) }}
                     className="mt-5 bg-primary px-5 py-2.5 text-body-04 font-bold text-white hover:bg-primary/90"
                   >
