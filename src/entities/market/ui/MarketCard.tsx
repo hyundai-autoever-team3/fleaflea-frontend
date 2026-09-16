@@ -58,7 +58,7 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
                     )}
                 </div>
 
-                <Link to={`/market/${market.marketId}`} className="shrink-0 bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white" style={{ clipPath: pixelBox() }}>
+                <Link to={`/market/${market.marketId}`} viewTransition className="shrink-0 bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white" style={{ clipPath: pixelBox() }}>
                     입장하기
                 </Link>
             </div>

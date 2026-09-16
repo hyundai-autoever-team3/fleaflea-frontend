@@ -33,7 +33,7 @@ export function LoginForm() {
     try {
       const { data } = await login({ email, password })
       useSessionStore.getState().setSession(data, rememberMe)
-      navigate('/market', { replace: true })
+      navigate('/market', { replace: true, viewTransition: true })
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
     }

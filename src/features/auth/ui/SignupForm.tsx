@@ -76,7 +76,7 @@ export function SignupForm() {
             const { data } = await login({ email, password })
             useSessionStore.getState().setSession(data)
             useToastStore.getState().showToast('가입을 환영해요!')
-            navigate('/market', { replace: true })
+            navigate('/market', { replace: true, viewTransition: true })
         } catch {
             // 가입은 이미 끝나서 다시 가입하면 409가 나므로, 자동 로그인만 실패한 경우 로그인 화면으로 안내
             useToastStore.getState().showToast('가입은 완료됐어요. 로그인해 주세요.')

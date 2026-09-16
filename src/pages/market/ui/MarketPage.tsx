@@ -52,6 +52,7 @@ export function MarketPage() {
   const isComposingRef = useRef(false)
   const [modal, setModal] = useState<ModalKind>(null)
   const [isFormDirty, setIsFormDirty] = useState(false)
+  const [isConfirmingClose, setIsConfirmingClose] = useState(false)
   const [createdMarket, setCreatedMarket] = useState<CreateMarketResponse | null>(null)
   const isHostTab = tab === 'hosted'
 
@@ -85,10 +86,15 @@ export function MarketPage() {
     setModal(null)
     setIsFormDirty(false)
     setCreatedMarket(null)
+    setIsConfirmingClose(false)
   }
 
   function requestCloseModal() {
-    if (modal === 'create' && !createdMarket && isFormDirty && !window.confirm('작성 중인 내용이 사라져요. 닫을까요?')) return
+    // 작성 중이면 브라우저 기본 확인창 대신 모달 안에서 직접 확인
+    if (modal === 'create' && !createdMarket && isFormDirty) {
+      setIsConfirmingClose(true)
+      return
+    }
     closeModal()
   }
 
@@ -100,7 +106,7 @@ export function MarketPage() {
   function handleJoined(market: JoinMarketResponse) {
     closeModal()
     void queryClient.invalidateQueries({ queryKey: marketKeys.all })
-    navigate(`/market/${market.marketId}`)
+    navigate(`/market/${market.marketId}`, { viewTransition: true })
   }
 
   function retry() {
@@ -287,6 +293,46 @@ export function MarketPage() {
               </div>
             </>
           ))}
+
+        {/* 작성 중 닫기 확인: 폼은 그대로 두고 위에만 덮어 입력 내용을 지키지 않게 함 */}
+        {isConfirmingClose && (
+          <div
+            className="fixed inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
+            onClick={() => setIsConfirmingClose(false)}
+          >
+            <div
+              role="alertdialog"
+              aria-labelledby="close-confirm-title"
+              onClick={(event) => event.stopPropagation()}
+              style={{ clipPath: pixelBox(6) }}
+              className="w-[min(360px,100%)] bg-bg p-7 text-center"
+            >
+              <img src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
+              <p id="close-confirm-title" className="mt-4 text-body-02 font-bold text-text-strong">
+                작성 중인 내용이 사라져요
+              </p>
+              <p className="mt-1 text-body-04 text-text-muted">지금 닫으면 입력한 내용이 저장되지 않아요.</p>
+              <div className="mt-6 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingClose(false)}
+                  style={{ clipPath: pixelBox(4) }}
+                  className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                >
+                  계속 작성
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  style={{ clipPath: pixelBox(4) }}
+                  className="flex-1 bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   )
