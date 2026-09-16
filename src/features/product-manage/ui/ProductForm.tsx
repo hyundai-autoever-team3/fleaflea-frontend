@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 
-import { TRADE_TYPE_LABEL, type ProductSummary, type TradeType } from '../../../entities/product'
+import { TRADE_TYPE_LABEL, type TradeType } from '../../../entities/product'
 import { FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
-import { createProduct, getCreateProductErrorMessage } from '../api/product-api'
+import type { CreateProductPayload } from '../api/product-api'
 
 const TITLE_MAX = FIELD_LIMITS.productTitle.max
 const DESCRIPTION_MAX = FIELD_LIMITS.productDescription.max
@@ -19,23 +20,38 @@ interface FieldErrors {
   price?: string
 }
 
-interface CreateProductFormProps {
-  marketId: number
-  onCreated: (product: ProductSummary) => void
+export interface ProductFormInitialValue {
+  title: string
+  description: string
+  tradeType: TradeType
+  price: number | null
+  imageUrl: string | null
 }
 
-export function CreateProductForm({ marketId, onCreated }: CreateProductFormProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [tradeType, setTradeType] = useState<TradeType>('SALE')
-  const [price, setPrice] = useState('')
+interface ProductFormProps {
+  initialValue?: ProductFormInitialValue
+  submitLabel: string
+  submittingLabel: string
+  onSubmit: (payload: CreateProductPayload) => Promise<void>
+  toErrorMessage: (error: unknown) => string
+}
+
+// 상품 등록·수정이 함께 쓰는 폼
+export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubmit, toErrorMessage }: ProductFormProps) {
+  const [title, setTitle] = useState(initialValue?.title ?? '')
+  const [description, setDescription] = useState(initialValue?.description ?? '')
+  const [tradeType, setTradeType] = useState<TradeType>(initialValue?.tradeType ?? 'SALE')
+  const [price, setPrice] = useState(initialValue?.price != null ? String(initialValue.price) : '')
   const [image, setImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const isGiveaway = tradeType === 'GIVEAWAY'
+  // MVP에서는 대여도 가격을 받지 않음 (대여 기간 설정과 함께 다음 단계에서)
+  const needsPrice = tradeType === 'SALE'
+  // 새로 고른 사진이 없으면 수정 화면에서는 기존 사진을 보여줌
+  const shownImageUrl = previewUrl ?? initialValue?.imageUrl ?? null
 
   // 미리보기 URL이 바뀌거나 페이지를 떠날 때 이전 URL 메모리 해제
   useEffect(() => {
@@ -68,23 +84,22 @@ export function CreateProductForm({ marketId, onCreated }: CreateProductFormProp
     const nextErrors: FieldErrors = {}
     if (!trimmedTitle) nextErrors.title = '상품명을 입력해 주세요.'
     if (!trimmedDescription) nextErrors.description = '상품 설명을 입력해 주세요.'
-    if (!isGiveaway && !price) nextErrors.price = '가격을 입력해 주세요. 무료라면 나눔을 골라 주세요.'
+    if (needsPrice && !price) nextErrors.price = '판매 가격을 입력해 주세요.'
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
     setIsSubmitting(true)
     setError('')
     try {
-      const { data } = await createProduct(marketId, {
+      await onSubmit({
         title: trimmedTitle,
         description: trimmedDescription,
         tradeType,
-        price: isGiveaway ? null : Number(price),
+        price: needsPrice ? Number(price) : null,
         image,
       })
-      onCreated(data)
-    } catch (createError) {
-      setError(getCreateProductErrorMessage(createError))
+    } catch (submitError) {
+      setError(toErrorMessage(submitError))
     } finally {
       setIsSubmitting(false)
     }
@@ -94,33 +109,41 @@ export function CreateProductForm({ marketId, onCreated }: CreateProductFormProp
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-7">
       <div>
         <span className="text-body-03 font-bold text-text-strong">상품 사진</span>
-        {/* 카드 쇼윈도와 같은 픽셀 테두리 */}
-        <label htmlFor="product-image" style={{ clipPath: pixelBox(4) }} className="mt-2 block cursor-pointer bg-primary-tint p-[3px]">
-          <div
-            style={{ clipPath: pixelBox(4) }}
-            className="group relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-primary-subtle"
-          >
-            {previewUrl ? (
-              <img src={previewUrl} alt="선택한 상품 사진 미리보기" className="size-full object-cover" />
-            ) : (
-              <div className="flex flex-col items-center gap-2">
-                <img src={MASCOTS.star} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
-                <span className="text-body-04 font-semibold text-text-muted">눌러서 상품 사진 선택</span>
-              </div>
-            )}
-            {previewUrl && (
-              <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-body-03 font-bold text-white opacity-0 transition-opacity group-hover:opacity-100">
-                사진 바꾸기
-              </span>
-            )}
-          </div>
-        </label>
+        {/* 지우기 버튼은 label 밖에 둠 — label 안에 있으면 누를 때 파일 선택 창이 같이 열림 */}
+        <div className="relative mt-2">
+          <label htmlFor="product-image" style={{ clipPath: pixelBox(4) }} className="block cursor-pointer bg-primary-tint p-[3px]">
+            <div
+              style={{ clipPath: pixelBox(4) }}
+              className="group relative flex h-52 items-center justify-center overflow-hidden bg-primary-subtle"
+            >
+              {shownImageUrl ? (
+                <img src={shownImageUrl} alt="선택한 상품 사진 미리보기" className="size-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <img src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+                  <span className="text-body-04 font-semibold text-text-muted">눌러서 상품 사진 선택</span>
+                </div>
+              )}
+              {shownImageUrl && (
+                <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-body-03 font-bold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  사진 바꾸기
+                </span>
+              )}
+            </div>
+          </label>
+          {image && (
+            <button
+              type="button"
+              onClick={() => selectImage(null)}
+              aria-label="고른 사진 취소"
+              style={{ clipPath: pixelBox(2) }}
+              className="absolute right-2 top-2 z-10 grid size-6 place-items-center bg-black/40 text-white transition-colors hover:bg-black/60"
+            >
+              <XMarkIcon className="size-4" />
+            </button>
+          )}
+        </div>
         <input id="product-image" type="file" accept="image/*" onChange={handleImageChange} className="sr-only" />
-        {image && (
-          <button type="button" onClick={() => selectImage(null)} className="mt-2 text-body-04 text-text-muted underline">
-            사진 지우기
-          </button>
-        )}
       </div>
 
       <div>
@@ -180,10 +203,10 @@ export function CreateProductForm({ marketId, onCreated }: CreateProductFormProp
         </div>
       </div>
 
-      {!isGiveaway && (
+      {needsPrice && (
         <div>
           <label htmlFor="product-price" className="text-body-03 font-bold text-text-strong">
-            {tradeType === 'RENTAL' ? '대여 가격' : '판매 가격'} <span className="text-primary">*</span>
+            판매 가격 <span className="text-primary">*</span>
           </label>
           <PixelField invalid={Boolean(fieldErrors.price)} className="mt-2">
             <div className="relative">
@@ -243,7 +266,7 @@ export function CreateProductForm({ marketId, onCreated }: CreateProductFormProp
         style={{ clipPath: pixelBox(4) }}
         className="h-14 bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
       >
-        {isSubmitting ? '상품 등록하는 중...' : '상품 등록하기'}
+        {isSubmitting ? submittingLabel : submitLabel}
       </button>
     </form>
   )

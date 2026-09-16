@@ -10,6 +10,8 @@ import { MarketDetailPage } from '../../pages/market-detail'
 import { MyPage } from '../../pages/my-page'
 import { ProductPage } from '../../pages/product'
 import { ProductCreatePage } from '../../pages/product-create'
+import { ProductDetailPage } from '../../pages/product-detail'
+import { ProductEditPage } from '../../pages/product-edit'
 import { RequireAuth, RequireGuest } from './guards'
 
 export const router = createBrowserRouter([
@@ -69,6 +71,22 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <MarketPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/items/:itemId/edit',
+    element: (
+      <RequireAuth>
+        <ProductEditPage />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: '/items/:itemId',
+    element: (
+      <RequireAuth>
+        <ProductDetailPage />
       </RequireAuth>
     ),
   },
