@@ -92,40 +92,20 @@ export function ProductDetailPage() {
             >
               ← {marketQuery.data?.title ?? '마켓'}
             </Link>
-            {/* 제목 줄 오른쪽에 주인용 동작 — 마켓 상세와 같은 자리 */}
-            <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="text-head-02 font-bold text-text-strong">상품 상세</h1>
-                <p className="mt-1 text-body-04 text-text-muted">
-                  {marketQuery.data?.title ?? '마켓'}
-                  <span className="px-1">›</span>
-                  {product.title}
-                </p>
-              </div>
-              {isOwner && (
-                <div className="flex shrink-0 gap-2">
-                  <Link
-                    to={`/items/${product.itemId}/edit`}
-                    viewTransition
-                    style={{ clipPath: pixelBox(2) }}
-                    className="flex h-9 items-center bg-primary px-3 text-xs font-bold text-white transition-colors duration-200 hover:bg-primary/90"
-                  >
-                    정보 수정
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setIsDeleteOpen(true)}
-                    style={{ clipPath: pixelBox(2) }}
-                    className="flex h-9 items-center bg-primary-subtle px-3 text-xs font-bold text-text-muted transition-colors duration-200 hover:bg-red-100 hover:text-red-600"
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-            </div>
+            <h1 className="mt-3 text-head-02 font-bold text-text-strong">상품 상세</h1>
+            <p className="mt-1 text-body-04 text-text-muted">
+              {marketQuery.data?.title ?? '마켓'}
+              <span className="px-1">›</span>
+              {product.title}
+            </p>
 
+            {/* 티켓 겉면처럼 그라데이션 판 하나가 사진·정보·소개글을 전부 감쌈 */}
+            <div
+              style={{ clipPath: pixelBox(6) }}
+              className="relative mt-6 bg-[image:var(--gradient-dreamy)] p-3 md:p-4"
+            >
             {/* 사진 + 정보를 한 카드로 묶음. 사진 칸은 최대 360px, 남는 폭은 정보 칸이 사용 */}
-            <div style={{ clipPath: pixelBox(6) }} className="mt-6 bg-bg p-4 md:p-6">
+            <div style={{ clipPath: pixelBox(4) }} className="bg-bg p-4 md:p-6">
             <div className="grid gap-6 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
               {/* 사진 */}
               <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-2">
@@ -148,12 +128,35 @@ export function ProductDetailPage() {
 
               {/* 정보 */}
               <div className="flex flex-col py-2 md:py-4">
-                <span
-                  style={{ clipPath: pixelBox(2) }}
-                  className="w-fit bg-primary-subtle px-2 py-1 text-xs font-bold text-text-muted"
-                >
-                  {getStatusTagLabel(product.status, product.tradeType)}
-                </span>
+                {/* 상태 태그 줄 오른쪽에 주인용 동작 배치 */}
+                <div className="flex items-center justify-between gap-3">
+                  <span
+                    style={{ clipPath: pixelBox(2) }}
+                    className="w-fit bg-primary-subtle px-2 py-1 text-xs font-bold text-text-muted"
+                  >
+                    {getStatusTagLabel(product.status, product.tradeType)}
+                  </span>
+                  {isOwner && (
+                    <div className="flex shrink-0 gap-2">
+                      <Link
+                        to={`/items/${product.itemId}/edit`}
+                        viewTransition
+                        style={{ clipPath: pixelBox(2) }}
+                        className="flex h-7 items-center bg-primary px-2.5 text-[11px] font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                      >
+                        정보 수정
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setIsDeleteOpen(true)}
+                        style={{ clipPath: pixelBox(2) }}
+                        className="flex h-7 items-center bg-primary-subtle px-2.5 text-[11px] font-bold text-text-muted transition-colors duration-200 hover:bg-red-100 hover:text-red-600"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <h2 className="mt-3 text-head-03 font-bold text-text-strong">{product.title}</h2>
                 <p className="mt-2 text-body-02 font-bold text-primary">{formatProductPrice(product)}</p>
 
@@ -172,9 +175,7 @@ export function ProductDetailPage() {
                 </div>
 
                 <div className="mt-8">
-                  {isOwner ? (
-                    <p className="text-body-04 text-text-muted">내가 올린 상품이에요. 위에서 수정하거나 삭제할 수 있어요.</p>
-                  ) : (
+                  {!isOwner && (
                     <>
                       <button
                         type="button"
@@ -194,15 +195,20 @@ export function ProductDetailPage() {
             </div>
             </div>
 
-            {/* 설명 */}
-            <div style={{ clipPath: pixelBox(6) }} className="mt-6 bg-bg p-6 md:p-8">
-              <h3 className="text-body-02 font-bold text-text-strong">이 물건을 소개해요</h3>
-              <p className="mt-3 whitespace-pre-wrap text-body-03 text-text-muted">
+            {/* 설명 — 같은 그라데이션 판 위에 놓인 두 번째 흰 면 */}
+            {/* 글이 마스코트 밑으로 들어가지 않도록 오른쪽 여백 확보 */}
+            <div style={{ clipPath: pixelBox(4) }} className="mt-3 bg-bg p-6 pr-14 md:mt-4 md:p-8 md:pr-16">
+              <h3 className="text-[22px] font-bold text-text-strong">이 물건을 소개해요</h3>
+              <p className="mt-4 whitespace-pre-wrap text-body-02 leading-relaxed text-text-strong">
                 {product.description || '소개글이 없어요'}
               </p>
-              <p className="mt-6 text-body-04 text-text-muted">
-                예약 중이거나 거래가 끝난 상품은 상태 태그가 표시되고 새 요청을 받을 수 없어요.
-              </p>
+            </div>
+
+            <img
+              src={MASCOTS.star}
+              alt=""
+              className="pointer-events-none absolute bottom-4 right-4 h-8 select-none object-contain [image-rendering:pixelated] md:bottom-5 md:right-5"
+            />
             </div>
           </>
         )}
@@ -216,7 +222,7 @@ export function ProductDetailPage() {
             이 상품을 삭제할까요?
           </h2>
           <p className="mt-2 text-body-03 text-text-muted">삭제하면 되돌릴 수 없어요.</p>
-          {deleteError && <p className="mt-3 text-body-04 text-red-600">{deleteError}</p>}
+          {deleteError && <p className="mt-3 text-body-04 text-red-200">{deleteError}</p>}
           <div className="mt-10 flex gap-3">
             <button
               type="button"
