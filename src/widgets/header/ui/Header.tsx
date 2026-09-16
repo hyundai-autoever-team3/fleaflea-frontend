@@ -10,7 +10,7 @@ const navItmes = [
 
 export function Header(){
     return(
-        <header className = "grid grid-cols-3 items-center bg-bg px-6 py-3 shadow-sm">
+        <header className = "grid grid-cols-3 items-center bg-bg px-6 py-3">
             <div className = "flex items-center gap-2">
                 <div className={"size-8 overflow-hidden rounded-full"}>
                     <img src="/mascot/flea.png" alt="FELA" className="h-full w-full object-cover"/>
