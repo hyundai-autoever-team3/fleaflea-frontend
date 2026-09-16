@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
@@ -21,6 +21,53 @@ function formatDate(isoDate: string) {
   const date = new Date(isoDate)
   const pad = (value: number) => String(value).padStart(2, '0')
   return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`
+}
+
+// 옆에 놓인 커버(288px) 높이에 맞춘 줄 수. 이보다 적게 접으면 커버 옆에 빈 공간만 생김.
+// Tailwind는 소스의 문자열을 그대로 훑어 클래스를 만들므로 `line-clamp-${n}`처럼 조립하면 안 됨
+const DESCRIPTION_CLAMP_CLASS = 'line-clamp-8'
+
+// line-clamp는 잘렸는지를 알려주지 않아, 접힌 상태의 실제 내용 높이와 보이는 높이를 재서 판단.
+// 창 폭이 바뀌면 줄 수가 달라지므로 ResizeObserver로 다시 잼
+function MarketDescription({ description }: { description: string | null }) {
+  const textRef = useRef<HTMLParagraphElement>(null)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isOverflowing, setIsOverflowing] = useState(false)
+
+  useLayoutEffect(() => {
+    const element = textRef.current
+    // 펼친 상태에서는 잘릴 일이 없어 측정하지 않고, 접기 버튼이 유지되도록 값을 그대로 둠
+    if (!element || isExpanded) return
+
+    const measure = () => setIsOverflowing(element.scrollHeight > element.clientHeight + 1)
+    measure()
+
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [description, isExpanded])
+
+  return (
+    <div>
+      <p
+        ref={textRef}
+        className={`max-w-2xl whitespace-pre-wrap text-body-02 leading-relaxed text-text-muted ${
+          isExpanded ? '' : DESCRIPTION_CLAMP_CLASS
+        }`}
+      >
+        {description || '소개글이 없어요'}
+      </p>
+      {isOverflowing && (
+        <button
+          type="button"
+          onClick={() => setIsExpanded((value) => !value)}
+          className="mt-2 text-body-04 font-bold text-primary"
+        >
+          {isExpanded ? '접기' : '더보기'}
+        </button>
+      )}
+    </div>
+  )
 }
 
 export function MarketDetailPage() {
@@ -105,30 +152,34 @@ export function MarketDetailPage() {
               <p className="mt-2 text-right text-body-04 text-text-muted">초대 링크를 불러오지 못했어요.</p>
             )}
 
-            {/* 마켓 정보 */}
-            <section className="mt-8 flex flex-col gap-8 md:flex-row md:items-center">
-              <MarketCover coverImageUrl={market.coverImageUrl} marketId={market.marketId} className="w-48 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-body-02 text-text-muted">{market.description || '소개글이 없어요'}</p>
-                {/* 호스트 · 참여자 · 개설일 정보 칸 */}
-                <dl className="mt-4 flex flex-wrap gap-2">
-                  {[
-                    { label: '호스트', value: market.hostNickname },
-                    { label: '참여자', value: `${market.memberCount}명` },
-                    { label: '개설일', value: formatDate(market.createdAt) },
-                  ].map(({ label, value }) => (
-                    <div
-                      key={label}
-                      style={{ clipPath: pixelBox(4) }}
-                      className="min-w-20 bg-primary-subtle px-3 py-2"
-                    >
-                      <dt className="text-[11px] font-semibold text-text-muted text-gray-400">{label}</dt>
-                      <dd className="mt-0.5 text-body-04 font-bold text-text-strong text-gray-400">{value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
+            {/* 마켓 소개 — 배너 아래, 카드 없이 페이지 바탕 위에 놓음 */}
+            <section className="mt-4">
+              <MarketDescription description={market.description} />
             </section>
+
+            {/* 커버 — MarketCover는 style을 받지 않아 픽셀 모서리는 바깥 div에 */}
+            <div className="mt-6" style={{ clipPath: pixelBox(6) }}>
+              <MarketCover
+                coverImageUrl={market.coverImageUrl}
+                marketId={market.marketId}
+                variant="bare"
+                className="h-56 w-full md:h-72"
+              />
+            </div>
+
+            {/* 호스트 · 참여자 · 개설일 — 사진 아래. 박스 없이 글자만 */}
+            <dl className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              {[
+                { label: '호스트', value: market.hostNickname },
+                { label: '참여자', value: `${market.memberCount}명` },
+                { label: '개설일', value: formatDate(market.createdAt) },
+              ].map(({ label, value }) => (
+                <Fragment key={label}>
+                  <dt className="text-[11px] font-semibold text-gray-400">{label}</dt>
+                  <dd className="mr-4 text-[11px] font-bold text-gray-400">{value}</dd>
+                </Fragment>
+              ))}
+            </dl>
 
             {/* 상품 */}
             <section className="mt-14">
