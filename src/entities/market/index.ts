@@ -1,4 +1,5 @@
 export type { MarketDetail, MarketInvitation, MarketMember, MarketSummary, PageResponse } from './model/types'
 export { marketKeys, useMarket, useMarketInvitation, useMarketMembers, useMyMarkets } from './api/market-api'
+export { Awning } from './ui/Awning'
 export { MarketCard } from './ui/MarketCard'
 export { MarketCover } from './ui/MarketCover'

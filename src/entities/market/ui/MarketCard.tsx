@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { pixelBox, pixelCorners } from '../../../shared/lib/pixel'
 import type { MarketSummary } from '../model/types'
+import { Awning } from './Awning'
 import { MarketCover } from './MarketCover'
 
 interface MarketCardProps {
@@ -11,27 +11,6 @@ interface MarketCardProps {
 
 export function MarketCard({ market, isHost }: MarketCardProps) {
     return <AwningCard market={market} isHost={isHost} />
-}
-
-// 반지름을 타일 비율(%)로 잡아 round 반복으로 타일이 늘어나도 줄무늬 폭과 반원이 같이 늘어나게 함
-const valanceMask = 'radial-gradient(25% 100% at 25% 0, black 98%, transparent 100%), radial-gradient(25% 100% at 75% 0, black 98%, transparent 100%)'
-
-// 줄무늬 2칸(120px) 타일을 round로 반복해 카드 폭이 달라도 끝에서 줄무늬·물결이 잘리지 않게 맞춤
-function Awning({ color, stripeColor }: { color: string; stripeColor: string }) {
-    const tile: CSSProperties = {
-        backgroundImage: `linear-gradient(90deg, ${color} 50%, ${stripeColor} 50%)`,
-        backgroundSize: '120px 100%',
-        backgroundRepeat: 'round',
-    }
-    return (
-        <div className = "relative z-10 -mb-[30px] drop-shadow-sm">
-            <div className = "h-8" style={{ ...tile, clipPath: pixelCorners('top') }} />
-            <div
-                className = "h-[30px]"
-                style={{ ...tile, maskImage: valanceMask, WebkitMaskImage: valanceMask, maskSize: '120px 100%', WebkitMaskSize: '120px 100%', maskRepeat: 'round', WebkitMaskRepeat: 'round' }}
-            />
-        </div>
-    )
 }
 
 function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean }) {
