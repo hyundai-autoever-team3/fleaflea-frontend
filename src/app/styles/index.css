@@ -2,6 +2,14 @@
 @import './tokens.css';
 @import './animations.css';
 
+/* 줄바꿈은 한글 문서처럼 글자 단위(브라우저 기본값)로 둬서 한 줄을 끝까지 채움.
+   keep-all은 좁은 폭에서 줄 끝이 들쑥날쑥해져 쓰지 않음.
+   공백 없는 긴 문자열(초대 링크 등)만 끊어 넘침을 막고, 마지막 줄에 한 글자만 남는 건 pretty로 완화 */
+body {
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
 /* 브라우저 자동완성 시 강제로 입혀지는 배경색 제거 — box-shadow로 흰 배경을 덮어씀 */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
