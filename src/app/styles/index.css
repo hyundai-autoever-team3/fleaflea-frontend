@@ -1,3 +1,33 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './animations.css';
+
+/* 줄바꿈은 한글 문서처럼 글자 단위(브라우저 기본값)로 둬서 한 줄을 끝까지 채움.
+   keep-all은 좁은 폭에서 줄 끝이 들쑥날쑥해져 쓰지 않음.
+   공백 없는 긴 문자열(초대 링크 등)만 끊어 넘침을 막고, 마지막 줄에 한 글자만 남는 건 pretty로 완화 */
+body {
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+}
+
+/* 버튼과 링크의 커서를 화살표로 통일.
+   Tailwind v4는 버튼에 cursor:pointer를 넣지 않는데 링크(<a>)는 브라우저 기본이 손가락이라,
+   같아 보이는 '입장하기'(Link)와 '플리마켓 만들기'(button)의 커서가 달랐음.
+   링크 쪽을 화살표로 맞춰 해소 */
+@layer base {
+  a,
+  button,
+  [role='button'] {
+    cursor: default;
+  }
+}
+
+/* 브라우저 자동완성 시 강제로 입혀지는 배경색 제거 — box-shadow로 흰 배경을 덮어씀 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-bg) inset;
+  box-shadow: 0 0 0px 1000px var(--color-bg) inset;
+  -webkit-text-fill-color: var(--color-text-strong);
+  transition: background-color 9999s ease-in-out 0s;
+}

@@ -1,51 +1,105 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+import type { StateStorage } from 'zustand/middleware'
 
+import { queryClient } from '../../../shared/api/query-client'
 import type { User } from '../../user'
 
-interface SessionState {
-  token: string | null
-  currentUser: User | null
-  setSession: (token: string, user: User, remember?: boolean) => void
-  clearSession: () => void
+interface SessionTokens {
+    accessToken: string
+    refreshToken: string
 }
 
-// "로그인 상태 유지" 체크 여부에 따라 실제 쓰기 대상만 바꾸는 저장소.
-// remember=true → localStorage(브라우저 껐다 켜도 유지), false → sessionStorage(탭 닫으면 삭제).
-// 어디서 읽어와야 할지 모르니 getItem은 둘 다 확인한다.
+interface SessionState {
+    accessToken: string | null
+    refreshToken: string | null
+    currentUser: User | null
+    setSession: (tokens: SessionTokens, rememberMe?: boolean) => void
+    setCurrentUser: (user: User | null) => void
+    clearSession: () => void
+}
+
+const SESSION_STORAGE_KEY = 'fleaflea-session'
+
 let remember = true
 
-const dualStorage = {
-  getItem: (name: string) => localStorage.getItem(name) ?? sessionStorage.getItem(name),
-  setItem: (name: string, value: string) => {
-    if (remember) {
-      localStorage.setItem(name, value)
-      sessionStorage.removeItem(name)
-    } else {
-      sessionStorage.setItem(name, value)
-      localStorage.removeItem(name)
-    }
-  },
-  removeItem: (name: string) => {
-    localStorage.removeItem(name)
-    sessionStorage.removeItem(name)
-  },
+const dualStorage: StateStorage = {
+    getItem: (name) => {
+        const localValue = localStorage.getItem(name)
+
+        if (localValue !== null) {
+            remember = true
+            return localValue
+        }
+
+        const sessionValue = sessionStorage.getItem(name)
+
+        // 세션 저장소에서 복원했다면 이후에도 같은 저장소 사용
+        remember = sessionValue === null
+        return sessionValue
+    },
+
+    setItem: (name, value) => {
+        if (remember) {
+            localStorage.setItem(name, value)
+            sessionStorage.removeItem(name)
+        } else {
+            sessionStorage.setItem(name, value)
+            localStorage.removeItem(name)
+        }
+    },
+
+    removeItem: (name) => {
+        localStorage.removeItem(name)
+        sessionStorage.removeItem(name)
+    },
 }
 
-// Persisted so a page refresh doesn't drop the login. app/router reads `token` to
-// decide public vs. protected routes; features/auth is the only slice that calls
-// setSession/clearSession (after login/signup/logout API calls).
 export const useSessionStore = create<SessionState>()(
-  persist(
-    (set) => ({
-      token: null,
-      currentUser: null,
-      setSession: (token, user, rememberMe = true) => {
-        remember = rememberMe
-        set({ token, currentUser: user })
-      },
-      clearSession: () => set({ token: null, currentUser: null }),
-    }),
-    { name: 'fleaflea-session', storage: createJSONStorage(() => dualStorage) },
-  ),
+    persist(
+        (set) => ({
+            accessToken: null,
+            refreshToken: null,
+            currentUser: null,
+
+            setSession: (
+                { accessToken, refreshToken },
+                rememberMe = remember,
+            ) => {
+                remember = rememberMe
+                // 이전 세션(가짜·만료 토큰, 다른 계정)의 조회 결과와 에러가 새 로그인에 남지 않도록 캐시 비움
+                queryClient.clear()
+                set({ accessToken, refreshToken })
+            },
+
+            setCurrentUser: (user) => {
+                set({ currentUser: user })
+            },
+
+            clearSession: () => {
+                // 로그아웃 뒤 다른 계정으로 로그인했을 때 이전 사용자의 데이터가 보이지 않도록 캐시 비움
+                queryClient.clear()
+                // 메모리 상태를 먼저 초기화한 뒤 저장된 데이터도 삭제
+                set({
+                    accessToken: null,
+                    refreshToken: null,
+                    currentUser: null,
+                })
+
+                dualStorage.removeItem(SESSION_STORAGE_KEY)
+                remember = true
+            },
+        }),
+        {
+            name: SESSION_STORAGE_KEY,
+            storage: createJSONStorage(() => dualStorage),
+
+            // 브라우저에 저장할 필드 명시
+            partialize: (state) => ({
+                accessToken: state.accessToken,
+                refreshToken: state.refreshToken,
+                currentUser: state.currentUser,
+            }),
+        },
+    ),
 )

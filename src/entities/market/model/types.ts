@@ -1,28 +1,40 @@
-// Backend tables: markets, market_members, market_invites
-export type MarketStatus = 'SCHEDULED' | 'OPEN' | 'CLOSED'
+// 백엔드 Swagger(/v3/api-docs) 응답 형식 기준
+export type { PageResponse } from '../../../shared/api/page-response'
 
-export interface Market {
+// GET /markets/{marketId}/invitation (호스트만 조회 가능)
+export interface MarketInvitation {
   marketId: number
-  hostId: number
-  title: string
-  description: string | null
-  startDate: string
-  endDate: string
-  status: MarketStatus
-  createdAt: string
-  updatedAt: string
+  inviteCode: string
 }
 
-export interface MarketMember {
-  marketMemberId: number
+// GET /markets
+export interface MarketSummary {
   marketId: number
-  memberId: number
+  hostId: number
+  hostNickname: string
+  title: string
+  description: string | null
+  coverImageUrl: string | null
   joinedAt: string
 }
 
-export interface MarketInvite {
-  inviteId: number
+// GET /markets/{marketId}
+export interface MarketDetail {
   marketId: number
-  inviteCode: string
+  hostId: number
+  hostNickname: string
+  title: string
+  description: string | null
+  coverImageUrl: string | null
+  memberCount: number
   createdAt: string
+}
+
+// GET /markets/{marketId}/members
+export interface MarketMember {
+  memberId: number
+  nickname: string
+  profileImageUrl: string | null
+  host: boolean
+  joinedAt: string
 }

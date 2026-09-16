@@ -5,18 +5,35 @@
 export type TradeType = 'SALE' | 'GIVEAWAY' | 'RENTAL'
 export type ProductStatus = 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED'
 
-export interface Product {
+// GET/POST /api/v1/markets/{marketId}/items 응답 (Swagger ItemSummaryResponse). API에서 price는 숫자
+export interface ProductSummary {
   itemId: number
-  marketId: number
-  sellerId: number
   title: string
-  description: string | null
   tradeType: TradeType
-  // NOTE: ERD types this VARCHAR(20), not numeric — likely to allow non-numeric values
-  // (e.g. 나눔 items with no price). Keep as string on the frontend to match.
-  price: string | null
+  price: number | null
   status: ProductStatus
   imageUrl: string | null
   createdAt: string
-  updatedAt: string
+}
+
+// GET /api/v1/items/{itemId} 응답의 seller (Swagger SellerResponse)
+export interface ProductSeller {
+  id: number
+  nickname: string
+  profileImageUrl: string | null
+}
+
+// GET /api/v1/items/{itemId} 응답 (Swagger ItemDetailResponse).
+// 목록과 달리 사진 주소 대신 저장 키(imageKey)만 내려줌 — 사진은 목록의 imageUrl을 사용
+export interface ProductDetail {
+  itemId: number
+  marketId: number
+  seller: ProductSeller
+  title: string
+  description: string | null
+  tradeType: TradeType
+  price: number | null
+  status: ProductStatus
+  imageKey: string | null
+  createdAt: string
 }

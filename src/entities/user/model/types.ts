@@ -3,7 +3,7 @@ export interface User {
   memberId: number
   email: string
   nickname: string
-  profileImageUrl: string | null
+  profileImageUrl: null
   createdAt: string
   updatedAt: string
 }

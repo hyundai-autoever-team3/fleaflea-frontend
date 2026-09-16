@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
-import { useNavigate } from 'react-router'
+import type { FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router'
 import {
   CheckCircleIcon,
   HeartIcon,
-  LinkIcon,
   LockClosedIcon,
   SparklesIcon,
   UserGroupIcon,
@@ -15,23 +14,6 @@ import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
 import { LandingHeader } from './LandingHeader'
 
-type ItemKind = 'camera' | 'headphones' | 'plant' | 'book'
-type Tone = 'mint' | 'peach' | 'blue' | 'primary'
-
-const chipBg: Record<Tone, string> = {
-  mint: 'bg-mint-subtle',
-  peach: 'bg-peach-subtle',
-  blue: 'bg-blue-subtle',
-  primary: 'bg-primary-subtle',
-}
-
-const itemTone: Record<ItemKind, Tone> = {
-  camera: 'mint',
-  headphones: 'blue',
-  plant: 'peach',
-  book: 'primary',
-}
-
 // Apple(macOS) 글래스모피즘 — 반투명 흰색 레이어 + 블러/채도 + 3겹 그림자(외곽선/남색 큰 그림자/상단 하이라이트).
 const glass =
   'rounded-2xl border border-[rgba(0,0,0,0.1)] bg-white/70 backdrop-blur-[30px] backdrop-saturate-[180%] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_20px_48px_-10px_rgba(20,30,60,0.28)]'
@@ -40,49 +22,6 @@ const glass =
 const glassPill =
   'rounded-full border border-[rgba(0,0,0,0.1)] bg-white/70 backdrop-blur-[16px] backdrop-saturate-[180%] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_20px_-6px_rgba(20,30,60,0.22)]'
 
-function PixelItem({ kind }: { kind: ItemKind }) {
-  const drawings: Record<ItemKind, ReactNode> = {
-    camera: (
-      <>
-        <path fill="#655676" d="M3 9h5V6h9v3h4v12H3z" />
-        <path fill="#b9b4d6" d="M4 11h16v8H4z" />
-        <path fill="#655676" d="M8 11h8v8H8z" />
-        <path fill="#d9e7e7" d="M10 13h4v4h-4z" />
-        <path fill="#f8f2dc" d="M17 11h2v2h-2z" />
-      </>
-    ),
-    headphones: (
-      <>
-        <path fill="#655676" d="M7 3h10v2h3v4h2v12h-6V11h3V8h-2V6H7v2H5v3h3v10H2V9h2V5h3z" />
-        <path fill="#b9b4d6" d="M3 13h3v6H3zM18 13h3v6h-3zM8 4h8v2H8z" />
-      </>
-    ),
-    plant: (
-      <>
-        <path
-          fill="#567d6f"
-          d="M11 4h3v13h-3zM4 5h5v2h3v6H8v-2H6V9H4zM17 2h5v5h-2v2h-3v3h-4V7h2V4h2z"
-        />
-        <path fill="#a5c3a7" d="M6 6h3v3H6zM17 4h3v3h-3z" />
-        <path fill="#a98080" d="M6 15h13v3h-2v5H8v-5H6z" />
-        <path fill="#e5bba6" d="M8 16h9v2H8zM10 18h5v4h-5z" />
-      </>
-    ),
-    book: (
-      <>
-        <path fill="#716080" d="M4 3h15v18H4v-2H2V5h2z" />
-        <path fill="#cebcdc" d="M5 4h12v13H5z" />
-        <path fill="#fff6e7" d="M5 18h13v2H5zM8 7h6v2H8z" />
-        <path fill="#9c83b5" d="M5 4h2v13H5z" />
-      </>
-    ),
-  }
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="size-8">
-      {drawings[kind]}
-    </svg>
-  )
-}
 
 function Mascot({ className = 'size-10' }: { className?: string }) {
   return (
@@ -91,13 +30,6 @@ function Mascot({ className = 'size-10' }: { className?: string }) {
     </div>
   )
 }
-
-const products: { kind: ItemKind; name: string; price: string; condition: string }[] = [
-  { kind: 'camera', name: '카메라', price: '₩300', condition: '중고' },
-  { kind: 'headphones', name: '디지방', price: '₩250', condition: '조건' },
-  { kind: 'book', name: '이불', price: '₩550', condition: '조건' },
-  { kind: 'plant', name: '오뚜기 조립', price: '₩700', condition: '조건' },
-]
 
 // 로그인 후 실제 앱 화면을 미리 보여주는 브라우저 창 목업. 실제 캡처가 아니라 우리 컴포넌트/토큰으로 재구성한 것.
 function BrowserMockup() {
@@ -130,16 +62,6 @@ function BrowserMockup() {
             </div>
             <Mascot className="size-16" />
           </div>
-          <div className="mt-4 grid grid-cols-4 gap-3">
-            {products.map((product) => (
-              <div
-                key={product.name}
-                className={`grid aspect-square place-items-center rounded-xl ${chipBg[itemTone[product.kind]]}`}
-              >
-                <PixelItem kind={product.kind} />
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -147,15 +69,15 @@ function BrowserMockup() {
       <div className={`absolute -left-6 top-10 flex max-w-56 items-center gap-3 p-4 ${glass}`}>
         <UserGroupIcon className="size-6 shrink-0 text-primary" />
         <div className="text-left">
-          <p className="text-body-04 font-bold text-[rgba(28,30,50,0.92)]">은지님이 마켓에 참여했어요!</p>
-          <p className="text-body-04 text-[rgba(28,30,50,0.58)]">우리 마켓에 새로운 친구가 생겼어요.</p>
+          <p className="text-body-04 font-bold text-glass-ink/92">은지님이 마켓에 참여했어요!</p>
+          <p className="text-body-04 text-glass-ink/58">우리 마켓에 새로운 친구가 생겼어요.</p>
         </div>
       </div>
       <div className={`absolute -right-6 -bottom-6 flex items-center gap-3 p-4 ${glass}`}>
         <CheckCircleIcon className="size-6 shrink-0 text-primary" />
         <div className="text-left">
-          <p className="text-body-04 font-bold text-[rgba(28,30,50,0.92)]">기분 좋은 거래 완료</p>
-          <p className="text-body-04 text-[rgba(28,30,50,0.58)]">물건에 새로운 이야기가 생겼어요.</p>
+          <p className="text-body-04 font-bold text-glass-ink/92">기분 좋은 거래 완료</p>
+          <p className="text-body-04 text-glass-ink/58">물건에 새로운 이야기가 생겼어요.</p>
         </div>
       </div>
     </div>
@@ -255,9 +177,8 @@ export function LandingPage() {
               type="button"
               onClick={() => dialogRef.current?.showModal()}
               data-hover-lift
-              className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-body-03 font-bold text-white"
-            >
-              <LinkIcon className="size-4" /> 초대 링크로 참여하기
+              className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-body-03 font-bold text-white">
+              초대 링크로 참여하기
             </button>
           </div>
         </div>
@@ -457,14 +378,14 @@ export function LandingPage() {
           data-hover-lift
           className="flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-body-02 font-bold text-white"
         >
-          초대 링크로 참여하기 <LinkIcon className="size-4" />
+          초대 링크로 참여하기
         </button>
       </section>
 
       {/* 푸터 — 스냅 대상 아님 (design.md: 랜딩 페이지 전용) */}
       <footer className="flex flex-col items-center justify-between gap-2 border-t border-border bg-bg-subtle px-6 py-6 text-body-04 text-text-muted md:flex-row">
         <span className="flex items-center gap-2">
-          <span className="font-jua text-body-03 font-bold text-primary">FLEE</span>
+          <span className="font-jua text-body-03 font-bold text-primary">FleaFlea</span>
           <SparklesIcon className="size-3 text-primary" />
           <span>좋은 건, 함께.</span>
         </span>
@@ -473,7 +394,7 @@ export function LandingPage() {
 
       <dialog
         ref={dialogRef}
-        className={`m-auto w-[min(440px,calc(100vw-36px))] p-8 text-center [&::backdrop]:bg-[rgba(20,24,29,0.42)] [&::backdrop]:backdrop-blur-sm ${glass}`}
+        className={`m-auto w-[min(440px,calc(100vw-36px))] p-8 text-center rounded-2xl shadow-lg`}
         onClose={() => {
           setInvite('')
           setInviteError('')
@@ -483,22 +404,22 @@ export function LandingPage() {
           type="button"
           onClick={() => dialogRef.current?.close()}
           aria-label="닫기"
-          className="absolute right-4 top-4 text-[rgba(28,30,50,0.58)]"
+          className="absolute right-4 top-4"
         >
           <XMarkIcon className="size-6" />
         </button>
 
-        <h2 className="text-left text-head-03 font-bold text-[rgba(28,30,50,0.92)]">
+        <h2 className="text-center text-gray-800 text-head-03 font-bold">
           이웃의 초대를 받으셨나요?
         </h2>
-        <p className="mt-2 text-left text-body-03 text-[rgba(28,30,50,0.58)]">
+        <p className="mt-2 text-gray-800 text-center text-body-03">
           받은 초대 링크나 코드를 붙여 넣어 주세요.
         </p>
 
         <img src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
 
-        <form onSubmit={joinMarket} className="text-left">
-          <label htmlFor="flea-invite-input" className="text-body-04 font-bold text-[rgba(28,30,50,0.92)]">
+        <form onSubmit={joinMarket} noValidate className="text-left">
+          <label htmlFor="flea-invite-input" className="text-gray-800 text-body-04 font-bold ">
             초대 링크 또는 코드
           </label>
           <input
@@ -516,7 +437,7 @@ export function LandingPage() {
             autoCapitalize="none"
             spellCheck={false}
             aria-invalid={Boolean(inviteError)}
-            className="mt-2 h-12 w-full rounded-lg border border-[rgba(0,0,0,0.12)] bg-white/60 px-3 text-body-03"
+            className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03"
           />
           {inviteError && <p className="mt-2 text-body-04 text-red-600">{inviteError}</p>}
           <button
@@ -524,9 +445,27 @@ export function LandingPage() {
             data-hover-lift
             className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-body-03 font-bold text-white"
           >
-            마켓 참여하기 <LinkIcon className="size-4" />
+            마켓 참여하기
           </button>
         </form>
+
+        <div className="mt-6 flex items-center gap-3">
+          <hr className="flex-1 border-border" />
+          <span className="text-body-04 text-text-muted">또는</span>
+          <hr className="flex-1 border-border" />
+        </div>
+
+        <p className="mt-6 text-center text-body-04 text-text-muted">
+          아직 계정이 없으신가요?{' '}
+          <Link
+            to="/signup"
+            viewTransition
+            onClick={() => dialogRef.current?.close()}
+            className="font-bold text-primary"
+          >
+            회원가입
+          </Link>
+        </p>
       </dialog>
     </div>
   )

@@ -1,30 +1,42 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
+import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { StarField } from '../../../shared/ui/star-field'
+import { login } from '../api/auth-api'
+import { useSessionStore } from '../../../entities/session'
 
 export function LoginForm() {
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  // TODO: 로그인 API 연동 시 setError로 실패 메시지 채우기 (아이디/비밀번호 불일치 등)
-  const [error] = useState('')
+  const [error, setError] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const email = String(formData.get('email') ?? '').trim()
     const password = String(formData.get('password') ?? '')
 
     const nextErrors: typeof fieldErrors = {}
+    const { min, max } = FIELD_LIMITS.password
     if (!email) nextErrors.email = '이메일을 입력해 주세요.'
+    else if (!EMAIL_PATTERN.test(email)) nextErrors.email = '올바른 이메일 형식이 아니에요.'
     if (!password) nextErrors.password = '비밀번호를 입력해 주세요.'
+    else if (password.length < min || password.length > max) nextErrors.password = `비밀번호는 ${min}~${max}자로 입력해 주세요.`
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    // TODO: 로그인 API 연동 — 성공 시 entities/session의 setSession(token, user, rememberMe) 호출
+    try {
+      const { data } = await login({ email, password })
+      useSessionStore.getState().setSession(data, rememberMe)
+      navigate('/market', { replace: true, viewTransition: true })
+    } catch {
+      setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+    }
   }
 
   return (
@@ -40,7 +52,7 @@ export function LoginForm() {
           </div>
 
           <div className="flex flex-1 flex-col justify-center">
-            <h1 className="text-head-02 font-bold text-text-strong">로그인</h1>
+            <h1 className="text-head-02 text-gray-800 font-bold text-text-strong">로그인</h1>
             <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
 
             <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-6">
@@ -48,7 +60,7 @@ export function LoginForm() {
               <div className="relative">
                 <label
                   htmlFor="email"
-                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+                  className="absolute -top-2 left-3 bg-bg px-1 text-gray-800 text-body-04 text-text-muted"
                 >
                   이메일
                 </label>
@@ -56,9 +68,10 @@ export function LoginForm() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   placeholder=" flee@example.com"
                   aria-invalid={Boolean(fieldErrors.email)}
-                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03"
+                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
                 />
               </div>
               {fieldErrors.email && (
@@ -78,6 +91,8 @@ export function LoginForm() {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  maxLength={FIELD_LIMITS.password.max}
                   placeholder=" 비밀번호를 입력해 주세요"
                   aria-invalid={Boolean(fieldErrors.password)}
                   className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
@@ -114,6 +129,12 @@ export function LoginForm() {
             </button>
 
             {error && <p className="text-body-04 text-red-600">{error}</p>}
+
+            <div className="flex items-center gap-3">
+              <hr className="flex-1 border-border" />
+              <span className="text-body-04 text-text-muted">또는</span>
+              <hr className="flex-1 border-border" />
+            </div>
 
             <p className="text-center text-body-04 text-text-muted">
               계정이 없으신가요?{' '}
