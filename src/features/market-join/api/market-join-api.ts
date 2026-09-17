@@ -2,7 +2,7 @@ import { isAxiosError } from 'axios'
 
 import { api } from '../../../shared/api/axios'
 
-// POST /market-members
+// POST /api/v1/market-members
 export interface JoinMarketResponse {
   marketId: number
   title: string
@@ -10,7 +10,7 @@ export interface JoinMarketResponse {
 }
 
 export function joinMarket(inviteCode: string) {
-  return api.post<JoinMarketResponse>('/market-members', { inviteCode })
+  return api.post<JoinMarketResponse>('/api/v1/market-members', { inviteCode })
 }
 
 export function isAlreadyJoinedError(error: unknown) {

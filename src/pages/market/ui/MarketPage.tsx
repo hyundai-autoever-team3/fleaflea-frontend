@@ -205,8 +205,8 @@ export function MarketPage() {
               )
             })}
 
-            {/* 마켓 검색: 현재 탭에 마켓이 있을 때만 */}
-            {tabMarkets.length > 0 && (
+            {/* 마켓 검색: 참여 중인 마켓 탭에만. 내가 만든 마켓은 수가 적어 검색이 필요 없음 */}
+            {!isHostTab && tabMarkets.length > 0 && (
               <label className="mt-5 flex w-full max-w-md items-center gap-2 rounded-full bg-primary-subtle px-5 py-3 focus-within:ring-2 focus-within:ring-primary-tint">
                 <svg viewBox="0 0 24 24" className="size-5 shrink-0 text-text-muted" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                   <circle cx="11" cy="11" r="7" />
@@ -235,7 +235,7 @@ export function MarketPage() {
 
             <div className="mt-8 flex flex-col items-start gap-14">
               {markets.map((market) => (
-                <MarketCard key={market.marketId} market={market} isHost={isHostTab} />
+                <MarketCard key={market.marketId} market={market} isHost={market.hostId === myMemberId} />
               ))}
 
               {tabMarkets.length === 0 && <EmptyState image="/mascot/flea4.png" {...TAB_EMPTY[tab]} />}

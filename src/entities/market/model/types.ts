@@ -1,4 +1,4 @@
-// 백엔드 Swagger(/v3/api-docs) 응답 형식 기준
+// 백엔드 Swagger(https://fleaflea.duckdns.org/v3/api-docs) 응답 형식 기준
 export type { PageResponse } from '../../../shared/api/page-response'
 
 // GET /markets/{marketId}/invitation (호스트만 조회 가능)
