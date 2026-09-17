@@ -100,6 +100,26 @@ export function FriendsPage() {
   const received = receivedQuery.data ?? []
   const sent = sentQuery.data ?? []
 
+  // 검색 API에는 관계·프로필이 없으므로 이미 조회한 친구/요청 목록과 대조.
+  // 목록 조회가 실패하거나 진행 중이면 관계를 NONE으로 단정하지 않음.
+  const hasRelationshipError = friendsQuery.isError || receivedQuery.isError || sentQuery.isError
+  const relationshipsReady = friendsQuery.isSuccess && receivedQuery.isSuccess && sentQuery.isSuccess
+  const searchResults = (searchQuery.data ?? []).map((person) => {
+    const friend = friends.find((entry) => entry.memberId === person.memberId)
+    const receivedRequest = received.find((entry) => entry.memberId === person.memberId)
+    const sentRequest = sent.find((entry) => entry.memberId === person.memberId)
+    const relationshipStatus: RelationshipStatus | null = !relationshipsReady ? null
+      : friend ? 'FRIEND'
+      : receivedRequest ? 'REQUEST_RECEIVED'
+      : sentRequest ? 'REQUESTED'
+      : 'NONE'
+    return {
+      ...person,
+      profileImageUrl: (friend ?? receivedRequest ?? sentRequest)?.profileImageUrl ?? null,
+      relationshipStatus,
+    }
+  })
+
   function refreshAll() {
     void queryClient.invalidateQueries({ queryKey: friendKeys.all })
   }
@@ -288,11 +308,11 @@ export function FriendsPage() {
                     <p className="text-body-04 text-text-muted">'{submittedKeyword}'로 찾은 사람이 없어요</p>
                   ) : (
                     <ul className="flex flex-col gap-3">
-                      {searchQuery.data.map((person) => (
+                      {searchResults.map((person) => (
                         <FriendRow
                           key={person.memberId}
                           friend={person}
-                          caption={SEARCH_CAPTION[person.relationshipStatus]}
+                          caption={person.relationshipStatus ? SEARCH_CAPTION[person.relationshipStatus] : hasRelationshipError ? '친구 관계를 확인하지 못했어요' : '친구 관계를 확인하는 중이에요'}
                         >
                           {person.relationshipStatus === 'NONE' && (
                             <button

@@ -18,11 +18,9 @@ export interface Friendship {
 // GET /api/v1/friend-requests 의 direction 쿼리 값
 export type FriendRequestDirection = 'SENT' | 'RECEIVED'
 
-// GET /api/v1/members?nickname= 응답 (아직 백엔드에 없는 API — 합의한 형태로 미리 맞춰 둠).
-// 아직 관계가 없는 사람도 나오므로 friendshipId가 없고 relationshipStatus에 NONE이 올 수 있음
+// GET /api/v1/members/search?nickname= 응답 (Swagger SearchMemberResponse).
+// 프로필 이미지와 친구 관계는 이 응답에 포함되지 않음.
 export interface MemberSearchResult {
   memberId: number
   nickname: string
-  profileImageUrl: string | null
-  relationshipStatus: RelationshipStatus
 }
