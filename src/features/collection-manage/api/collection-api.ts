@@ -21,16 +21,16 @@ function toFormData({ title, description, isPublic, image }: CollectionItemPaylo
 }
 
 export function createCollectionItem(payload: CollectionItemPayload) {
-  return api.post<CollectionItemDetail>('/collection-items', toFormData(payload))
+  return api.post<CollectionItemDetail>('/api/v1/collection-items', toFormData(payload))
 }
 
 // 새 사진을 보내지 않으면 기존 사진을 유지한다.
 export function updateCollectionItem(collectionItemId: number, payload: CollectionItemPayload) {
-  return api.patch<CollectionItemDetail>(`/collection-items/${collectionItemId}`, toFormData(payload))
+  return api.patch<CollectionItemDetail>(`/api/v1/collection-items/${collectionItemId}`, toFormData(payload))
 }
 
 export function deleteCollectionItem(collectionItemId: number) {
-  return api.delete(`/collection-items/${collectionItemId}`)
+  return api.delete(`/api/v1/collection-items/${collectionItemId}`)
 }
 
 export function useCreateCollectionItem() {

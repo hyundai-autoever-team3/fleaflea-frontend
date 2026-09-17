@@ -16,17 +16,17 @@ export const marketKeys = {
 
 // 개설자도 자동으로 참여자로 등록되므로 scope=joined 한 번으로 내가 만든 마켓까지 함께 받음
 export function getMyMarkets() {
-  return api.get<PageResponse<MarketSummary>>('/markets', {
+  return api.get<PageResponse<MarketSummary>>('/api/v1/markets', {
     params: { scope: 'joined', page: 0, size: LIST_SIZE },
   })
 }
 
 export function getMarket(marketId: number) {
-  return api.get<MarketDetail>(`/markets/${marketId}`)
+  return api.get<MarketDetail>(`/api/v1/markets/${marketId}`)
 }
 
 export function getMarketMembers(marketId: number) {
-  return api.get<PageResponse<MarketMember>>(`/markets/${marketId}/members`, {
+  return api.get<PageResponse<MarketMember>>(`/api/v1/markets/${marketId}/members`, {
     params: { page: 0, size: LIST_SIZE },
   })
 }
@@ -66,7 +66,7 @@ export function useMarketMembers(marketId: number) {
 }
 
 export function getMarketInvitation(marketId: number) {
-  return api.get<MarketInvitation>(`/markets/${marketId}/invitation`)
+  return api.get<MarketInvitation>(`/api/v1/markets/${marketId}/invitation`)
 }
 
 // 호스트가 아니면 403이라 enabled로 호스트일 때만 조회

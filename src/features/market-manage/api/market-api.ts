@@ -21,5 +21,5 @@ export function createMarket({ title, description, coverImage }: CreateMarketPay
   if (description) formData.append('description', description)
   if (coverImage) formData.append('coverImage', coverImage)
 
-  return api.post<CreateMarketResponse>('/markets', formData)
+  return api.post<CreateMarketResponse>('/api/v1/markets', formData)
 }

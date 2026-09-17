@@ -23,14 +23,14 @@ function retryUnlessClientError(failureCount: number, error: unknown) {
 }
 
 export function getMyCollectionItems(page = 0, signal?: AbortSignal) {
-  return api.get<PageResponse<CollectionItemSummary>>('/members/me/collection-items', {
+  return api.get<PageResponse<CollectionItemSummary>>('/api/v1/members/me/collection-items', {
     params: { page, size: LIST_SIZE },
     signal,
   })
 }
 
 export function getOwnerCollectionItems(ownerId: number, page = 0, signal?: AbortSignal) {
-  return api.get<PageResponse<CollectionItemSummary>>(`/members/${ownerId}/collection-items`, {
+  return api.get<PageResponse<CollectionItemSummary>>(`/api/v1/members/${ownerId}/collection-items`, {
     params: { page, size: LIST_SIZE },
     signal,
   })
@@ -66,7 +66,7 @@ export function useOwnerCollectionItems(ownerId: number) {
 }
 
 export function getCollectionItem(collectionItemId: number, signal?: AbortSignal) {
-  return api.get<CollectionItemDetail>(`/collection-items/${collectionItemId}`, { signal })
+  return api.get<CollectionItemDetail>(`/api/v1/collection-items/${collectionItemId}`, { signal })
 }
 
 export function useCollectionItem(collectionItemId: number) {
