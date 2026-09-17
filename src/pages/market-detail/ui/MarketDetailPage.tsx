@@ -303,7 +303,7 @@ export function MarketDetailPage() {
                     src={selectedMember.profileImageUrl || MASCOTS.default}
                     alt=""
                     style={{ clipPath: pixelBox(3) }}
-                    className="mx-auto size-28 object-contain [image-rendering:pixelated]"
+                    className="mx-auto size-20 object-contain [image-rendering:pixelated]"
                   />
                   <h2 id="member-modal-title" className="mt-6 text-head-03 font-bold text-text-strong">
                     {selectedMember.nickname}
