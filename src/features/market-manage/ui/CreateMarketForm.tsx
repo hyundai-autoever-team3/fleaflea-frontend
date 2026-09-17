@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent } from 'react'
 
 import { FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { shrinkImage } from '../../../shared/lib/image'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { createMarket, type CreateMarketResponse } from '../api/market-api'
@@ -40,14 +41,15 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
     setPreviewUrl(file ? URL.createObjectURL(file) : null)
   }
 
-  function handleCoverChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handleCoverChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null
     if (file && !file.type.startsWith('image/')) {
       setError('이미지 파일만 올릴 수 있어요.')
       return
     }
     setError('')
-    selectCover(file)
+    // 올리기 전에 줄여서 업로드 실패(413)와 긴 대기를 막음. 커버를 지우는 경우(null)는 그대로 둠
+    selectCover(file ? await shrinkImage(file) : null)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

@@ -5,6 +5,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import { TRADE_TYPE_LABEL, type TradeType } from '../../../entities/product'
 import { FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { shrinkImage } from '../../../shared/lib/image'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import type { CreateProductPayload } from '../api/product-api'
@@ -64,7 +65,7 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
     setPreviewUrl(file ? URL.createObjectURL(file) : null)
   }
 
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null
     // 같은 파일을 지웠다가 다시 골라도 change가 발생하도록 입력값을 비움
     event.target.value = ''
@@ -73,7 +74,8 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
       return
     }
     setError('')
-    selectImage(file)
+    // 올리기 전에 줄여서 업로드 실패(413)와 긴 대기를 막음. 사진을 지우는 경우(null)는 그대로 둠
+    selectImage(file ? await shrinkImage(file) : null)
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
