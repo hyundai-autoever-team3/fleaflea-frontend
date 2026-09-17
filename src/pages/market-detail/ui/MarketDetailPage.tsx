@@ -356,6 +356,17 @@ export function MarketDetailPage() {
                       닫기
                     </button>
                   </div>
+
+                  {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
+                  {selectedMember.memberId !== meQuery.data?.memberId && (
+                    <Link
+                      to={`/members/${selectedMember.memberId}/item-dex`}
+                      state={{ nickname: selectedMember.nickname }}
+                      className="mt-4 block text-body-04 font-bold text-text-muted underline transition-colors duration-200 hover:text-text-strong"
+                    >
+                      물건 도감 보기
+                    </Link>
+                  )}
                 </div>
               )}
             </Modal>

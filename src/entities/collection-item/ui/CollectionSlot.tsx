@@ -28,8 +28,21 @@ function PixelLock({ className = '' }: { className?: string }) {
   )
 }
 
-// 아직 채우지 않은 칸. 눌러서 바로 등록할 수 있게 버튼으로 둔다
-export function EmptySlot({ onClick }: { onClick: () => void }) {
+// 아직 채우지 않은 칸. 내 도감에서는 눌러서 바로 등록할 수 있게 버튼으로 둔다.
+// 남의 도감처럼 내가 채울 수 없는 칸은 onClick 없이 써서 판의 모양만 유지한다
+export function EmptySlot({ onClick }: { onClick?: () => void }) {
+  if (!onClick) {
+    return (
+      <div
+        aria-hidden
+        style={{ clipPath: pixelBox(3) }}
+        className="grid aspect-square w-full place-items-center bg-bg-subtle"
+      >
+        <PixelLock className="w-1/4 text-gray-400" />
+      </div>
+    )
+  }
+
   return (
     <button
       type="button"

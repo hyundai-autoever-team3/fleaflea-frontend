@@ -7,6 +7,7 @@ import { ItemDexPage } from '../../pages/item-dex'
 import { LandingPage } from '../../pages/landing'
 import { MarketJoinPage, MarketPage } from '../../pages/market'
 import { MarketDetailPage } from '../../pages/market-detail'
+import { MemberItemDexPage } from '../../pages/member-item-dex'
 import { MyPage } from '../../pages/my-page'
 import { ProductPage } from '../../pages/product'
 import { ProductCreatePage } from '../../pages/product-create'
@@ -103,6 +104,15 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <ItemDexPage />
+      </RequireAuth>
+    ),
+  },
+  // 남의 도감. 내 도감(/item-dex)과 화면은 닮았지만 공개 물건만 보이고 등록·수정이 없음
+  {
+    path: '/members/:memberId/item-dex',
+    element: (
+      <RequireAuth>
+        <MemberItemDexPage />
       </RequireAuth>
     ),
   },
