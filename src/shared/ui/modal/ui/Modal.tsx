@@ -8,6 +8,8 @@ interface ModalProps {
   labelledBy?: string
   // md = 폼처럼 가로가 필요한 모달(기본), sm = 프로필·확인처럼 세로로 좁게
   size?: 'md' | 'sm'
+  // 내용 안에 닫기 버튼이 따로 있어 오른쪽 위 X가 중복될 때 false
+  showClose?: boolean
   children: ReactNode
 }
 
@@ -29,7 +31,7 @@ function isOutsideDialog(event: MouseEvent<HTMLDialogElement>) {
 }
 
 // 랜딩 페이지 초대 코드 모달과 같은 <dialog> 스타일. 열림/닫힘 페이드는 app/styles/animations.css의 dialog 전환
-export function Modal({ open, onRequestClose, labelledBy, size = 'md', children }: ModalProps) {
+export function Modal({ open, onRequestClose, labelledBy, size = 'md', showClose = true, children }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   // 입력칸에서 드래그하다 바깥에서 마우스를 떼도 닫히지 않도록, 누른 위치도 바깥이었는지 기억
   const pressedOutsideRef = useRef(false)
@@ -73,9 +75,11 @@ export function Modal({ open, onRequestClose, labelledBy, size = 'md', children 
       // 내용이 길면 스크롤은 되지만 스크롤바는 숨김. 열릴 때 창 자체에 생기는 포커스 테두리도 제거
       className={`m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
     >
-      <button type="button" onClick={onRequestClose} aria-label="닫기" className="absolute right-4 top-4">
-        <XMarkIcon className="size-6" />
-      </button>
+      {showClose && (
+        <button type="button" onClick={onRequestClose} aria-label="닫기" className="absolute right-4 top-4">
+          <XMarkIcon className="size-6" />
+        </button>
+      )}
       <div key={openCount}>{shownChildren}</div>
     </dialog>
   )

@@ -264,28 +264,47 @@ export function MarketDetailPage() {
                 <p className="mt-4 text-body-04 text-text-muted">참여자 목록을 불러오지 못했어요.</p>
               ) : (
                 <ul className="mt-4 flex flex-wrap gap-3">
-                  {membersQuery.data.map((member) => (
-                    <li key={member.memberId}>
-                      {/* 참여자를 누르면 프로필 모달 — 친구 추가는 거기서 */}
-                      <button
-                        type="button"
-                        onClick={() => openMember(member)}
-                        style={{ clipPath: pixelBox() }}
-                        className="flex items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4 transition-colors duration-200 hover:bg-primary-tint"
-                      >
+                  {membersQuery.data.map((member) => {
+                    const isMe = member.memberId === meQuery.data?.memberId
+                    const chipClass = 'flex items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
+                    const content = (
+                      <>
                         <img
                           src={member.profileImageUrl || MASCOTS.default}
                           alt=""
                           style={{ clipPath: pixelBox(2) }}
                           className="size-8 bg-white object-cover"
                         />
-                        <span className="text-body-04 font-semibold text-text-strong">{member.nickname}</span>
+                        <span className="text-body-04 font-semibold text-text-strong">
+                          {member.nickname}
+                          {isMe && ' (나)'}
+                        </span>
                         {member.host && (
                           <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">HOST</span>
                         )}
-                      </button>
-                    </li>
-                  ))}
+                      </>
+                    )
+
+                    return (
+                      <li key={member.memberId}>
+                        {/* 내 프로필은 모달을 열어도 할 수 있는 게 없어 누를 수 없게 둠 */}
+                        {isMe ? (
+                          <div style={{ clipPath: pixelBox() }} className={chipClass}>
+                            {content}
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openMember(member)}
+                            style={{ clipPath: pixelBox() }}
+                            className={`${chipClass} transition-colors duration-200 hover:bg-primary-tint`}
+                          >
+                            {content}
+                          </button>
+                        )}
+                      </li>
+                    )
+                  })}
                 </ul>
               )}
             </section>
@@ -296,6 +315,7 @@ export function MarketDetailPage() {
               onRequestClose={() => setSelectedMember(null)}
               labelledBy="member-modal-title"
               size="sm"
+              showClose={false}
             >
               {selectedMember && (
                 <div className="py-6 text-center">
@@ -313,8 +333,8 @@ export function MarketDetailPage() {
                   </p>
                   {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  {/* 좁은 폭이라 버튼을 가로로 나누지 않고 세로로 쌓음 */}
-                  <div className="mt-10 flex flex-col gap-3">
+                  {/* X를 없앤 대신 닫기를 둠. 주요 동작인 친구 추가를 왼쪽에 */}
+                  <div className="mt-8 flex gap-3">
                     {/* 나 자신에게는 보낼 수 없어(400) 숨김 */}
                     {selectedMember.memberId !== meQuery.data?.memberId && (
                       <button
@@ -322,7 +342,7 @@ export function MarketDetailPage() {
                         disabled={isRequesting}
                         onClick={() => void handleSendFriendRequest(selectedMember.memberId)}
                         style={{ clipPath: pixelBox(4) }}
-                        className="bg-primary py-3.5 text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                        className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
                         {isRequesting ? '보내는 중...' : '친구 추가'}
                       </button>
@@ -331,7 +351,7 @@ export function MarketDetailPage() {
                       type="button"
                       onClick={() => setSelectedMember(null)}
                       style={{ clipPath: pixelBox(4) }}
-                      className="bg-primary-subtle py-3.5 text-body-03 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                      className="flex-1 bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
                     >
                       닫기
                     </button>
