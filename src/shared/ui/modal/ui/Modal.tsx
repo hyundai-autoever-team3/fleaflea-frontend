@@ -6,8 +6,16 @@ interface ModalProps {
   open: boolean
   onRequestClose: () => void
   labelledBy?: string
+  // md = 폼처럼 가로가 필요한 모달(기본), sm = 프로필·확인처럼 세로로 좁게
+  size?: 'md' | 'sm'
   children: ReactNode
 }
+
+// Tailwind는 소스의 문자열을 그대로 훑으므로 클래스를 조립하지 않고 통째로 적어 둠
+const SIZE_CLASS = {
+  md: 'w-[min(600px,calc(100vw-36px))] p-10',
+  sm: 'w-[min(380px,calc(100vw-36px))] p-8',
+} as const
 
 // 클릭 좌표가 모달 창 사각형 밖이면 바깥(backdrop) 클릭
 function isOutsideDialog(event: MouseEvent<HTMLDialogElement>) {
@@ -21,7 +29,7 @@ function isOutsideDialog(event: MouseEvent<HTMLDialogElement>) {
 }
 
 // 랜딩 페이지 초대 코드 모달과 같은 <dialog> 스타일. 열림/닫힘 페이드는 app/styles/animations.css의 dialog 전환
-export function Modal({ open, onRequestClose, labelledBy, children }: ModalProps) {
+export function Modal({ open, onRequestClose, labelledBy, size = 'md', children }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   // 입력칸에서 드래그하다 바깥에서 마우스를 떼도 닫히지 않도록, 누른 위치도 바깥이었는지 기억
   const pressedOutsideRef = useRef(false)
@@ -63,7 +71,7 @@ export function Modal({ open, onRequestClose, labelledBy, children }: ModalProps
         if (!open && event.target === event.currentTarget && event.propertyName === 'opacity') setShownChildren(null)
       }}
       // 내용이 길면 스크롤은 되지만 스크롤바는 숨김. 열릴 때 창 자체에 생기는 포커스 테두리도 제거
-      className="m-auto max-h-[calc(100dvh-48px)] w-[min(600px,calc(100vw-36px))] overflow-y-auto overscroll-contain rounded-2xl p-10 shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className={`m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
     >
       <button type="button" onClick={onRequestClose} aria-label="닫기" className="absolute right-4 top-4">
         <XMarkIcon className="size-6" />

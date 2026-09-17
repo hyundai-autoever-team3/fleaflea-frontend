@@ -295,6 +295,7 @@ export function MarketDetailPage() {
               open={selectedMember !== null}
               onRequestClose={() => setSelectedMember(null)}
               labelledBy="member-modal-title"
+              size="sm"
             >
               {selectedMember && (
                 <div className="py-6 text-center">
@@ -302,25 +303,18 @@ export function MarketDetailPage() {
                     src={selectedMember.profileImageUrl || MASCOTS.default}
                     alt=""
                     style={{ clipPath: pixelBox(3) }}
-                    className="mx-auto size-24 bg-primary-subtle object-cover [image-rendering:pixelated]"
+                    className="mx-auto size-28 object-contain [image-rendering:pixelated]"
                   />
-                  <h2 id="member-modal-title" className="mt-4 text-head-03 font-bold text-text-strong">
+                  <h2 id="member-modal-title" className="mt-6 text-head-03 font-bold text-text-strong">
                     {selectedMember.nickname}
                   </h2>
-                  <p className="mt-1 text-body-04 text-text-muted">
+                  <p className="mt-2 text-body-04 text-text-muted">
                     {selectedMember.host ? '이 마켓을 연 호스트예요' : '이 마켓에 참여하고 있어요'}
                   </p>
                   {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  <div className="mt-8 flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMember(null)}
-                      style={{ clipPath: pixelBox(4) }}
-                      className="flex-1 bg-primary-subtle py-3.5 text-body-03 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
-                    >
-                      닫기
-                    </button>
+                  {/* 좁은 폭이라 버튼을 가로로 나누지 않고 세로로 쌓음 */}
+                  <div className="mt-10 flex flex-col gap-3">
                     {/* 나 자신에게는 보낼 수 없어(400) 숨김 */}
                     {selectedMember.memberId !== meQuery.data?.memberId && (
                       <button
@@ -328,11 +322,19 @@ export function MarketDetailPage() {
                         disabled={isRequesting}
                         onClick={() => void handleSendFriendRequest(selectedMember.memberId)}
                         style={{ clipPath: pixelBox(4) }}
-                        className="flex-1 bg-primary py-3.5 text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                        className="bg-primary py-3.5 text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
                         {isRequesting ? '보내는 중...' : '친구 추가'}
                       </button>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMember(null)}
+                      style={{ clipPath: pixelBox(4) }}
+                      className="bg-primary-subtle py-3.5 text-body-03 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                    >
+                      닫기
+                    </button>
                   </div>
                 </div>
               )}

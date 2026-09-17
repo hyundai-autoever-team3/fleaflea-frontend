@@ -126,9 +126,20 @@ export function FriendsPage() {
 
       <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
         <h1 className="text-head-02 font-bold text-text-strong">친구</h1>
-        <p className="mt-1 text-body-04 text-text-muted">
-          친구 요청을 보내고, 상대가 수락하면 친구가 돼요.
-        </p>
+
+        {/* 안내 — 처음 들어온 사람이 바로 보도록 제목 바로 아래에 */}
+        <div
+          style={{ clipPath: pixelBox(6) }}
+          className="mt-4 flex items-start gap-3 bg-primary-subtle px-5 py-4"
+        >
+          <img src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
+          <div>
+            <p className="text-body-03 font-bold text-text-strong">친구가 되는 방법</p>
+            <p className="mt-1 text-body-04 text-text-muted">
+              마켓 참여자 목록에서 친구 요청을 보내면 상대에게 알림이 가요. 상대가 수락하면 친구가 돼요.
+            </p>
+          </div>
+        </div>
 
         {error && <p className="mt-4 text-body-04 text-red-600">{error}</p>}
 
@@ -237,19 +248,6 @@ export function FriendsPage() {
               )}
             </section>
 
-            {/* 안내 */}
-            <div
-              style={{ clipPath: pixelBox(6) }}
-              className="mt-12 flex items-start gap-3 bg-primary-subtle px-5 py-4"
-            >
-              <img src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
-              <div>
-                <p className="text-body-03 font-bold text-text-strong">친구가 되는 방법</p>
-                <p className="mt-1 text-body-04 text-text-muted">
-                  마켓 참여자 목록에서 친구 요청을 보내면 상대에게 알림이 가요. 상대가 수락하면 친구가 돼요.
-                </p>
-              </div>
-            </div>
           </>
         )}
       </div>
