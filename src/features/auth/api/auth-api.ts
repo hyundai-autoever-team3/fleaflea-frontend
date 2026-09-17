@@ -18,12 +18,12 @@ export interface AuthTokens {
 }
 
 export function signup(payload: SignupPayload){
-    return api.post('/auth/signup', payload)
+    return api.post('/api/v1/auth/signup', payload)
 }
 
 export function login(payload: LoginPayload){
-    return api.post('/auth/login', payload)
+    return api.post('/api/v1/auth/login', payload)
 }
 export function reissue(refreshToken: string){
-    return api.post<{ accessToken: string}>('/auth/reissue', {refreshToken })
+    return api.post<{ accessToken: string}>('/api/v1/auth/reissue', {refreshToken })
 }

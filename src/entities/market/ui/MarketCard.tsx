@@ -33,7 +33,7 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
                         {market.description || '소개글이 없어요'}
                     </p>
                     {!isHost && (
-                        <p className="mt-2 text-body-04 text-text-muted">호스트 {market.host.nickname}</p>
+                        <p className="mt-2 text-body-04 text-text-muted">호스트 {market.hostNickname}</p>
                     )}
                 </div>
 

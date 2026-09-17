@@ -87,7 +87,7 @@ export function MarketDetailPage() {
   const meQuery = useMyProfile()
 
   const market = marketQuery.data
-  const isHost = market !== undefined && market.host.memberId === meQuery.data?.memberId
+  const isHost = market !== undefined && market.hostId === meQuery.data?.memberId
   const invitationQuery = useMarketInvitation(marketId, isHost)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
 
@@ -203,7 +203,7 @@ export function MarketDetailPage() {
             {/* 호스트 · 참여자 · 개설일 — 사진 아래. 박스 없이 글자만 */}
             <dl className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
               {[
-                { label: '호스트', value: market.host.nickname },
+                { label: '호스트', value: market.hostNickname },
                 { label: '참여자', value: `${market.memberCount}명` },
                 { label: '개설일', value: formatDate(market.createdAt) },
               ].map(({ label, value }) => (

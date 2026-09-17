@@ -70,8 +70,8 @@ export function MarketPage() {
   // 개설자도 참여자로 등록되므로, 한 목록을 호스트 여부로 나눔
   const myMemberId = meQuery.data?.memberId
   const allMarkets = marketsQuery.data ?? []
-  const hostedMarkets = allMarkets.filter((market) => market.host.memberId === myMemberId)
-  const joinedMarkets = allMarkets.filter((market) => market.host.memberId !== myMemberId)
+  const hostedMarkets = allMarkets.filter((market) => market.hostId === myMemberId)
+  const joinedMarkets = allMarkets.filter((market) => market.hostId !== myMemberId)
 
   const hasAnyMarket = allMarkets.length > 0
   const tabMarkets = isHostTab ? hostedMarkets : joinedMarkets
@@ -235,7 +235,7 @@ export function MarketPage() {
 
             <div className="mt-8 flex flex-col items-start gap-14">
               {markets.map((market) => (
-                <MarketCard key={market.marketId} market={market} isHost={market.host.memberId === myMemberId} />
+                <MarketCard key={market.marketId} market={market} isHost={market.hostId === myMemberId} />
               ))}
 
               {tabMarkets.length === 0 && <EmptyState image="/mascot/flea4.png" {...TAB_EMPTY[tab]} />}
