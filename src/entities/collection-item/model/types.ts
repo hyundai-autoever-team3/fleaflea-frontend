@@ -1,13 +1,18 @@
-// Backend table: collection_items (개인 물건 도감). Separate from entities/product
-// (backend: items, 마켓에 등록된 상품) — a collection item may or may not be listed
-// to a market as a product.
-export interface CollectionItem {
+// CollectionItemSummaryResponse: 목록에는 설명과 소유자 정보가 포함되지 않는다.
+export interface CollectionItemSummary {
   collectionItemId: number
-  memberId: number
   title: string
-  description: string | null
   imageUrl: string | null
   isPublic: boolean
   createdAt: string
+}
+
+// CollectionItemResponse: GET /collection-items/{collectionItemId}
+export interface CollectionItemDetail extends CollectionItemSummary {
+  ownerId: number
+  ownerNickname: string
+  description: string | null
   updatedAt: string
 }
+
+export type CollectionItem = CollectionItemDetail
