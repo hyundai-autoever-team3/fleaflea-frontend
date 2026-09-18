@@ -230,7 +230,7 @@ export function ProductDetailPage() {
                         disabled={isClosed}
                         onClick={() => setIsRequestOpen(true)}
                         style={{ clipPath: pixelBox(4) }}
-                        className="h-12 w-full bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                        className="h-11 w-full max-w-[260px] bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
                         {isClosed ? '거래가 끝난 상품이에요' : getRequestActionLabel(product.tradeType)}
                       </button>
