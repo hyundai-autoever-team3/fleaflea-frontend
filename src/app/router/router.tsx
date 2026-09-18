@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router'
 
 import { LoginPage, SignupPage } from '../../pages/auth'
+import { CollectionItemDetailPage } from '../../pages/collection-item-detail'
 import { FriendsPage } from '../../pages/friends'
 import { HomePage } from '../../pages/home'
 import { ItemDexPage } from '../../pages/item-dex'
@@ -104,6 +105,15 @@ export const router = createBrowserRouter([
     element: (
       <RequireAuth>
         <ItemDexPage />
+      </RequireAuth>
+    ),
+  },
+  // 도감 물건 상세. 남의 물건이면 대여·교환·구걸 요청을 여기서 보냄
+  {
+    path: '/collection-items/:collectionItemId',
+    element: (
+      <RequireAuth>
+        <CollectionItemDetailPage />
       </RequireAuth>
     ),
   },
