@@ -177,9 +177,11 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
 
       <div>
         <span className="text-body-03 font-bold text-text-strong">
-          거래 방식 <span className="text-primary">*</span>
+          거래 유형 <span className="text-primary">*</span>
         </span>
-        <div className="mt-2 flex gap-2" role="group" aria-label="거래 방식">
+        {/* 고르지 않은 칩은 픽셀 테두리 2겹(연보라 판 + 흰 면)으로 윤곽만 남긴다.
+            고른 칩만 보라로 채워, 무엇을 골랐는지가 한눈에 보이게 함 */}
+        <div className="mt-2 flex gap-2" role="group" aria-label="거래 유형">
           {TRADE_TYPES.map((type) => {
             const active = tradeType === type
             return (
@@ -192,13 +194,22 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
                   setFieldErrors((prev) => ({ ...prev, price: undefined }))
                 }}
                 style={{ clipPath: pixelBox() }}
-                className={`flex-1 py-2.5 text-body-03 font-semibold transition-colors duration-200 ${
+                className={
                   active
-                    ? 'bg-primary text-white hover:bg-primary/90'
-                    : 'bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong'
-                }`}
+                    ? 'flex-1 bg-primary p-[2px] transition-colors duration-200'
+                    : 'flex-1 bg-primary-tint p-[2px] transition-colors duration-200 hover:bg-primary'
+                }
               >
-                {TRADE_TYPE_LABEL[type]}
+                <span
+                  style={{ clipPath: pixelBox() }}
+                  className={
+                    active
+                      ? 'block bg-primary py-2.5 text-body-03 font-semibold text-white'
+                      : 'block bg-bg py-2.5 text-body-03 font-semibold text-text-muted'
+                  }
+                >
+                  {TRADE_TYPE_LABEL[type]}
+                </span>
               </button>
             )
           })}
