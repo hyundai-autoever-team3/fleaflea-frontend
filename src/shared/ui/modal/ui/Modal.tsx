@@ -6,8 +6,9 @@ interface ModalProps {
   open: boolean
   onRequestClose: () => void
   labelledBy?: string
-  // md = 폼처럼 가로가 필요한 모달(기본), sm = 프로필·확인처럼 세로로 좁게
-  size?: 'md' | 'sm'
+  // md = 폼처럼 가로가 필요한 모달(기본), sm = 프로필·확인처럼 세로로 좁게,
+  // lg = 고르기 그리드처럼 한 화면에 여러 칸을 늘어놓아야 할 때
+  size?: 'md' | 'sm' | 'lg'
   // 내용 안에 닫기 버튼이 따로 있어 오른쪽 위 X가 중복될 때 false
   showClose?: boolean
   children: ReactNode
@@ -15,6 +16,7 @@ interface ModalProps {
 
 // Tailwind는 소스의 문자열을 그대로 훑으므로 클래스를 조립하지 않고 통째로 적어 둠
 const SIZE_CLASS = {
+  lg: 'w-[min(760px,calc(100vw-36px))] p-10',
   md: 'w-[min(600px,calc(100vw-36px))] p-10',
   sm: 'w-[min(380px,calc(100vw-36px))] p-8',
 } as const
