@@ -14,6 +14,7 @@ import {
 } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import { deleteProduct, getDeleteProductErrorMessage } from '../../../features/product-manage'
+import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Modal } from '../../../shared/ui/modal'
@@ -45,6 +46,10 @@ export function ProductDetailPage() {
 
   const isOwner = product !== undefined && product.seller.id === meQuery.data?.memberId
   const isClosed = product !== undefined && product.status !== 'AVAILABLE'
+
+  // 상품 상세 응답에는 내가 이미 요청했는지가 없다. 목록 API(GET /item-trade-requests)는
+  // 마이페이지용이라 여기서는 쓰지 않고, 중복 요청은 서버의 409 응답으로 알린다
+  const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -177,17 +182,16 @@ export function ProductDetailPage() {
                 <div className="mt-8">
                   {!isOwner && (
                     <>
+                      {/* 거래가 끝난 상품에는 요청을 보낼 수 없다 */}
                       <button
                         type="button"
-                        disabled
+                        disabled={isClosed}
+                        onClick={() => setIsRequestOpen(true)}
                         style={{ clipPath: pixelBox(4) }}
-                        className="h-12 w-full bg-primary text-body-04 font-bold text-white disabled:bg-primary/50"
+                        className="h-12 w-full bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
                         {isClosed ? '거래가 끝난 상품이에요' : getRequestActionLabel(product.tradeType)}
                       </button>
-                      {!isClosed && (
-                        <p className="mt-2 text-center text-body-04 text-text-muted">거래 요청 기능은 준비 중이에요.</p>
-                      )}
                     </>
                   )}
                 </div>
@@ -244,6 +248,17 @@ export function ProductDetailPage() {
           </div>
         </div>
       </Modal>
+
+      {/* 거래 요청 — 내 상품에는 열 일이 없어 주인일 때는 두지 않는다 */}
+      {product && !isOwner && (
+        <ProductTradeRequestModal
+          open={isRequestOpen}
+          itemId={product.itemId}
+          itemTitle={product.title}
+          tradeType={product.tradeType}
+          onClose={() => setIsRequestOpen(false)}
+        />
+      )}
     </div>
   )
 }
