@@ -1,22 +1,27 @@
 import { useId, useState } from 'react'
 
+import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
 import { getBegRequestErrorMessage, useCreateBegRequest } from '../api/collection-trade-api'
+import { MascotTip } from './MascotTip'
+import { PreviewSlot } from './PreviewSlot'
 
 interface BegRequestModalProps {
   open: boolean
   collectionItemId: number
   itemTitle: string
+  itemImageUrl?: string | null
   onClose: () => void
 }
 
 const MAX_STORY = 1000
 
-// 구걸은 내 물건을 걸지 않고 사연만 보낸다 (Swagger BeggingRequest: story 필수)
-export function BegRequestModal({ open, collectionItemId, itemTitle, onClose }: BegRequestModalProps) {
+// 구걸은 내 물건을 걸지 않고 사연만 보낸다 (Swagger BeggingRequest: story 필수).
+// 대여·교환과 같은 판·같은 칸 문법을 쓰되, 사연 입력칸이 길어 사진은 작게 둔다
+export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUrl, onClose }: BegRequestModalProps) {
   const id = useId()
   const [story, setStory] = useState('')
   const [error, setError] = useState('')
@@ -49,11 +54,17 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, onClose }: 
       <h2 id="beg-request-title" className="text-head-03 font-bold text-text-strong">
         구걸하기
       </h2>
-      <p className="mt-1 text-body-04 text-text-muted">
-        <span className="font-bold text-text-strong">{itemTitle}</span>
-        <span className="px-1">·</span>
-        갖고 싶은 마음을 사연으로 전해요
-      </p>
+      {/* 물건 이름은 아래 판이 보여주므로 여기서는 무엇을 하는 화면인지만 말한다 */}
+      <p className="mt-1 text-body-04 text-text-muted">갖고 싶은 마음을 사연으로 전해요</p>
+
+      <div style={{ clipPath: pixelBox(4) }} className="mt-5 bg-primary-subtle p-4">
+        <div className="mx-auto w-[min(160px,45%)]">
+          <PreviewSlot label="갖고 싶은 물건" title={itemTitle} imageUrl={itemImageUrl} />
+        </div>
+        <MascotTip mascot={MASCOTS.wink} className="mt-3">
+          사연이 닿으면 주인이 나눠줄지도 몰라요.
+        </MascotTip>
+      </div>
 
       <div className="mt-6">
         <label htmlFor={`${id}-story`} className="text-body-03 font-bold text-text-strong">
