@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
 import { useCollectionItem } from '../../../entities/collection-item'
-import { useMyFriends } from '../../../entities/friend'
 import { useMyProfile } from '../../../entities/user'
 import { BegRequestModal, TradeRequestModal } from '../../../features/collection-trade'
 import type { CollectionTradeType } from '../../../features/collection-trade'
@@ -11,8 +10,15 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Header } from '../../../widgets/header'
 
-// 한 번에 하나만 열리므로 어떤 요청 화면인지만 들고 있으면 된다
-type RequestKind = CollectionTradeType | 'BEG' | null
+// 구걸은 거래 유형이 아니라 별도 API라 타입을 따로 붙여 한 묶음으로 다룬다
+type ActionKind = CollectionTradeType | 'BEG'
+
+// 상품 등록의 거래 유형 칩과 같은 문법 — 셋 중 하나를 고르고 아래에서 확정한다
+const ACTIONS: { key: ActionKind; label: string }[] = [
+  { key: 'RENTAL', label: '대여' },
+  { key: 'EXCHANGE', label: '교환' },
+  { key: 'BEG', label: '구걸' },
+]
 
 function getDetailErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
@@ -30,12 +36,12 @@ export function CollectionItemDetailPage() {
   const detailQuery = useCollectionItem(collectionItemId)
   const detail = detailQuery.data
   const meQuery = useMyProfile()
-  const friendsQuery = useMyFriends()
 
-  const [request, setRequest] = useState<RequestKind>(null)
+  // 고른 유형과 모달 열림을 나눠 둔다 — 모달을 닫아도 고른 것은 남아야 다시 보내기 쉽다
+  const [action, setAction] = useState<ActionKind | null>(null)
+  const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const isMine = detail !== undefined && detail.ownerId === meQuery.data?.memberId
-  const isFriend = friendsQuery.data?.some((friend) => friend.memberId === detail?.ownerId) ?? false
 
   return (
     <div>
@@ -63,37 +69,12 @@ export function CollectionItemDetailPage() {
             >
               ← {isMine ? '내 물건 도감' : `${detail.ownerNickname}님의 물건 도감`}
             </Link>
+            {/* 누구의 도감인지는 제목이 말해주므로 프로필 줄을 따로 두지 않는다 */}
             <h1 className="mt-3 text-head-02 font-bold text-text-strong">
               {isMine ? '내 물건 도감' : `${detail.ownerNickname}의 물건 도감`}
             </h1>
-            <p className="mt-1 text-body-04 text-text-muted">
-              {isMine ? '내가 공개한 물건이에요.' : `${detail.ownerNickname}가 공개한 물건을 구경해요.`}
-            </p>
 
-            {/* 소유자 — 목업의 프로필 줄 */}
-            <div className="mt-6 flex items-center gap-3">
-              <img
-                src={MASCOTS.default}
-                alt=""
-                style={{ clipPath: pixelBox(3) }}
-                className="size-14 bg-primary-subtle object-cover [image-rendering:pixelated]"
-              />
-              <div className="min-w-0">
-                <p className="truncate text-body-02 font-bold text-text-strong">{detail.ownerNickname}</p>
-                {!isMine && isFriend && (
-                  <span
-                    style={{ clipPath: pixelBox(2) }}
-                    className="mt-1 inline-block bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary"
-                  >
-                    친구
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* 상품 상세와 같은 구성 — 그라데이션 판 위에 사진 칸과 정보 칸 */}
-            <div style={{ clipPath: pixelBox(6) }} className="mt-6 bg-[image:var(--gradient-dreamy)] p-3 md:p-4">
-              <div className="grid gap-3 md:grid-cols-[minmax(0,480px)_minmax(0,1fr)] md:gap-4">
+            <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,480px)_minmax(0,1fr)] md:gap-8">
                 <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-2">
                   <div
                     style={{ clipPath: pixelBox(4) }}
@@ -107,61 +88,66 @@ export function CollectionItemDetailPage() {
                   </div>
                 </div>
 
-                <div style={{ clipPath: pixelBox(4) }} className="flex flex-col bg-bg p-6 md:p-8">
+                {/* 겉 판을 걷어내 흰 카드가 흰 배경에 묻히므로, 정보는 배경 없이 그대로 둔다 */}
+                <div className="flex flex-col py-2 md:py-4">
                   <h2 className="text-head-03 font-bold text-text-strong">{detail.title}</h2>
                   <p className="mt-4 whitespace-pre-wrap text-body-03 leading-relaxed text-text-muted">
                     {detail.description || '설명이 없어요'}
                   </p>
 
-                  {/* 내 물건에는 요청을 보낼 수 없어 버튼을 두지 않는다 */}
+                  {/* 내 물건에는 요청을 보낼 수 없어 고르기 자체를 두지 않는다 */}
                   {isMine ? (
                     <p className="mt-8 text-body-04 text-text-muted">내가 등록한 물건이에요.</p>
                   ) : (
-                    <div className="mt-8 flex flex-col gap-3">
+                    <div className="mt-8">
+                      <p className="text-body-03 font-bold text-text-strong">무엇을 하고 싶나요?</p>
+
+                      {/* 고르지 않은 칩은 픽셀 테두리 2겹으로 윤곽만, 고른 칩만 보라로 채운다 */}
+                      <div className="mt-2 flex gap-2" role="group" aria-label="요청 유형">
+                        {ACTIONS.map(({ key, label }) => {
+                          const active = action === key
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => setAction(key)}
+                              style={{ clipPath: pixelBox() }}
+                              className={
+                                active
+                                  ? 'flex-1 bg-primary p-[2px] transition-colors duration-200'
+                                  : 'flex-1 bg-primary-tint p-[2px] transition-colors duration-200 hover:bg-primary'
+                              }
+                            >
+                              <span
+                                style={{ clipPath: pixelBox() }}
+                                className={
+                                  active
+                                    ? 'block bg-primary py-2.5 text-body-03 font-semibold text-white'
+                                    : 'block bg-bg py-2.5 text-body-03 font-semibold text-text-muted'
+                                }
+                              >
+                                {label}
+                              </span>
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      {/* 유형별 설명은 모달 부제가 다시 말해주므로 여기서는 두지 않는다 */}
                       <button
                         type="button"
-                        onClick={() => setRequest('RENTAL')}
+                        disabled={action === null}
+                        onClick={() => setIsRequestOpen(true)}
                         style={{ clipPath: pixelBox(4) }}
-                        className="h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                        className="mt-6 h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
-                        대여하기
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRequest('EXCHANGE')}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
-                      >
-                        교환하기
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRequest('BEG')}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
-                      >
-                        구걸하기
+                        요청 보내기
                       </button>
                     </div>
                   )}
                 </div>
-              </div>
             </div>
-
-            {!isMine && (
-              <div
-                style={{ clipPath: pixelBox(6) }}
-                className="mt-4 flex items-start gap-3 bg-primary-subtle px-5 py-4"
-              >
-                <img src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
-                <div>
-                  <p className="text-body-03 font-bold text-text-strong">소장품에 마음을 전해요</p>
-                  <p className="mt-1 text-body-04 text-text-muted">
-                    구걸하기는 이 물건이 갖고 싶다는 의사 표시예요. 대여·교환은 내 도감 물건을 하나 걸어서 요청해요.
-                  </p>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>
@@ -169,17 +155,19 @@ export function CollectionItemDetailPage() {
       {detail && (
         <>
           <TradeRequestModal
-            open={request === 'RENTAL' || request === 'EXCHANGE'}
+            open={isRequestOpen && (action === 'RENTAL' || action === 'EXCHANGE')}
             collectionItemId={detail.collectionItemId}
             itemTitle={detail.title}
-            tradeType={request === 'EXCHANGE' ? 'EXCHANGE' : 'RENTAL'}
-            onClose={() => setRequest(null)}
+            itemImageUrl={detail.imageUrl}
+            tradeType={action === 'EXCHANGE' ? 'EXCHANGE' : 'RENTAL'}
+            onClose={() => setIsRequestOpen(false)}
           />
           <BegRequestModal
-            open={request === 'BEG'}
+            open={isRequestOpen && action === 'BEG'}
             collectionItemId={detail.collectionItemId}
             itemTitle={detail.title}
-            onClose={() => setRequest(null)}
+            itemImageUrl={detail.imageUrl}
+            onClose={() => setIsRequestOpen(false)}
           />
         </>
       )}
