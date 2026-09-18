@@ -297,7 +297,9 @@ export function MarketPage() {
         {/* 작성 중 닫기 확인: 폼은 그대로 두고 위에만 덮어 입력 내용을 지키지 않게 함 */}
         {isConfirmingClose && (
           <div
-            className="fixed inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
+            // dialog에 transform이 걸려 있어 fixed를 쓰면 뷰포트가 아니라 모달 상자를 기준으로 잡힌다.
+            // 닫힐 때 모달이 축소되면 같이 찌그러지므로, 기준을 명시적으로 모달로 두는 absolute를 쓴다
+            className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
             onClick={() => setIsConfirmingClose(false)}
           >
             <div

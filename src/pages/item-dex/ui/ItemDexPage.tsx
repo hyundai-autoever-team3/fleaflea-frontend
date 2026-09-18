@@ -232,7 +232,9 @@ export function ItemDexPage() {
         {/* 작성 중 닫기 확인: 폼은 그대로 두고 위에만 덮어 입력 내용을 지키지 않게 함 */}
         {isConfirmingClose && (
           <div
-            className="fixed inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
+            // dialog에 transform이 걸려 있어 fixed를 쓰면 뷰포트가 아니라 모달 상자를 기준으로 잡힌다.
+            // 닫힐 때 모달이 축소되면 같이 찌그러지므로, 기준을 명시적으로 모달로 두는 absolute를 쓴다
+            className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
             onClick={() => setIsConfirmingClose(false)}
           >
             <div
@@ -273,7 +275,12 @@ export function ItemDexPage() {
       {/* 상세 */}
       <Modal
         open={selectedId !== null && modal === null}
-        onRequestClose={() => setSelectedId(null)}
+        // 삭제 확인 화면에서 바깥을 눌러 닫으면 그 상태가 남아, 다음에 연 물건이 삭제 화면으로 뜬다
+        onRequestClose={() => {
+          setSelectedId(null)
+          setIsDeleteOpen(false)
+          setDeleteError('')
+        }}
         labelledBy="collection-detail-title"
         size="sm"
         showClose={false}
