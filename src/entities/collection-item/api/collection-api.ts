@@ -36,7 +36,7 @@ export function getOwnerCollectionItems(ownerId: number, page = 0, signal?: Abor
   })
 }
 
-// 첫 100개 이후의 항목도 가져와 목록과 공개/비공개 합계가 일치하게 한다.
+// 첫 100개 이후의 항목도 가져와 목록이 중간에서 끊기지 않게 한다.
 async function getAllCollectionItems(getPage: (page: number) => Promise<PageResponse<CollectionItemSummary>>) {
   const firstPage = await getPage(0)
   const items = [...firstPage.content]
