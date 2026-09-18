@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios'
 
 import { api } from '../../../shared/api/axios'
 
-// 도감 거래는 대여와 교환 두 가지. 둘 다 내 도감 물건을 하나 걸어서 요청한다
+// 도감 거래는 대여와 교환 두 가지. 교환만 내 도감 물건을 하나 걸고, 대여는 상대 물건을 빌리기만 한다
 export type CollectionTradeType = 'RENTAL' | 'EXCHANGE'
 
 export const TRADE_TYPE_LABEL: Record<CollectionTradeType, string> = {
@@ -36,9 +36,11 @@ export interface BegRequest {
   updatedAt: string
 }
 
+// 교환만 내 물건을 걸어 맞바꾼다. 대여는 상대 물건을 빌리는 것이라 거는 물건이 없다
+// (Swagger CollectionTradeRequestCreateRequest: required는 tradeType뿐)
 export interface CollectionTradePayload {
   tradeType: CollectionTradeType
-  offerCollectionItemId: number
+  offerCollectionItemId?: number
 }
 
 export function createCollectionTradeRequest(collectionItemId: number, payload: CollectionTradePayload) {
