@@ -85,7 +85,7 @@ export function ItemDexPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 md:px-14 lg:px-24">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-head-02 font-bold text-text-strong">물건 도감</h1>
@@ -105,9 +105,9 @@ export function ItemDexPage() {
         </div>
 
         {itemsQuery.isPending ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
         ) : itemsQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">도감을 불러오지 못했어요.</p>
             <button

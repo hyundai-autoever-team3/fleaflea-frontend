@@ -118,21 +118,21 @@ export function MarketPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {/* 히어로 — 마스코트 + 말풍선 + 시작 버튼 */}
-        <div className="relative min-h-96 overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-12">
-          <h1 className="mt-14 max-w-[60%] text-head-00 font-bold text-text-strong">
+        <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-8 lg:min-h-80 lg:p-10">
+          <h1 className="mt-6 max-w-[60%] text-head-01 font-bold text-text-strong lg:mt-8 lg:text-4xl">
             친구들과 여는
             <br />
             우리들만의 비밀 마켓
           </h1>
 
-          <div className="relative z-10 mt-8 flex flex-wrap gap-3">
+          <div className="relative z-10 mt-6 flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => setModal('create')}
               style={{ clipPath: pixelBox(4) }}
-              className="bg-primary px-7 py-3.5 text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+              className="h-11 bg-primary px-5 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
             >
               + 플리마켓 만들기
             </button>
@@ -141,33 +141,33 @@ export function MarketPage() {
               type="button"
               onClick={() => setModal('join')}
               style={{ clipPath: pixelBox(4) }}
-              className="group bg-primary-tint p-[2px]"
+              className="group h-11 bg-primary-tint p-[2px]"
             >
               <span
                 style={{ clipPath: pixelBox(4) }}
-                className="block bg-primary-subtle px-7 py-3 text-body-03 font-bold text-text-strong transition-colors duration-200 group-hover:bg-white"
+                className="flex h-full items-center bg-primary-subtle px-5 text-body-04 font-bold text-text-strong transition-colors duration-200 group-hover:bg-white"
               >
                 초대 링크로 참여하기
               </span>
             </button>
           </div>
 
-          <div className="absolute right-8 top-38 max-w-64 rounded-2xl bg-bg px-4 py-3 text-body-03 text-text-muted shadow-md">
+          <div className="absolute right-6 top-24 max-w-56 rounded-2xl bg-bg px-4 py-3 text-body-04 text-text-muted shadow-md lg:right-8 lg:top-28">
             친구들과 함께 마켓을 열어보세요!
             <span className="absolute -bottom-1.5 left-8 size-3 rotate-45 bg-bg shadow-md" />
           </div>
-          <div className="absolute bottom-6 right-16 h-4 w-28 rounded-full bg-black/15 blur-md" />
+          <div className="absolute bottom-6 right-10 h-3 w-20 rounded-full bg-black/15 blur-md lg:right-14 lg:w-24" />
           <img
             src="/mascot/flea.png"
             alt=""
-            className="absolute bottom-4 right-10 size-40 object-contain"
+            className="absolute bottom-4 right-6 size-28 object-contain [image-rendering:pixelated] lg:right-10 lg:size-32"
           />
         </div>
 
         {isLoading ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">마켓을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">마켓을 불러오는 중이에요...</p>
         ) : isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <p className="text-body-03 text-text-muted">마켓 목록을 불러오지 못했어요.</p>
             <button
               type="button"
@@ -194,7 +194,7 @@ export function MarketPage() {
                     setAppliedKeyword('')
                   }}
                   style={{ clipPath: pixelBox() }}
-                  className={`mr-2 mt-10 px-5 py-2.5 text-body-03 font-semibold transition-colors duration-200 ${
+                  className={`mr-2 mt-8 h-10 px-4 text-body-04 font-semibold transition-colors duration-200 ${
                     active
                       ? 'bg-primary text-white hover:bg-primary/90'
                       : 'bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong'
@@ -233,7 +233,7 @@ export function MarketPage() {
               </label>
             )}
 
-            <div className="mt-8 flex flex-col items-start gap-14">
+            <div className="mt-6 flex flex-col items-start gap-10">
               {markets.map((market) => (
                 <MarketCard key={market.marketId} market={market} isHost={market.hostId === myMemberId} />
               ))}

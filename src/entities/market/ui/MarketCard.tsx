@@ -19,17 +19,17 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
             <Awning color="var(--color-primary-tint)" stripeColor="#f2f3f6" />
 
             {/* 가판대 본체: 쇼윈도 | 소개 | 입장 */}
-            <div className="flex items-center gap-6 bg-bg px-6 pb-10 pt-14" style={{ clipPath: pixelCorners('bottom') }}>
-                <MarketCover coverImageUrl={market.coverImageUrl} marketId={market.marketId} className="w-44 shrink-0" />
+            <div className="flex items-center gap-5 bg-bg px-6 pb-8 pt-12" style={{ clipPath: pixelCorners('bottom') }}>
+                <MarketCover coverImageUrl={market.coverImageUrl} marketId={market.marketId} className="w-36 shrink-0" />
 
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                        <h3 className="truncate text-2xl font-bold text-text-strong">{market.title}</h3>
+                        <h3 className="truncate text-xl font-bold text-text-strong">{market.title}</h3>
                         {isHost && (
                             <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">HOST</span>
                         )}
                     </div>
-                    <p className="mt-2 line-clamp-2 text-body-02 text-text-muted">
+                    <p className="mt-2 line-clamp-2 text-body-03 text-text-muted">
                         {market.description || '소개글이 없어요'}
                     </p>
                     {!isHost && (

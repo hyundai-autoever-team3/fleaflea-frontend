@@ -181,7 +181,7 @@ export function FriendsPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">친구</h1>
 
         {/* 안내 — 처음 들어온 사람이 바로 보도록 제목 바로 아래에 */}
@@ -201,7 +201,7 @@ export function FriendsPage() {
         {error && <p className="mt-4 text-body-04 text-red-600">{error}</p>}
 
         {isLoading ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">친구 목록을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">친구 목록을 불러오는 중이에요...</p>
         ) : (
           <>
             {/* 받은 요청 — 있을 때만 */}

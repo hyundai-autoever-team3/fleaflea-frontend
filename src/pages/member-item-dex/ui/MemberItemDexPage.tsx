@@ -49,7 +49,7 @@ export function MemberItemDexPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 md:px-14 lg:px-24">
         {/* 상품 수정 화면과 같은 위치·모양의 뒤로가기 */}
         <Link to="/friends" viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
           ← 친구 목록
@@ -65,11 +65,11 @@ export function MemberItemDexPage() {
         </p>
 
         {!Number.isInteger(memberId) || memberId <= 0 ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">잘못된 주소예요.</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">잘못된 주소예요.</p>
         ) : itemsQuery.isPending ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
         ) : itemsQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">{getListErrorMessage(itemsQuery.error)}</p>
             <button

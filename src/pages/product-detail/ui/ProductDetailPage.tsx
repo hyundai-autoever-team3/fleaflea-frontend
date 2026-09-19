@@ -15,10 +15,10 @@ import {
 import { useMyProfile } from '../../../entities/user'
 import { deleteProduct, getDeleteProductErrorMessage } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
-import { TapeStrip } from '../../../shared/ui/doodle'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Modal } from '../../../shared/ui/modal'
+import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 
@@ -78,9 +78,9 @@ export function ProductDetailPage() {
     <div className="min-h-screen bg-bg">
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {!isValidId || productQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(productQuery.error) : '상품을 찾을 수 없어요.'}
@@ -90,7 +90,7 @@ export function ProductDetailPage() {
             </Link>
           </div>
         ) : !product ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
         ) : (
           <>
             <Link
@@ -109,46 +109,10 @@ export function ProductDetailPage() {
 
             <div className="mt-8 grid gap-10 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
               {/* 사진 — 폴라로이드. 액자와 사진 칸 모두 픽셀 계단 모서리. 액자는 기울이지 않는다 */}
-              <div className="relative mx-auto w-full max-w-[360px] px-5 py-6">
-                {/* 테이프는 액자의 clip-path 바깥에 둔다 — 안에 넣으면 잘려서 안 보인다 */}
-                <TapeStrip className="absolute left-1/2 top-2 z-10 h-6 w-24 -translate-x-1/2 -rotate-3" />
-
-                {/* 흰 필름지는 흰 배경 위에서 윤곽이 생기지 않는다.
-                    그래서 픽셀 테두리 2겹(design.md 4장 기본형)으로 바깥에 연보라 선을 두른다.
-                    액자는 기울이지 않는다 — 회전하면 clip-path 계단에 안티앨리어싱이 껴 픽셀 느낌이 죽는다.
-                    그림자는 clip-path가 box-shadow를 잘라내므로 필터(drop-shadow)로 준다 */}
-                <div
-                  style={{ clipPath: pixelBox(4) }}
-                  className="bg-primary-tint p-[2px] drop-shadow-[0_16px_28px_rgba(0,0,0,0.30)]"
-                >
-                <div
-                  style={{ clipPath: pixelBox(4) }}
-                  className="relative bg-white p-3 pb-14"
-                >
-                  <div
-                    style={{ clipPath: pixelBox(2) }}
-                    className="relative flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
-                  >
-                    {imageUrl ? (
-                      <img src={imageUrl} alt="" className={`size-full object-cover ${isClosed ? 'blur-sm' : ''}`} />
-                    ) : (
-                      <img src={MASCOTS.default} alt="" className="h-28 object-contain [image-rendering:pixelated]" />
-                    )}
-                    {isClosed && (
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-head-03 font-bold text-white">
-                        {getStatusTagLabel(product.status, product.tradeType)}
-                      </span>
-                    )}
-                  </div>
-                  {/* 아래 빈 여백 오른쪽에 마스코트를 작게 — 폴라로이드에 사인하듯 */}
-                  <img
-                    src={MASCOTS.star}
-                    alt=""
-                    className="absolute bottom-3 right-4 h-7 select-none object-contain [image-rendering:pixelated]"
-                  />
-                </div>
-                </div>
-              </div>
+              <PolaroidPhoto
+                imageUrl={imageUrl}
+                statusLabel={isClosed ? getStatusTagLabel(product.status, product.tradeType) : undefined}
+              />
 
               {/* 정보 */}
               <div className="flex flex-col py-2 md:py-4">

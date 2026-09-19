@@ -8,6 +8,7 @@ import { BegRequestModal, TradeRequestModal } from '../../../features/collection
 import type { CollectionTradeType } from '../../../features/collection-trade'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { Header } from '../../../widgets/header'
 
 // 구걸은 거래 유형이 아니라 별도 API라 타입을 따로 붙여 한 묶음으로 다룬다
@@ -47,9 +48,9 @@ export function CollectionItemDetailPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 md:px-14 lg:px-24">
         {!isValidId || detailQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(detailQuery.error) : '볼 수 없는 물건이에요.'}
@@ -59,7 +60,7 @@ export function CollectionItemDetailPage() {
             </Link>
           </div>
         ) : !detail ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">물건을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">물건을 불러오는 중이에요...</p>
         ) : (
           <>
             <Link
@@ -74,19 +75,8 @@ export function CollectionItemDetailPage() {
               {isMine ? '내 물건 도감' : `${detail.ownerNickname}의 물건 도감`}
             </h1>
 
-            <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,480px)_minmax(0,1fr)] md:gap-8">
-                <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-2">
-                  <div
-                    style={{ clipPath: pixelBox(4) }}
-                    className="flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
-                  >
-                    {detail.imageUrl ? (
-                      <img src={detail.imageUrl} alt="" className="size-full object-cover" />
-                    ) : (
-                      <img src={MASCOTS.default} alt="" className="h-28 object-contain [image-rendering:pixelated]" />
-                    )}
-                  </div>
-                </div>
+            <div className="mt-6 grid gap-10 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+                <PolaroidPhoto imageUrl={detail.imageUrl} />
 
                 {/* 겉 판을 걷어내 흰 카드가 흰 배경에 묻히므로, 정보는 배경 없이 그대로 둔다 */}
                 <div className="flex flex-col py-2 md:py-4">
