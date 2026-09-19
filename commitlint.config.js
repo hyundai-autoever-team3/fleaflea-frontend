@@ -4,7 +4,7 @@ export default {
     'type-enum': [
       2,
       'always',
-      ['feat', 'chore', 'design', 'fix', 'test', 'deploy', 'refactor', 'docs'],
+      ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore', 'ci', 'build', 'perf', 'revert'],
     ],
     // subject-case (lowercase first letter) only makes sense for Latin-alphabet subjects.
     // Our subjects are written in Korean (see CONTRIBUTING.md example), which has no
