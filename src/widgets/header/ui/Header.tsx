@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { BellIcon } from "@heroicons/react/24/outline";
 
 const navItmes = [
@@ -10,13 +10,15 @@ const navItmes = [
 
 export function Header(){
     return(
-        <header className = "grid grid-cols-3 items-center bg-bg px-6 py-3">
-            <div className = "flex items-center gap-2">
+        <header className = "bg-bg">
+            {/* 배경은 화면 끝까지. 헤더는 본문 여백이 커져도 따라 줄어들지 않게 자체 여백(px-6 lg:px-8)을 유지한다 */}
+            <div className = "mx-auto grid w-full max-w-7xl grid-cols-3 items-center px-6 py-3 sm:grid-cols-[1fr_auto_1fr] lg:px-8">
+            <Link to="/market" aria-label="FleaFlea 홈, 마켓으로 이동" className = "flex w-fit items-center gap-2 transition-opacity hover:opacity-80">
                 <div className={"size-8 overflow-hidden rounded-full"}>
-                    <img src="/mascot/flea.png" alt="FELA" className="h-full w-full object-cover"/>
+                    <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover"/>
                 </div>
                 <span className = "font-jua text-head-03 text-text-strong">FleaFlea</span>
-            </div>
+            </Link>
 
             {/* 마우스 호버 시, 색 변화*/}
             <nav className = "flex justify-center gap-6">{navItmes.map((item)=> (
@@ -35,6 +37,7 @@ export function Header(){
                 <div className="size-8 overflow-hidden rounded-full ring-1 ring-border shadow-md">
                     <img src="/mascot/flea.png" alt="프로필" className="h-full w-full object-cover"/>
                 </div>
+            </div>
             </div>
         </header>
     )
