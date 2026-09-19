@@ -103,10 +103,10 @@ export function TradeRequestModal({
       open={open}
       onRequestClose={close}
       labelledBy="trade-request-title"
-      size={isExchange ? 'lg' : 'md'}
+      size={isExchange ? 'md' : 'compact'}
       showClose={false}
     >
-      <h2 id="trade-request-title" className="text-head-03 font-bold text-text-strong">
+      <h2 id="trade-request-title" className="text-xl font-bold text-text-strong">
         {label} 요청 보내기
       </h2>
       <p className="mt-1 text-body-04 text-text-muted">
@@ -115,8 +115,8 @@ export function TradeRequestModal({
 
       {isExchange ? (
         /* 교환판 — 무엇과 무엇이 오가는지 */
-        <div style={{ clipPath: pixelBox(4) }} className="mt-5 bg-primary-subtle p-4">
-          <div className="flex items-center gap-3">
+        <div style={{ clipPath: pixelBox(4) }} className="mt-4 bg-primary-subtle p-3">
+          <div className="mx-auto flex max-w-[360px] items-center gap-3">
             <PreviewSlot label="내 물건" title={offered?.title} imageUrl={offered?.imageUrl} />
             <div className="flex shrink-0 flex-col gap-1 pt-4 text-primary">
               <Sprite rows={ARROW_RIGHT} className="w-6" />
@@ -130,8 +130,8 @@ export function TradeRequestModal({
         </div>
       ) : (
         /* 대여 — 교환판과 같은 판·같은 칸 문법을 쓰되, 내 물건을 걸지 않으므로 상대 물건 한 칸만 둔다 */
-        <div style={{ clipPath: pixelBox(4) }} className="mt-5 bg-primary-subtle p-4">
-          <div className="mx-auto w-[min(220px,60%)]">
+        <div style={{ clipPath: pixelBox(4) }} className="mt-4 bg-primary-subtle p-3">
+          <div className="mx-auto w-[min(180px,60%)]">
             <PreviewSlot label="빌릴 물건" title={itemTitle} imageUrl={itemImageUrl} />
           </div>
           <MascotTip mascot={MASCOTS.wink} className="mt-3">
@@ -169,7 +169,7 @@ export function TradeRequestModal({
           </div>
         ) : (
           <>
-            <div className="mt-6 flex items-baseline justify-between gap-3">
+            <div className="mt-4 flex items-baseline justify-between gap-3">
               <p className="text-body-03 font-bold text-text-strong">
                 내 도감에서 고르기 <span className="text-primary">{tradableCount}</span>
               </p>
@@ -241,7 +241,7 @@ export function TradeRequestModal({
         </p>
       )}
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-6 flex gap-3">
         <button
           type="button"
           onClick={() => void handleSubmit()}

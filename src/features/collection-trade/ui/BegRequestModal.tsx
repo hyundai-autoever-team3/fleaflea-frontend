@@ -50,15 +50,15 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
   }
 
   return (
-    <Modal open={open} onRequestClose={close} labelledBy="beg-request-title" showClose={false}>
-      <h2 id="beg-request-title" className="text-head-03 font-bold text-text-strong">
+    <Modal open={open} onRequestClose={close} labelledBy="beg-request-title" size="compact" showClose={false}>
+      <h2 id="beg-request-title" className="text-xl font-bold text-text-strong">
         구걸하기
       </h2>
       {/* 물건 이름은 아래 판이 보여주므로 여기서는 무엇을 하는 화면인지만 말한다 */}
       <p className="mt-1 text-body-04 text-text-muted">갖고 싶은 마음을 사연으로 전해요</p>
 
-      <div style={{ clipPath: pixelBox(4) }} className="mt-5 bg-primary-subtle p-4">
-        <div className="mx-auto w-[min(160px,45%)]">
+      <div style={{ clipPath: pixelBox(4) }} className="mt-4 bg-primary-subtle p-3">
+        <div className="mx-auto w-[min(128px,45%)]">
           <PreviewSlot label="갖고 싶은 물건" title={itemTitle} imageUrl={itemImageUrl} />
         </div>
         <MascotTip mascot={MASCOTS.wink} className="mt-3">
@@ -66,7 +66,7 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
         </MascotTip>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <label htmlFor={`${id}-story`} className="text-body-03 font-bold text-text-strong">
           사연 <span className="text-primary">*</span>
         </label>
@@ -78,7 +78,7 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
               setStory(event.target.value)
               setError('')
             }}
-            rows={5}
+            rows={4}
             maxLength={MAX_STORY}
             required
             placeholder="이 물건이 왜 갖고 싶은지 적어 주세요."
@@ -98,7 +98,7 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
         )}
       </div>
 
-      <div className="mt-8 flex gap-3">
+      <div className="mt-6 flex gap-3">
         <button
           type="button"
           onClick={() => void handleSubmit()}
