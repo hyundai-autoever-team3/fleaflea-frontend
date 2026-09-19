@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
+import type { CollectionItemDetail } from '../../../entities/collection-item'
 import { TRADE_TYPE_LABEL, type TradeType } from '../../../entities/product'
 import { FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { MASCOTS } from '../../../shared/config/mascots'
@@ -9,6 +10,7 @@ import { shrinkImage } from '../../../shared/lib/image'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import type { CreateProductPayload } from '../api/product-api'
+import { CollectionPhoto, CollectionPickerModal } from './CollectionPickerModal'
 
 const TITLE_MAX = FIELD_LIMITS.productTitle.max
 const DESCRIPTION_MAX = FIELD_LIMITS.productDescription.max
@@ -30,6 +32,7 @@ export interface ProductFormInitialValue {
 }
 
 interface ProductFormProps {
+  allowCollectionImport?: boolean
   initialValue?: ProductFormInitialValue
   submitLabel: string
   submittingLabel: string
@@ -38,7 +41,7 @@ interface ProductFormProps {
 }
 
 // 상품 등록·수정이 함께 쓰는 폼
-export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubmit, toErrorMessage }: ProductFormProps) {
+export function ProductForm({ allowCollectionImport = false, initialValue, submitLabel, submittingLabel, onSubmit, toErrorMessage }: ProductFormProps) {
   const [title, setTitle] = useState(initialValue?.title ?? '')
   const [description, setDescription] = useState(initialValue?.description ?? '')
   const [tradeType, setTradeType] = useState<TradeType>(initialValue?.tradeType ?? 'SALE')
@@ -48,11 +51,30 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [collectionItem, setCollectionItem] = useState<CollectionItemDetail | null>(null)
+  const imageRequest = useRef(0)
+  const busy = isSubmitting || isProcessingImage
 
   // MVP에서는 대여도 가격을 받지 않음 (대여 기간 설정과 함께 다음 단계에서)
   const needsPrice = tradeType === 'SALE'
   // 새로 고른 사진이 없으면 수정 화면에서는 기존 사진을 보여줌
-  const shownImageUrl = previewUrl ?? initialValue?.imageUrl ?? null
+  const shownImageUrl = previewUrl ?? collectionItem?.imageUrl ?? initialValue?.imageUrl ?? null
+
+  useEffect(() => () => { imageRequest.current += 1 }, [])
+
+  function applyCollectionItem(item: CollectionItemDetail) {
+    imageRequest.current += 1
+    setIsProcessingImage(false)
+    setCollectionItem(item)
+    setTitle(item.title)
+    setDescription(item.description ?? '')
+    selectImage(null)
+    setFieldErrors((previous) => ({ ...previous, title: undefined, description: undefined }))
+    setError('')
+    setPickerOpen(false)
+  }
 
   // 미리보기 URL이 바뀌거나 페이지를 떠날 때 이전 URL 메모리 해제
   useEffect(() => {
@@ -69,23 +91,34 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
     const file = event.target.files?.[0] ?? null
     // 같은 파일을 지웠다가 다시 골라도 change가 발생하도록 입력값을 비움
     event.target.value = ''
+    if (!file) return
     if (file && !file.type.startsWith('image/')) {
       setError('이미지 파일만 올릴 수 있어요.')
       return
     }
     setError('')
     // 올리기 전에 줄여서 업로드 실패(413)와 긴 대기를 막음. 사진을 지우는 경우(null)는 그대로 둠
-    selectImage(file ? await shrinkImage(file) : null)
+    const request = ++imageRequest.current
+    setIsProcessingImage(true)
+    try {
+      const processed = await shrinkImage(file)
+      if (request === imageRequest.current) selectImage(processed)
+    } finally {
+      if (request === imageRequest.current) setIsProcessingImage(false)
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (busy || pickerOpen) return
     const trimmedTitle = title.trim()
     const trimmedDescription = description.trim()
 
     const nextErrors: FieldErrors = {}
     if (!trimmedTitle) nextErrors.title = '상품명을 입력해 주세요.'
+    else if (title.length > TITLE_MAX) nextErrors.title = `상품명은 ${TITLE_MAX}자 이내로 입력해 주세요.`
     if (!trimmedDescription) nextErrors.description = '상품 설명을 입력해 주세요.'
+    else if (description.length > DESCRIPTION_MAX) nextErrors.description = `상품 설명은 ${DESCRIPTION_MAX.toLocaleString()}자 이내로 입력해 주세요.`
     if (needsPrice && !price) nextErrors.price = '판매 가격을 입력해 주세요.'
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
@@ -94,6 +127,7 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
     setError('')
     try {
       await onSubmit({
+        ...(allowCollectionImport && collectionItem ? { collectionItemId: collectionItem.collectionItemId } : {}),
         title: trimmedTitle,
         description: trimmedDescription,
         tradeType,
@@ -109,6 +143,23 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-7">
+      {allowCollectionImport && (
+        <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-4 sm:p-5">
+          {/* 안내 문구와 불러오기 버튼을 한 줄에 둔다. 좁은 화면에서는 버튼이 아래로 접힌다 */}
+          <div className="flex flex-wrap items-center gap-3">
+            <img src={MASCOTS.basket} alt="" className="h-12 w-12 shrink-0 object-contain [image-rendering:pixelated]" />
+            <div className="min-w-[9rem] flex-1">
+              <p className="text-body-03 font-bold text-text-strong">{collectionItem ? '내 도감과 연결했어요' : '도감에 있는 물건인가요?'}</p>
+              <p className="mt-1 truncate text-body-04 text-text-muted">{collectionItem?.title ?? '이름·설명·사진을 한 번에 가져와요.'}</p>
+            </div>
+            <button type="button" disabled={busy} onClick={() => setPickerOpen(true)} style={{ clipPath: pixelBox(3) }}
+              className="min-h-11 shrink-0 bg-primary px-4 py-2.5 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-50">
+              {collectionItem ? '다른 물건 고르기' : '내 도감에서 불러오기'}
+            </button>
+          </div>
+        </div>
+      )}
+      <fieldset disabled={busy} className="flex min-w-0 flex-col gap-7">
       <div>
         <span className="text-body-03 font-bold text-text-strong">상품 사진</span>
         {/* 지우기 버튼은 label 밖에 둠 — label 안에 있으면 누를 때 파일 선택 창이 같이 열림 */}
@@ -119,7 +170,7 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
               className="group relative flex h-52 items-center justify-center overflow-hidden bg-primary-subtle"
             >
               {shownImageUrl ? (
-                <img src={shownImageUrl} alt="선택한 상품 사진 미리보기" className="size-full object-cover" />
+                <CollectionPhoto imageUrl={shownImageUrl} />
               ) : (
                 <div className="flex flex-col items-center gap-2">
                   <img src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
@@ -146,6 +197,7 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
           )}
         </div>
         <input id="product-image" type="file" accept="image/*" onChange={handleImageChange} className="sr-only" />
+        {isProcessingImage && <p role="status" className="mt-2 text-body-04 text-text-muted">사진을 준비하는 중이에요...</p>}
       </div>
 
       <div>
@@ -271,16 +323,25 @@ export function ProductForm({ initialValue, submitLabel, submittingLabel, onSubm
         {fieldErrors.description && <p className="mt-2 text-body-04 text-red-600">{fieldErrors.description}</p>}
       </div>
 
+      </fieldset>
       {error && <p className="text-body-04 text-red-600">{error}</p>}
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={busy || pickerOpen}
         style={{ clipPath: pixelBox(4) }}
         className="h-14 bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
       >
         {isSubmitting ? submittingLabel : submitLabel}
       </button>
+      {allowCollectionImport && pickerOpen && (
+        <CollectionPickerModal
+          currentItemId={collectionItem?.collectionItemId}
+          replacesContent={Boolean(title || description || image || collectionItem)}
+          onApply={applyCollectionItem}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </form>
   )
 }
