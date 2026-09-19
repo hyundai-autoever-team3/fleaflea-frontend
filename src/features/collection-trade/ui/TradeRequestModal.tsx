@@ -21,6 +21,9 @@ const ARROW_RIGHT = ['...#...', '...##..', '#######', '...##..', '...#...']
 const ARROW_LEFT = ['...#...', '..##...', '#######', '..##...', '...#...']
 const CHECK = ['......#', '.....##', '#...##.', '##.##..', '.####..', '..##...', '..#....']
 
+// 모달이 길어지지 않도록 접힌 상태에서 보여줄 칸 수
+const VISIBLE_COUNT = 4
+
 function Sprite({ rows, className = '' }: { rows: string[]; className?: string }) {
   return (
     <svg
@@ -60,12 +63,19 @@ export function TradeRequestModal({
   const myItemsQuery = useMyCollectionItems()
   const myItems = myItemsQuery.data ?? []
   const [offerId, setOfferId] = useState<number | null>(null)
+  // 모달에서는 네 칸만 보여주고, 나머지는 전체 보기로 펼친다
+  const [showAll, setShowAll] = useState(false)
   const [error, setError] = useState('')
   const mutation = useCreateCollectionTradeRequest(collectionItemId)
 
   const label = TRADE_TYPE_LABEL[tradeType]
   const offered = myItems.find((item) => item.collectionItemId === offerId)
-  const needsPick = isExchange && offerId === null
+  const visibleItems = showAll ? myItems : myItems.slice(0, VISIBLE_COUNT)
+  // 비공개 물건은 거래 대상이 될 수 없다. 목록에서 빼면 "내 물건이 왜 없지" 하게 되므로
+  // 보여주되 고를 수 없게 하고, 개수도 고를 수 있는 것만 센다
+  const tradableCount = myItems.filter((item) => item.isPublic).length
+  // 고른 뒤 목록이 갱신돼 그 물건이 사라지거나 비공개로 바뀌었을 수 있어 공개 여부까지 본다
+  const needsPick = isExchange && (offered === undefined || !offered.isPublic)
 
   function close() {
     setOfferId(null)
@@ -136,11 +146,18 @@ export function TradeRequestModal({
           <p className="py-12 text-center text-body-03 text-text-muted">내 도감을 불러오는 중이에요...</p>
         ) : myItemsQuery.isError ? (
           <p className="py-12 text-center text-body-03 text-text-muted">내 도감을 불러오지 못했어요.</p>
-        ) : myItems.length === 0 ? (
+        ) : tradableCount === 0 ? (
+          // 물건이 아예 없는 것과 전부 비공개인 것은 다음에 할 일이 달라 문구를 가른다
           <div className="flex flex-col items-center py-10 text-center">
             <img src={MASCOTS.basket} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
-            <p className="mt-3 text-body-03 font-bold text-text-strong">바꿀 물건이 없어요</p>
-            <p className="mt-1 text-body-04 text-text-muted">내 도감에 물건을 먼저 등록해 주세요.</p>
+            <p className="mt-3 text-body-03 font-bold text-text-strong">
+              {myItems.length === 0 ? '바꿀 물건이 없어요' : '바꿀 수 있는 물건이 없어요'}
+            </p>
+            <p className="mt-1 text-body-04 text-text-muted">
+              {myItems.length === 0
+                ? '내 도감에 물건을 먼저 등록해 주세요.'
+                : '비공개 물건은 교환할 수 없어요. 도감에서 공개로 바꿔 주세요.'}
+            </p>
             <Link
               to="/item-dex"
               viewTransition
@@ -152,27 +169,38 @@ export function TradeRequestModal({
           </div>
         ) : (
           <>
-            <p className="mt-6 text-body-03 font-bold text-text-strong">
-              내 도감에서 고르기 <span className="text-primary">{myItems.length}</span>
-            </p>
-            {/* 물건이 많아지면 세로로 길어지므로 가로로 흘려보낸다.
-                한 번에 4칸만 보이도록 칸 폭을 1/4로 고정하고, 스냅으로 칸 경계에 멈추게 함 */}
-            <ul className="mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2">
-              {myItems.map((item) => {
+            <div className="mt-6 flex items-baseline justify-between gap-3">
+              <p className="text-body-03 font-bold text-text-strong">
+                내 도감에서 고르기 <span className="text-primary">{tradableCount}</span>
+              </p>
+              {myItems.length > VISIBLE_COUNT && (
+                <button
+                  type="button"
+                  onClick={() => setShowAll((current) => !current)}
+                  className="shrink-0 text-body-04 font-bold text-primary underline transition-colors duration-200 hover:text-primary/80"
+                >
+                  {showAll ? '접기' : '전체 보기'}
+                </button>
+              )}
+            </div>
+            {/* 접힌 상태는 네 칸 한 줄, 전체 보기는 같은 칸 크기로 아래로 쌓고 스크롤 */}
+            <ul className={showAll ? 'mt-2 grid max-h-64 grid-cols-4 gap-2 overflow-y-auto' : 'mt-2 grid grid-cols-4 gap-2'}>
+              {visibleItems.map((item) => {
                 const selected = offerId === item.collectionItemId
                 return (
-                  <li key={item.collectionItemId} className="w-[calc((100%-1.5rem)/4)] shrink-0 snap-start">
+                  <li key={item.collectionItemId}>
                     <button
                       type="button"
+                      disabled={!item.isPublic}
                       onClick={() => setOfferId(item.collectionItemId)}
                       aria-pressed={selected}
-                      title={item.title}
-                      aria-label={item.title}
+                      title={item.isPublic ? item.title : `${item.title} — 비공개라 교환할 수 없어요`}
+                      aria-label={item.isPublic ? item.title : `${item.title}, 비공개라 고를 수 없음`}
                       style={{ clipPath: pixelBox(3) }}
                       className={
                         selected
                           ? 'block w-full bg-primary p-[2px]'
-                          : 'block w-full bg-transparent p-[2px] transition-colors duration-200 hover:bg-primary-tint'
+                          : 'block w-full bg-transparent p-[2px] transition-colors duration-200 hover:bg-primary-tint disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent'
                       }
                     >
                       <span
@@ -190,6 +218,12 @@ export function TradeRequestModal({
                             className="absolute right-1 top-1 grid size-5 place-items-center bg-primary text-white"
                           >
                             <Sprite rows={CHECK} className="w-2.5" />
+                          </span>
+                        )}
+                        {/* 왜 고를 수 없는지 칸 위에서 바로 보이게 */}
+                        {!item.isPublic && (
+                          <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-xs font-bold text-white">
+                            비공개
                           </span>
                         )}
                       </span>
