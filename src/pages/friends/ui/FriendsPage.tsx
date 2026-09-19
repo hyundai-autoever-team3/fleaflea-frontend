@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { Link } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
 import {
@@ -180,7 +181,7 @@ export function FriendsPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">친구</h1>
 
         {/* 안내 — 처음 들어온 사람이 바로 보도록 제목 바로 아래에 */}
@@ -200,7 +201,7 @@ export function FriendsPage() {
         {error && <p className="mt-4 text-body-04 text-red-600">{error}</p>}
 
         {isLoading ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">친구 목록을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">친구 목록을 불러오는 중이에요...</p>
         ) : (
           <>
             {/* 받은 요청 — 있을 때만 */}
@@ -360,15 +361,15 @@ export function FriendsPage() {
                 <ul className="mt-4 flex flex-col gap-3">
                   {friends.map((friend) => (
                     <FriendRow key={friend.memberId} friend={friend} caption="친구">
-                      {/* 남의 도감을 여는 경로가 아직 없어 비활성 — 도감 화면이 생기면 연결 */}
-                      <button
-                        type="button"
-                        disabled
+                      {/* 목록 응답에 소유자 이름이 없어, 제목에 쓸 닉네임을 같이 넘김 */}
+                      <Link
+                        to={`/members/${friend.memberId}/item-dex`}
+                        state={{ nickname: friend.nickname }}
                         style={{ clipPath: pixelBox(2) }}
-                        className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted disabled:opacity-50`}
+                        className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong`}
                       >
                         물건 도감
-                      </button>
+                      </Link>
                       <button
                         type="button"
                         disabled={pendingId === friend.memberId}

@@ -8,6 +8,7 @@ import type { CreateProductPayload } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { useToastStore } from '../../../shared/ui/toast'
+import { Header } from '../../../widgets/header'
 
 export function ProductEditPage() {
   const { itemId: itemIdParam } = useParams()
@@ -37,7 +38,8 @@ export function ProductEditPage() {
 
   return (
     <div>
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <Header />
+      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <Link
           to={isValidId ? `/items/${itemId}` : '/market'}
           viewTransition
@@ -49,14 +51,14 @@ export function ProductEditPage() {
         <p className="mt-1 text-body-03 text-text-muted">바꾸고 싶은 내용을 고쳐 주세요.</p>
 
         {!isValidId || productQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">상품을 찾을 수 없어요.</p>
           </div>
         ) : !product ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
         ) : !isOwner ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">내가 올린 상품만 수정할 수 있어요.</p>
             <Link to={`/items/${itemId}`} className="mt-4 text-body-04 font-bold text-primary underline">

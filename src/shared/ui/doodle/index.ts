@@ -1,0 +1,1 @@
+export { TapeStrip } from './Doodles'

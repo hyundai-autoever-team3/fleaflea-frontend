@@ -4,6 +4,7 @@ import type { ProductSummary, TradeType } from '../../../entities/product'
 import { api } from '../../../shared/api/axios'
 
 export interface CreateProductPayload {
+  collectionItemId?: number
   title: string
   description: string
   tradeType: TradeType
@@ -12,8 +13,9 @@ export interface CreateProductPayload {
 }
 
 // POST /api/v1/markets/{marketId}/items (multipart/form-data)
-export function createProduct(marketId: number, { title, description, tradeType, price, image }: CreateProductPayload) {
+export function createProduct(marketId: number, { collectionItemId, title, description, tradeType, price, image }: CreateProductPayload) {
   const formData = new FormData()
+  if (collectionItemId !== undefined) formData.append('collectionItemId', String(collectionItemId))
   formData.append('title', title)
   formData.append('description', description)
   formData.append('tradeType', tradeType)

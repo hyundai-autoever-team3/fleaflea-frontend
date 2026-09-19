@@ -124,20 +124,20 @@ export function MarketDetailPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <Link to="/market" viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
           ← 내 마켓
         </Link>
 
         {!isValidId || marketQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(marketQuery.error) : '마켓을 찾을 수 없어요.'}
             </p>
           </div>
         ) : !market ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">마켓을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">마켓을 불러오는 중이에요...</p>
         ) : (
           <>
             {/* 마켓 이름 + 초대 링크 / 상품 등록 */}
@@ -356,6 +356,17 @@ export function MarketDetailPage() {
                       닫기
                     </button>
                   </div>
+
+                  {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
+                  {selectedMember.memberId !== meQuery.data?.memberId && (
+                    <Link
+                      to={`/members/${selectedMember.memberId}/item-dex`}
+                      state={{ nickname: selectedMember.nickname }}
+                      className="mt-4 block text-body-04 font-bold text-text-muted underline transition-colors duration-200 hover:text-text-strong"
+                    >
+                      물건 도감 보기
+                    </Link>
+                  )}
                 </div>
               )}
             </Modal>

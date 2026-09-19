@@ -40,7 +40,8 @@ export function CollectionForm({
   const submitting = useRef(false)
   const [title, setTitle] = useState(initialValue?.title ?? '')
   const [description, setDescription] = useState(initialValue?.description ?? '')
-  const [isPublic, setIsPublic] = useState(initialValue?.isPublic ?? false)
+  // 새 물건은 공개가 기본. 스위치를 켜면 비공개가 된다
+  const [isPublic, setIsPublic] = useState(initialValue?.isPublic ?? true)
   const [image, setImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [titleError, setTitleError] = useState('')
@@ -50,7 +51,7 @@ export function CollectionForm({
   const shownImageUrl = previewUrl ?? initial?.imageUrl ?? null
   const isDirty = title !== (initial?.title ?? '')
     || description !== (initial?.description ?? '')
-    || isPublic !== (initial?.isPublic ?? false)
+    || isPublic !== (initial?.isPublic ?? true)
     || image !== null
 
   useEffect(() => {

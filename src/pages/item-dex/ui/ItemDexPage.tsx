@@ -22,21 +22,19 @@ type ModalKind = 'create' | 'edit' | null
 // 넓은 화면 4열 기준 3줄. 칸이 커서 한 화면에 이만큼만 두고 나머지는 페이지로 넘김
 const SLOTS_PER_PAGE = 12
 
-function SummaryLine({ total, publicCount }: { total: number; publicCount: number }) {
-  return (
-    <p className="mt-1 text-body-04 text-text-muted">
-      내 물건 {total}개 · 공개 {publicCount} · 비공개 {total - publicCount}
-    </p>
-  )
+// 공개/비공개 개수는 서버가 주지 않아 전 페이지를 받아야만 셀 수 있어서 표시하지 않기로 함
+function SummaryLine({ total }: { total: number }) {
+  return <p className="mt-1 text-body-04 text-text-muted">내 물건 {total}개</p>
 }
 
 export function ItemDexPage() {
   const itemsQuery = useMyCollectionItems()
   const items = itemsQuery.data ?? []
-  const publicCount = items.filter((item) => item.isPublic).length
-  // 서버가 100개씩 주는 걸 전부 받아두고(요약 숫자를 정확히 내려면 필요) 화면에서 12칸씩 끊어 보여줌
+  // 서버가 100개씩 주는 걸 전부 받아두고 화면에서 12칸씩 끊어 보여줌
   const [page, setPage] = useState(0)
-  const pageCount = Math.max(1, Math.ceil(items.length / SLOTS_PER_PAGE))
+  // 판이 가득 차면 등록할 빈 칸이 없어지므로, 여유 판을 늘 한 장 더 둔다.
+  // (12개 → 2장, 24개 → 3장. 0개일 때는 1장)
+  const pageCount = Math.floor(items.length / SLOTS_PER_PAGE) + 1
   // 삭제로 항목이 줄어 마지막 페이지가 사라지면 앞 페이지로 당김
   if (page > pageCount - 1) setPage(pageCount - 1)
   const pageItems = items.slice(page * SLOTS_PER_PAGE, (page + 1) * SLOTS_PER_PAGE)
@@ -87,13 +85,11 @@ export function ItemDexPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 md:px-14 lg:px-24">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-head-02 font-bold text-text-strong">물건 도감</h1>
-            {!itemsQuery.isPending && !itemsQuery.isError && (
-              <SummaryLine total={items.length} publicCount={publicCount} />
-            )}
+            {!itemsQuery.isPending && !itemsQuery.isError && <SummaryLine total={items.length} />}
           </div>
           {/* 물건이 없을 때는 판 위의 "첫 물건 등록하기"가 그 역할을 하므로 숨김 (같은 동작 버튼 두 개 방지) */}
           {items.length > 0 && (
@@ -109,9 +105,9 @@ export function ItemDexPage() {
         </div>
 
         {itemsQuery.isPending ? (
-          <p className="py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
         ) : itemsQuery.isError ? (
-          <div className="flex flex-col items-center py-24 text-center">
+          <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">도감을 불러오지 못했어요.</p>
             <button
@@ -144,6 +140,30 @@ export function ItemDexPage() {
                     )
                   })}
                 </ul>
+
+                {/* 페이지 번호는 판 안쪽에 둔다 — 인벤토리 창의 탭처럼 보이게.
+                    12칸을 넘길 때만 나타남 */}
+                {pageCount > 1 && (
+                  <div className="mt-3 flex flex-wrap justify-center gap-1.5 border-t border-primary-subtle pt-3">
+                    {Array.from({ length: pageCount }, (_, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setPage(index)}
+                        aria-label={`${index + 1}페이지`}
+                        aria-current={page === index ? 'page' : undefined}
+                        style={{ clipPath: pixelBox(2) }}
+                        className={
+                          page === index
+                            ? 'size-8 bg-primary text-body-04 font-bold text-white'
+                            : 'size-8 bg-primary-subtle text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong'
+                        }
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -170,32 +190,6 @@ export function ItemDexPage() {
           </div>
         )}
 
-        {/* 페이지 이동: 물건이 한 화면을 넘칠 때만 */}
-        {!itemsQuery.isPending && !itemsQuery.isError && pageCount > 1 && (
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => setPage((current) => Math.max(0, current - 1))}
-              disabled={page === 0}
-              style={{ clipPath: pixelBox(2) }}
-              className="flex h-9 items-center bg-primary-subtle px-4 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong disabled:opacity-50"
-            >
-              이전
-            </button>
-            <span className="text-body-04 font-bold text-text-muted">
-              {page + 1} / {pageCount}
-            </span>
-            <button
-              type="button"
-              onClick={() => setPage((current) => Math.min(pageCount - 1, current + 1))}
-              disabled={page === pageCount - 1}
-              style={{ clipPath: pixelBox(2) }}
-              className="flex h-9 items-center bg-primary-subtle px-4 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong disabled:opacity-50"
-            >
-              다음
-            </button>
-          </div>
-        )}
       </div>
 
       {/* 등록 · 수정 */}
@@ -238,7 +232,9 @@ export function ItemDexPage() {
         {/* 작성 중 닫기 확인: 폼은 그대로 두고 위에만 덮어 입력 내용을 지키지 않게 함 */}
         {isConfirmingClose && (
           <div
-            className="fixed inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
+            // dialog에 transform이 걸려 있어 fixed를 쓰면 뷰포트가 아니라 모달 상자를 기준으로 잡힌다.
+            // 닫힐 때 모달이 축소되면 같이 찌그러지므로, 기준을 명시적으로 모달로 두는 absolute를 쓴다
+            className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 p-6"
             onClick={() => setIsConfirmingClose(false)}
           >
             <div
@@ -279,7 +275,12 @@ export function ItemDexPage() {
       {/* 상세 */}
       <Modal
         open={selectedId !== null && modal === null}
-        onRequestClose={() => setSelectedId(null)}
+        // 삭제 확인 화면에서 바깥을 눌러 닫으면 그 상태가 남아, 다음에 연 물건이 삭제 화면으로 뜬다
+        onRequestClose={() => {
+          setSelectedId(null)
+          setIsDeleteOpen(false)
+          setDeleteError('')
+        }}
         labelledBy="collection-detail-title"
         size="sm"
         showClose={false}
