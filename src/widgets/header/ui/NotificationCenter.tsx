@@ -6,12 +6,14 @@ import {
   BellIcon,
   CheckBadgeIcon,
   CheckCircleIcon,
+  CheckIcon,
   HandRaisedIcon,
   TrashIcon,
   UserGroupIcon,
   UserPlusIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline'
+import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid'
 import { useNavigate } from 'react-router'
 
 import {
@@ -28,8 +30,6 @@ import {
   useReadNotification,
 } from '../../../features/notification-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { pixelBox } from '../../../shared/lib/pixel'
-import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
@@ -172,8 +172,8 @@ function NotificationRow({
         <button
           type="button"
           onClick={() => onSelect(notification)}
-          className={`mt-1 block w-full break-keep text-left text-body-04 leading-5 after:absolute after:inset-0 after:content-[''] ${
-            unread ? 'font-bold text-glass-ink/92' : 'text-glass-ink/58'
+          className={`mt-1 block w-full break-keep text-left text-xs leading-5 after:absolute after:inset-0 after:content-[''] ${
+            unread ? 'font-medium text-glass-ink/70' : 'font-normal text-glass-ink/45'
           } ${FOCUS_RING}`}
         >
           {notification.message}
@@ -190,22 +190,14 @@ function NotificationRow({
           aria-pressed={!unread}
           title={unread ? '읽음으로 표시' : '읽은 알림'}
           aria-label={unread ? `${typeStyle.label} 알림을 읽음으로 표시` : `${typeStyle.label} 알림, 읽음`}
-          style={{ clipPath: pixelBox(2) }}
-          className={`group/check grid size-6 shrink-0 place-items-center bg-primary p-[2px] transition-opacity disabled:cursor-default ${FOCUS_RING}`}
+          className={`${ROW_ICON_BUTTON} disabled:cursor-default disabled:opacity-100 ${
+            unread ? 'hover:text-primary' : 'text-primary'
+          } ${FOCUS_RING}`}
         >
-          {/* clip-path는 테두리선(ring)을 잘라 계단 자리를 끊어 놓는다.
-              그래서 바깥 보라 판 + 안쪽 면을 겹치는 픽셀 테두리 2겹으로 그린다 */}
-          <span
-            style={{ clipPath: pixelBox(2) }}
-            className={`grid size-full place-items-center transition-colors ${
-              unread
-                // 빈 칸이지만 옅은 체크를 미리 비춰 '누르면 체크된다'를 보여준다
-                ? 'bg-bg text-primary/25 group-hover/check:text-primary/60'
-                : 'bg-primary text-white'
-            }`}
-          >
-            <Sprite rows={GLYPHS.check} className="w-2.5" />
-          </span>
+          {/* 읽고 나면 속이 찬 동그라미가 남아, 훑을 때 본 것과 안 본 것이 갈린다 */}
+          {unread
+            ? <CheckIcon aria-hidden="true" className="size-4" />
+            : <CheckCircleSolidIcon aria-hidden="true" className="size-4" />}
         </button>
         <button
           type="button"
