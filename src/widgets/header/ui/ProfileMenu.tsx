@@ -12,10 +12,14 @@ const MENU_ITEM = 'flex min-h-11 w-full items-center px-4 text-left text-body-04
 
 // 프로필 사진을 누르면 열리는 작은 메뉴. 로그아웃처럼 자주 쓰는 동작을
 // 마이페이지 안쪽까지 들어가지 않고 어디서든 할 수 있게 한다
-export function ProfileMenu() {
+interface ProfileMenuProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function ProfileMenu({ open, onOpenChange }: ProfileMenuProps) {
   const menuId = useId()
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -24,11 +28,11 @@ export function ProfileMenu() {
   useEffect(() => {
     if (!open) return
     function handlePointerDown(event: MouseEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false)
+      if (!containerRef.current?.contains(event.target as Node)) onOpenChange(false)
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape') return
-      setOpen(false)
+      onOpenChange(false)
       // 키보드로 닫았으면 누른 자리로 초점을 돌려준다
       triggerRef.current?.focus()
     }
@@ -38,7 +42,7 @@ export function ProfileMenu() {
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [open])
+  }, [onOpenChange, open])
 
   async function handleLogout() {
     if (isLoggingOut) return
@@ -59,7 +63,7 @@ export function ProfileMenu() {
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => onOpenChange(!open)}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
@@ -86,7 +90,7 @@ export function ProfileMenu() {
             to="/my-page"
             role="menuitem"
             viewTransition
-            onClick={() => setOpen(false)}
+            onClick={() => onOpenChange(false)}
             className={`${MENU_ITEM} ${FOCUS_RING}`}
           >
             내 정보 보기
