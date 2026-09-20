@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
+import { collectionKeys } from '../../../entities/collection-item'
 import { myTradeRequestKeys, type MyTradeRequest, type TradeRequestKind } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
@@ -34,10 +35,16 @@ export function useTradeAction() {
   return useMutation({
     mutationFn: ({ kind, requestId, action }: { kind: TradeRequestKind; requestId: number; action: TradeAction }) =>
       actOnTradeRequest(kind, requestId, action),
-    onSuccess: () => {
+    onSuccess: (_response, { kind }) => {
       // 목록의 상태 배지와 상품·도감 화면의 버튼이 함께 바뀌어야 한다
       void queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
       void queryClient.invalidateQueries({ queryKey: ['trade-requests'] }).catch(() => undefined)
+      // 도감 물건은 거래가 끝나면 주인이 바뀌어 내 도감에서 빠진다.
+      // 받아둔 목록은 1분간 그대로 쓰이므로(query-client의 staleTime),
+      // 여기서 비워주지 않으면 넘긴 물건이 한동안 도감에 남아 보인다
+      if (kind !== 'ITEM') {
+        void queryClient.invalidateQueries({ queryKey: collectionKeys.all }).catch(() => undefined)
+      }
     },
   })
 }
