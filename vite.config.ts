@@ -4,11 +4,16 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 // 개발 서버와 미리보기가 같은 규칙을 쓰도록 한곳에 둔다.
-// vite preview는 server.proxy를 읽지 않으므로 따로 넘겨야 한다
+// vite preview는 server.proxy를 읽지 않으므로 따로 넘겨야 한다.
+//
+// rewrite가 필요한 이유: VITE_API_BASE_URL이 '/api'라 axios가 앞에 '/api'를 붙이고,
+// 코드의 경로도 '/api/v1/...'로 시작한다. 그래서 브라우저는 '/api/api/v1/...'로 보낸다.
+// 앞의 '/api'(프록시를 타기 위한 표시)만 떼어내야 백엔드의 '/api/v1/...'과 맞는다
 const apiProxy = {
   '/api': {
     target: 'https://fleaflea.duckdns.org',
     changeOrigin: true,
+    rewrite: (path: string) => path.replace(/^\/api/, ''),
   },
 }
 
