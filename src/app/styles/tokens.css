@@ -46,6 +46,16 @@
   --blue-100: #e5edf8;
   --blue-700: #365b88;
 
+  /* 알림 종류 타일 — 흰 아이콘을 얹어도 형태가 읽히는 중간 파스텔.
+   * 옅은 100번대는 흰 아이콘이 묻히고, 짙은 700번대는 파스텔 톤에서 벗어나
+   * 그 사이 한 단을 따로 둔다 */
+  --purple-400: #9b7fd4;
+  --blue-400: #5e8fcd;
+  --red-400: #cf6d84;
+  --green-400: #4fa374;
+  --amber-400: #c9863a;
+  --pink-400: #cc75a2;
+
   /* 알림 상태 칩 — 옅은 면과 함께 써도 작은 글자가 읽히는 짙은 톤 */
   --green-100: #e7f4eb;
   --green-700: #356a4b;
@@ -121,6 +131,15 @@
   --color-status-warning-subtle: var(--amber-100);
   /* 콕 찌르기처럼 좋고 나쁨이 아닌 알림 — 성공·경고로 읽히지 않게 따로 둔다 */
   --color-status-accent: var(--pink-700);
+
+  /* 종류 타일 바탕 — 흰 아이콘을 얹는 자리 */
+  --color-status-brand-tile: var(--purple-400);
+  --color-status-info-tile: var(--blue-400);
+  --color-status-danger-tile: var(--red-400);
+  --color-status-success-tile: var(--green-400);
+  --color-status-warning-tile: var(--amber-400);
+  --color-status-accent-tile: var(--pink-400);
+  --color-status-muted-tile: var(--gray-500);
 
   /* Text */
   --color-text-strong: var(--gray-900);

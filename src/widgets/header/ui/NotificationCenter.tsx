@@ -39,20 +39,21 @@ const ROW_ICON_BUTTON = 'grid size-8 place-items-center rounded-lg text-glass-in
 interface NotificationTypeStyle {
   label: string
   textClass: string
+  tileClass: string
 }
 
-// 종류를 알아보는 건 라벨 한 단어가 맡는다. 색도 그 단어에만 주고
-// 아이콘·바탕은 무채색으로 둬 줄마다 색이 튀지 않게 한다.
+// 종류는 아이콘 타일의 색이 먼저 알려주고, 라벨 한 단어가 이름을 붙인다.
+// 타일은 흰 아이콘이 읽히는 중간 파스텔, 라벨 글자는 작아서 짙은 톤을 쓴다.
 // 색 값은 tokens.css의 status 토큰만 쓴다 (design.md 9장 — 컴포넌트에 hex 금지)
 const TYPE_STYLE: Record<NotificationType, NotificationTypeStyle> = {
-  TRADE_REQUESTED: { label: '교환', textClass: 'text-status-brand' },
-  TRADE_ACCEPTED: { label: '수락', textClass: 'text-status-info' },
-  TRADE_REJECTED: { label: '거절', textClass: 'text-status-danger' },
-  TRADE_CANCELLED: { label: '취소', textClass: 'text-text-muted' },
-  TRADE_COMPLETED: { label: '완료', textClass: 'text-status-success' },
-  FRIEND_REQUESTED: { label: '친구 요청', textClass: 'text-status-accent' },
-  FRIEND_ACCEPTED: { label: '친구 수락', textClass: 'text-status-info' },
-  POKE_RECEIVED: { label: '콕 찌르기', textClass: 'text-status-warning' },
+  TRADE_REQUESTED: { label: '교환', textClass: 'text-status-brand', tileClass: 'bg-status-brand-tile' },
+  TRADE_ACCEPTED: { label: '수락', textClass: 'text-status-info', tileClass: 'bg-status-info-tile' },
+  TRADE_REJECTED: { label: '거절', textClass: 'text-status-danger', tileClass: 'bg-status-danger-tile' },
+  TRADE_CANCELLED: { label: '취소', textClass: 'text-text-muted', tileClass: 'bg-status-muted-tile' },
+  TRADE_COMPLETED: { label: '완료', textClass: 'text-status-success', tileClass: 'bg-status-success-tile' },
+  FRIEND_REQUESTED: { label: '친구 요청', textClass: 'text-status-accent', tileClass: 'bg-status-accent-tile' },
+  FRIEND_ACCEPTED: { label: '친구 수락', textClass: 'text-status-info', tileClass: 'bg-status-info-tile' },
+  POKE_RECEIVED: { label: '콕 찌르기', textClass: 'text-status-warning', tileClass: 'bg-status-warning-tile' },
 }
 
 function NotificationIcon({ type }: { type: NotificationType }) {
@@ -148,8 +149,8 @@ function NotificationRow({
       }`}
     >
       <span
-        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-primary-subtle ${
-          unread ? 'text-glass-ink/92' : 'text-glass-ink/58'
+        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg text-white ${typeStyle.tileClass} ${
+          unread ? '' : 'opacity-55'
         }`}
       >
         <NotificationIcon type={notification.type} />
