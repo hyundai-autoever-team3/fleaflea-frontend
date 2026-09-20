@@ -1,10 +1,10 @@
 export {
-  acceptFriendRequest,
-  cancelFriendRequest,
-  deleteFriendship,
+  FRIEND_REQUEST_ACTION_LABEL,
   getDeleteFriendshipErrorMessage,
   getFriendRequestActionErrorMessage,
   getSendFriendRequestErrorMessage,
-  rejectFriendRequest,
-  sendFriendRequest,
+  useDeleteFriendship,
+  useRespondToFriendRequest,
+  useSendFriendRequest,
+  type FriendRequestAction,
 } from './api/friend-api'

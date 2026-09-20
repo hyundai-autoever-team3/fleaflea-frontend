@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 
 import {
-  friendKeys,
   getMemberSearchErrorMessage,
   useFriendRequests,
   useMemberSearch,
@@ -12,14 +10,14 @@ import {
 } from '../../../entities/friend'
 import type { Friendship, RelationshipStatus } from '../../../entities/friend'
 import {
-  acceptFriendRequest,
-  cancelFriendRequest,
-  deleteFriendship,
+  FRIEND_REQUEST_ACTION_LABEL,
   getDeleteFriendshipErrorMessage,
   getFriendRequestActionErrorMessage,
   getSendFriendRequestErrorMessage,
-  rejectFriendRequest,
-  sendFriendRequest,
+  useDeleteFriendship,
+  useRespondToFriendRequest,
+  useSendFriendRequest,
+  type FriendRequestAction,
 } from '../../../features/friend-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { Avatar } from '../../../shared/ui/avatar'
@@ -73,12 +71,10 @@ function SectionTitle({ label, count }: { label: string; count?: number }) {
 }
 
 export function FriendsPage() {
-  const queryClient = useQueryClient()
   const friendsQuery = useMyFriends()
   const receivedQuery = useFriendRequests('RECEIVED')
   const sentQuery = useFriendRequests('SENT')
 
-  const [pendingId, setPendingId] = useState<number | null>(null)
   const [error, setError] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Friendship | null>(null)
 
@@ -111,58 +107,46 @@ export function FriendsPage() {
     }
   })
 
-  function refreshAll() {
-    void queryClient.invalidateQueries({ queryKey: friendKeys.all })
-  }
+  // 목록 새로고침은 각 mutation 안에서 한다. 여기서는 어느 줄이 처리 중인지와
+  // 실패 문구만 다루면 된다
+  const sendRequestMutation = useSendFriendRequest()
+  const respondMutation = useRespondToFriendRequest()
+  const deleteFriendshipMutation = useDeleteFriendship()
+
+  const pendingId = sendRequestMutation.isPending ? sendRequestMutation.variables
+    : respondMutation.isPending ? respondMutation.variables.memberId
+    : deleteFriendshipMutation.isPending ? deleteTarget?.memberId ?? null
+    : null
 
   // 수락·거절·취소는 처리 흐름이 같아 한 곳에서 실행하고, 문구만 동작에 맞춰 바꿈
-  async function runRequestAction(
-    memberId: number,
-    action: '수락' | '거절' | '취소',
-    request: (id: number) => Promise<unknown>,
-    successMessage: string,
-  ) {
-    setPendingId(memberId)
+  function runRequestAction(memberId: number, action: FriendRequestAction, successMessage: string) {
     setError('')
-    try {
-      await request(memberId)
-      refreshAll()
-      useToastStore.getState().showToast(successMessage)
-    } catch (actionError) {
-      setError(getFriendRequestActionErrorMessage(actionError, action))
-    } finally {
-      setPendingId(null)
-    }
+    respondMutation.mutate({ action, memberId }, {
+      onSuccess: () => useToastStore.getState().showToast(successMessage),
+      onError: (actionError) => setError(
+        getFriendRequestActionErrorMessage(actionError, FRIEND_REQUEST_ACTION_LABEL[action]),
+      ),
+    })
   }
 
-  async function handleSendRequest(memberId: number) {
-    setPendingId(memberId)
+  function handleSendRequest(memberId: number) {
     setError('')
-    try {
-      await sendFriendRequest(memberId)
-      refreshAll()
-      useToastStore.getState().showToast('친구 요청을 보냈어요')
-    } catch (sendError) {
-      setError(getSendFriendRequestErrorMessage(sendError))
-    } finally {
-      setPendingId(null)
-    }
+    sendRequestMutation.mutate(memberId, {
+      onSuccess: () => useToastStore.getState().showToast('친구 요청을 보냈어요'),
+      onError: (sendError) => setError(getSendFriendRequestErrorMessage(sendError)),
+    })
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!deleteTarget) return
-    setPendingId(deleteTarget.memberId)
     setError('')
-    try {
-      await deleteFriendship(deleteTarget.friendshipId)
-      refreshAll()
-      useToastStore.getState().showToast('친구를 삭제했어요')
-      setDeleteTarget(null)
-    } catch (deleteError) {
-      setError(getDeleteFriendshipErrorMessage(deleteError))
-    } finally {
-      setPendingId(null)
-    }
+    deleteFriendshipMutation.mutate(deleteTarget.friendshipId, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구를 삭제했어요')
+        setDeleteTarget(null)
+      },
+      onError: (deleteError) => setError(getDeleteFriendshipErrorMessage(deleteError)),
+    })
   }
 
   const isLoading = friendsQuery.isPending || receivedQuery.isPending || sentQuery.isPending
@@ -205,7 +189,7 @@ export function FriendsPage() {
                         type="button"
                         disabled={pendingId === friend.memberId}
                         onClick={() =>
-                          void runRequestAction(friend.memberId, '수락', acceptFriendRequest, '친구가 됐어요!')
+                          runRequestAction(friend.memberId, 'accept', '친구가 됐어요!')
                         }
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary text-white hover:bg-primary/90 disabled:bg-primary/50`}
@@ -216,7 +200,7 @@ export function FriendsPage() {
                         type="button"
                         disabled={pendingId === friend.memberId}
                         onClick={() =>
-                          void runRequestAction(friend.memberId, '거절', rejectFriendRequest, '요청을 거절했어요')
+                          runRequestAction(friend.memberId, 'reject', '요청을 거절했어요')
                         }
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-red-100 hover:text-red-600`}
@@ -240,7 +224,7 @@ export function FriendsPage() {
                         type="button"
                         disabled={pendingId === friend.memberId}
                         onClick={() =>
-                          void runRequestAction(friend.memberId, '취소', cancelFriendRequest, '요청을 취소했어요')
+                          runRequestAction(friend.memberId, 'cancel', '요청을 취소했어요')
                         }
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong`}
@@ -309,7 +293,7 @@ export function FriendsPage() {
                             <button
                               type="button"
                               disabled={pendingId === person.memberId}
-                              onClick={() => void handleSendRequest(person.memberId)}
+                              onClick={() => handleSendRequest(person.memberId)}
                               style={{ clipPath: pixelBox(2) }}
                               className={`${ACTION_BUTTON} bg-primary text-white hover:bg-primary/90 disabled:bg-primary/50`}
                             >
@@ -321,7 +305,7 @@ export function FriendsPage() {
                               type="button"
                               disabled={pendingId === person.memberId}
                               onClick={() =>
-                                void runRequestAction(person.memberId, '수락', acceptFriendRequest, '친구가 됐어요!')
+                                runRequestAction(person.memberId, 'accept', '친구가 됐어요!')
                               }
                               style={{ clipPath: pixelBox(2) }}
                               className={`${ACTION_BUTTON} bg-primary text-white hover:bg-primary/90 disabled:bg-primary/50`}
@@ -401,12 +385,12 @@ export function FriendsPage() {
           <div className="mt-8 flex gap-3">
             <button
               type="button"
-              onClick={() => void handleDelete()}
-              disabled={pendingId !== null}
+              onClick={() => handleDelete()}
+              disabled={deleteFriendshipMutation.isPending}
               style={{ clipPath: pixelBox(4) }}
               className="flex-1 bg-red-500 py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-red-600 disabled:bg-red-300"
             >
-              {pendingId !== null ? '삭제하는 중...' : '삭제하기'}
+              {deleteFriendshipMutation.isPending ? '삭제하는 중...' : '삭제하기'}
             </button>
             <button
               type="button"

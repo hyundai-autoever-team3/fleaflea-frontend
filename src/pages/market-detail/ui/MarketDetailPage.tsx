@@ -1,14 +1,12 @@
 import { Fragment, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
-import { friendKeys } from '../../../entities/friend'
 import { MarketCover, useMarket, useMarketInvitation, useMarketMembers } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
 import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { getSendFriendRequestErrorMessage, sendFriendRequest } from '../../../features/friend-manage'
+import { getSendFriendRequestErrorMessage, useSendFriendRequest } from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -93,30 +91,27 @@ export function MarketDetailPage() {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
 
   // 닉네임 검색 API가 없어 memberId를 알 수 있는 곳이 참여자 목록뿐이라, 친구 추가를 여기서 함
-  const queryClient = useQueryClient()
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
-  const [isRequesting, setIsRequesting] = useState(false)
   const [friendError, setFriendError] = useState('')
+  const sendFriendRequestMutation = useSendFriendRequest()
+  const isRequesting = sendFriendRequestMutation.isPending
 
   function openMember(member: MarketMember) {
     setSelectedMember(member)
     setFriendError('')
   }
 
-  async function handleSendFriendRequest(memberId: number) {
-    setIsRequesting(true)
+  function handleSendFriendRequest(memberId: number) {
     setFriendError('')
-    try {
-      await sendFriendRequest(memberId)
-      // 이미 친구이거나 보낸 요청이면 서버가 409를 주므로 목록을 미리 받아 두지 않음
-      void queryClient.invalidateQueries({ queryKey: friendKeys.all })
-      useToastStore.getState().showToast('친구 요청을 보냈어요')
-      setSelectedMember(null)
-    } catch (error) {
-      setFriendError(getSendFriendRequestErrorMessage(error))
-    } finally {
-      setIsRequesting(false)
-    }
+    // 이미 친구이거나 보낸 요청이면 서버가 409를 주므로 목록을 미리 고쳐 두지 않는다.
+    // 목록 새로고침은 useSendFriendRequest 안에서 한다
+    sendFriendRequestMutation.mutate(memberId, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구 요청을 보냈어요')
+        setSelectedMember(null)
+      },
+      onError: (error) => setFriendError(getSendFriendRequestErrorMessage(error)),
+    })
   }
 
   const newProductPath = `/market/${marketId}/items/new`
@@ -331,7 +326,7 @@ export function MarketDetailPage() {
                       <button
                         type="button"
                         disabled={isRequesting}
-                        onClick={() => void handleSendFriendRequest(selectedMember.memberId)}
+                        onClick={() => handleSendFriendRequest(selectedMember.memberId)}
                         style={{ clipPath: pixelBox(4) }}
                         className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
