@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
   ArrowPathIcon,
   ArrowUturnLeftIcon,
@@ -6,8 +6,6 @@ import {
   BellIcon,
   CheckBadgeIcon,
   CheckCircleIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   HandRaisedIcon,
   TrashIcon,
   UserGroupIcon,
@@ -20,7 +18,7 @@ import {
   type NotificationItem,
   type NotificationReferenceType,
   type NotificationType,
-  useNotifications,
+  useInfiniteNotifications,
   useUnreadNotificationCount,
 } from '../../../entities/notification'
 import {
@@ -194,7 +192,6 @@ function NotificationRow({
           style={{ clipPath: pixelBox(2) }}
           className={`grid size-6 place-items-center transition-colors disabled:cursor-default disabled:opacity-100 ${
             unread
-              // 빈 칸이지만 테두리와 옅은 체크로 '누르면 체크된다'를 먼저 보여준다
               ? 'bg-bg text-primary/25 ring-1 ring-inset ring-primary hover:text-primary/60'
               : 'bg-primary text-white ring-1 ring-inset ring-primary'
           } ${FOCUS_RING}`}
@@ -240,16 +237,33 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
   const navigate = useNavigate()
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
-  const [page, setPage] = useState(0)
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const loadMoreRef = useRef<HTMLLIElement>(null)
   const [busyIds, setBusyIds] = useState<number[]>([])
-  const notificationsQuery = useNotifications({ page, enabled: open })
+  const notificationsQuery = useInfiniteNotifications({ enabled: open })
   const unreadCountQuery = useUnreadNotificationCount()
   const readNotificationMutation = useReadNotification()
   const readAllMutation = useReadAllNotifications()
   const deleteMutation = useDeleteNotification()
 
-  const notifications = notificationsQuery.data?.content ?? []
-  const totalPages = Math.max(1, notificationsQuery.data?.totalPages ?? 1)
+  const {
+    data: notificationPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchNextPageError,
+    isFetchingNextPage,
+  } = notificationsQuery
+
+  // 같은 알림이 두 쪽에 걸쳐 오면 키가 겹치므로 한 번만 남긴다
+  const notifications = useMemo(() => {
+    const byId = new Map<number, NotificationItem>()
+    for (const page of notificationPages?.pages ?? []) {
+      for (const notification of page.content) {
+        if (!byId.has(notification.notificationId)) byId.set(notification.notificationId, notification)
+      }
+    }
+    return [...byId.values()]
+  }, [notificationPages])
   const rawUnreadCount = unreadCountQuery.data?.unreadCount ?? 0
   const unreadCount = Math.max(0, Number.isFinite(rawUnreadCount) ? rawUnreadCount : 0)
   const hasUnread = unreadCount > 0 || notifications.some((notification) => !notification.isRead)
@@ -276,14 +290,26 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
     }
   }, [onOpenChange, open])
 
+  // 바닥이 보이면 다음 쪽을 이어 받는다
+  useEffect(() => {
+    const target = loadMoreRef.current
+    const root = scrollAreaRef.current
+    if (!open || !target || !root || !hasNextPage || isFetchNextPageError) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isFetchingNextPage) void fetchNextPage()
+      },
+      { root, rootMargin: '96px 0px' },
+    )
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [fetchNextPage, hasNextPage, isFetchNextPageError, isFetchingNextPage, open])
+
   function togglePanel() {
     const nextOpen = !open
     onOpenChange(nextOpen)
-    // 다시 열 때는 늘 첫 장부터 — 지난번에 보던 장은 이미 낡았다
-    if (nextOpen) {
-      setPage(0)
-      void unreadCountQuery.refetch()
-    }
+    if (nextOpen) void unreadCountQuery.refetch()
   }
 
   function showMutationError(error: unknown) {
@@ -308,8 +334,6 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
   }
 
   function removeNotification(notification: NotificationItem) {
-    // 마지막 장의 마지막 줄을 지우면 빈 장만 남으므로 앞 장으로 물러난다
-    if (notifications.length === 1 && page > 0) setPage(page - 1)
     runOnNotification(notification.notificationId, (id, options) => deleteMutation.mutate(id, options))
   }
 
@@ -355,16 +379,16 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
       {open && (
         // 잠깐 떴다 사라지는 조작용 판이라 픽셀 계단 대신 둥근 모서리를 쓴다
         // (프로필 메뉴·거래 출처 목록과 같은 예외 — design.md 1장).
-        // 판 안에서 스크롤하지 않도록 한 장에 다섯 줄만 그리고 나머지는 페이지로 넘긴다.
-        // max-h는 화면이 아주 낮을 때만 도는 안전장치다
+        // 제목 줄은 고정하고 목록만 스크롤하며 이어 받는다.
+        // 스크롤바는 판 안에 드러나지 않게 숨긴다
         <section
           id={panelId}
           role="dialog"
           aria-labelledby={titleId}
           aria-busy={notificationsQuery.isPending}
-          className="glass-panel fixed inset-x-4 top-[6.75rem] z-50 max-h-[calc(100dvh-7.75rem)] overflow-y-auto overscroll-contain rounded-2xl [scrollbar-width:none] md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96 [&::-webkit-scrollbar]:hidden"
+          className="glass-panel fixed inset-x-4 top-[6.75rem] z-50 flex max-h-[calc(100dvh-7.75rem)] flex-col overflow-hidden rounded-2xl md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96"
         >
-          <div className="flex items-center justify-between gap-4 px-4 py-3.5">
+          <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3.5">
             <div className="min-w-0">
               <h2 id={titleId} className="text-body-03 font-bold text-glass-ink/92">알림</h2>
               <p className="mt-0.5 text-xs text-glass-ink/58">
@@ -383,6 +407,10 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
             )}
           </div>
 
+          <div
+            ref={scrollAreaRef}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
           {notificationsQuery.isPending ? (
             <NotificationSkeleton />
           ) : notificationsQuery.isError && !notificationsQuery.data ? (
@@ -416,37 +444,30 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
                   onDelete={removeNotification}
                 />
               ))}
+              {hasNextPage && (
+                <li ref={loadMoreRef} className="flex min-h-10 items-center justify-center px-4 py-2 text-xs text-glass-ink/58">
+                  {isFetchNextPageError ? (
+                    <button
+                      type="button"
+                      onClick={() => void fetchNextPage()}
+                      className={`${PANEL_BUTTON} ${FOCUS_RING}`}
+                    >
+                      <ArrowPathIcon aria-hidden="true" className="size-4" />
+                      알림 더 불러오기
+                    </button>
+                  ) : isFetchingNextPage ? (
+                    <span role="status" className="flex items-center gap-2">
+                      <ArrowPathIcon aria-hidden="true" className="size-4 motion-safe:animate-spin" />
+                      이전 알림을 불러오는 중...
+                    </span>
+                  ) : (
+                    <span className="sr-only">이전 알림을 불러올 준비가 됐어요</span>
+                  )}
+                </li>
+              )}
             </ul>
           )}
-
-          {totalPages > 1 && (
-            <nav aria-label="알림 페이지" className="flex items-center justify-between gap-2 border-t border-glass-line px-3 py-2.5">
-              <button
-                type="button"
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-                disabled={page === 0 || notificationsQuery.isFetching}
-                aria-label="최근 알림으로"
-                className={`${ROW_ICON_BUTTON} ${FOCUS_RING}`}
-              >
-                <ChevronLeftIcon aria-hidden="true" className="size-4" />
-              </button>
-              <span aria-live="polite" className="text-[11px] text-glass-ink/58">
-                {page + 1} / {totalPages}
-                {notificationsQuery.data?.totalElements
-                  ? ` · 전체 ${notificationsQuery.data.totalElements}개`
-                  : ''}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPage((current) => current + 1)}
-                disabled={!notificationsQuery.data?.hasNext || notificationsQuery.isFetching}
-                aria-label="지난 알림으로"
-                className={`${ROW_ICON_BUTTON} ${FOCUS_RING}`}
-              >
-                <ChevronRightIcon aria-hidden="true" className="size-4" />
-              </button>
-            </nav>
-          )}
+          </div>
         </section>
       )}
     </div>

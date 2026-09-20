@@ -9,6 +9,6 @@ export {
   getNotifications,
   getUnreadNotificationCount,
   notificationKeys,
-  useNotifications,
+  useInfiniteNotifications,
   useUnreadNotificationCount,
 } from './api/notification-api'

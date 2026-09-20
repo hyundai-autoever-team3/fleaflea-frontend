@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import {
@@ -9,7 +9,7 @@ import {
 import { api } from '../../../shared/api/axios'
 import type { PageResponse } from '../../../shared/api/page-response'
 
-type NotificationPage = PageResponse<NotificationItem>
+type NotificationPages = InfiniteData<PageResponse<NotificationItem>, number>
 
 export function readNotification(notificationId: number) {
   return api.patch<void>(`/api/v1/notifications/${notificationId}/read`)
@@ -29,14 +29,17 @@ function updateCachedNotification(
   notificationId: number,
   change: (notification: NotificationItem) => NotificationItem,
 ) {
-  queryClient.setQueriesData<NotificationPage>(
+  queryClient.setQueriesData<NotificationPages>(
     { queryKey: notificationKeys.lists() },
     (current) => current
       ? {
           ...current,
-          content: current.content.map((notification) => notification.notificationId === notificationId
-            ? change(notification)
-            : notification),
+          pages: current.pages.map((page) => ({
+            ...page,
+            content: page.content.map((notification) => notification.notificationId === notificationId
+              ? change(notification)
+              : notification),
+          })),
         }
       : current,
   )
@@ -50,9 +53,11 @@ function decreaseUnreadCount(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 function wasUnread(queryClient: ReturnType<typeof useQueryClient>, notificationId: number) {
-  for (const [, page] of queryClient.getQueriesData<NotificationPage>({ queryKey: notificationKeys.lists() })) {
-    const found = page?.content.find((notification) => notification.notificationId === notificationId)
-    if (found) return !found.isRead
+  for (const [, cached] of queryClient.getQueriesData<NotificationPages>({ queryKey: notificationKeys.lists() })) {
+    for (const page of cached?.pages ?? []) {
+      const found = page.content.find((notification) => notification.notificationId === notificationId)
+      if (found) return !found.isRead
+    }
   }
   return false
 }
@@ -80,12 +85,15 @@ export function useReadAllNotifications() {
   return useMutation({
     mutationFn: readAllNotifications,
     onSuccess: () => {
-      queryClient.setQueriesData<NotificationPage>(
+      queryClient.setQueriesData<NotificationPages>(
         { queryKey: notificationKeys.lists() },
         (current) => current
           ? {
               ...current,
-              content: current.content.map((notification) => ({ ...notification, isRead: true })),
+              pages: current.pages.map((page) => ({
+                ...page,
+                content: page.content.map((notification) => ({ ...notification, isRead: true })),
+              })),
             }
           : current,
       )
@@ -106,7 +114,7 @@ export function useDeleteNotification() {
   return useMutation({
     mutationFn: deleteNotification,
     onSuccess: async (_response, notificationId) => {
-      // 지운 줄이 빠지면 뒷장의 알림이 한 칸씩 당겨 올라오므로 장 전체를 다시 받는다.
+      // 지운 줄이 빠지면 뒤쪽 알림이 한 칸씩 당겨 올라오므로 목록을 다시 받는다.
       // 읽지 않은 알림을 지웠다면 배지 숫자도 하나 줄어든다
       if (wasUnread(queryClient, notificationId)) decreaseUnreadCount(queryClient)
       await Promise.all([
