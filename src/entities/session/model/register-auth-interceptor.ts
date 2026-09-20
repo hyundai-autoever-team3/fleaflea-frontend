@@ -1,12 +1,63 @@
+import axios from 'axios'
+
 import { api } from '../../../shared/api/axios'
 import { useSessionStore } from './store'
 
-export function registerAuthInterceptor() {
-  api.interceptors.request.use((confing) => {
-    const accessToken = useSessionStore.getState().accessToken
-    if (accessToken){
-      confing.headers.Authorization = `Bearer ${accessToken}`
-    }
-    return confing
+const REISSUE_PATH = '/api/v1/auth/reissue'
+
+// 접근 토큰이 만료되면 서버는 401만 돌려준다. 되살리지 않으면 로그아웃할 때까지
+// 모든 요청이 401로 막혀, 화면은 멀쩡한데 누르는 것마다 실패하는 상태가 된다
+function reissue(refreshToken: string) {
+  // 기본 axios로 보낸다. api로 보내면 만료된 토큰이 다시 실리고,
+  // 이 응답이 401일 때 아래 처리가 또 돌아 재귀에 빠진다
+  return axios.post<{ accessToken: string }>(`${api.defaults.baseURL ?? ''}${REISSUE_PATH}`, { refreshToken })
+}
+
+// 토큰이 만료되면 여러 요청이 한꺼번에 401을 받는다.
+// 재발급은 한 번만 보내고 나머지는 그 결과를 함께 기다린다
+let refreshing: Promise<string> | null = null
+
+function refreshAccessToken() {
+  refreshing ??= (async () => {
+    const { refreshToken } = useSessionStore.getState()
+    if (!refreshToken) throw new Error('no refresh token')
+    const { data } = await reissue(refreshToken)
+    useSessionStore.getState().setAccessToken(data.accessToken)
+    return data.accessToken
+  })().finally(() => {
+    refreshing = null
   })
+  return refreshing
+}
+
+export function registerAuthInterceptor() {
+  api.interceptors.request.use((config) => {
+    const accessToken = useSessionStore.getState().accessToken
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
+    }
+    return config
+  })
+
+  api.interceptors.response.use(
+    (response) => response,
+    async (error: unknown) => {
+      if (!axios.isAxiosError(error)) throw error
+      const request = error.config as (typeof error.config & { retriedAfterReissue?: boolean }) | undefined
+      // 한 요청당 한 번만 다시 보낸다. 재발급 뒤에도 401이면 정말 권한이 없는 것이다
+      if (error.response?.status !== 401 || !request || request.retriedAfterReissue) throw error
+      if (!useSessionStore.getState().refreshToken) throw error
+
+      request.retriedAfterReissue = true
+      try {
+        const accessToken = await refreshAccessToken()
+        request.headers.Authorization = `Bearer ${accessToken}`
+        return await api.request(request)
+      } catch {
+        // 새로 고친 토큰마저 거절당하면 되살릴 방법이 없다. 세션을 비워 로그인으로 보낸다
+        useSessionStore.getState().clearSession()
+        throw error
+      }
+    },
+  )
 }

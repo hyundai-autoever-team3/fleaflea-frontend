@@ -13,6 +13,9 @@ interface SessionState {
     accessToken: string | null
     refreshToken: string | null
     setSession: (tokens: SessionTokens, rememberMe?: boolean) => void
+    // 토큰을 다시 받았을 때 접근 토큰만 갈아끼운다. 같은 사람의 같은 세션이므로
+    // setSession과 달리 캐시를 비우지 않는다
+    setAccessToken: (accessToken: string) => void
     clearSession: () => void
 }
 
@@ -67,6 +70,8 @@ export const useSessionStore = create<SessionState>()(
                 queryClient.clear()
                 set({ accessToken, refreshToken })
             },
+
+            setAccessToken: (accessToken) => set({ accessToken }),
 
             clearSession: () => {
                 // 로그아웃 뒤 다른 계정으로 로그인했을 때 이전 사용자의 데이터가 보이지 않도록 캐시 비움
