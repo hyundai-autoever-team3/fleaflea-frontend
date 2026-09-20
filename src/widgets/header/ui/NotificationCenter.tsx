@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 import {
@@ -127,10 +127,14 @@ function fullDate(value: string) {
 
 function NotificationRow({
   notification,
+  reading,
   onSelect,
+  onRead,
 }: {
   notification: NotificationItem
+  reading: boolean
   onSelect: (notification: NotificationItem) => void
+  onRead: (notification: NotificationItem) => void
 }) {
   const unread = !notification.isRead
   const typeStyle = TYPE_STYLE[notification.type]
@@ -162,7 +166,7 @@ function NotificationRow({
           </time>
         </div>
 
-        {/* 줄 어디를 눌러도 관련 화면으로 넘어가게 넓힌다 */}
+        {/* 줄 전체가 눌리도록 넓히되, 옆의 읽음 버튼은 z-10으로 위에 띄운다 */}
         <button
           type="button"
           onClick={() => onSelect(notification)}
@@ -174,6 +178,20 @@ function NotificationRow({
         </button>
       </div>
 
+      {unread && (
+        // 화면을 옮기지 않고 이 알림만 읽음으로 넘기고 싶을 때 쓴다
+        <button
+          type="button"
+          onClick={() => onRead(notification)}
+          disabled={reading}
+          aria-label={`${typeStyle.label} 알림을 읽음으로 표시`}
+          style={{ clipPath: pixelBox(2) }}
+          className={`relative z-10 mt-0.5 flex min-h-9 shrink-0 items-center gap-1 self-start bg-primary-subtle px-2 text-[11px] font-bold text-text-strong transition-colors hover:bg-primary-tint disabled:opacity-50 ${FOCUS_RING}`}
+        >
+          <Sprite rows={GLYPHS.check} className="w-2.5 shrink-0" />
+          {reading ? '처리 중' : '읽음'}
+        </button>
+      )}
     </li>
   )
 }
@@ -208,6 +226,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
   const triggerRef = useRef<HTMLButtonElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const loadMoreRef = useRef<HTMLLIElement>(null)
+  const [readingIds, setReadingIds] = useState<number[]>([])
   const notificationsQuery = useInfiniteNotifications({ enabled: open })
   const unreadCountQuery = useUnreadNotificationCount()
   const readNotificationMutation = useReadNotification()
@@ -288,10 +307,19 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
     useToastStore.getState().showToast(getNotificationActionErrorMessage(error))
   }
 
+  // 알림마다 따로 눌리므로, 어느 줄이 처리 중인지도 줄 단위로 기억한다
+  function markAsRead(notification: NotificationItem) {
+    const { notificationId } = notification
+    if (readingIds.includes(notificationId)) return
+    setReadingIds((current) => [...current, notificationId])
+    readNotificationMutation.mutate(notificationId, {
+      onError: showMutationError,
+      onSettled: () => setReadingIds((current) => current.filter((id) => id !== notificationId)),
+    })
+  }
+
   function selectNotification(notification: NotificationItem) {
-    if (!notification.isRead) {
-      readNotificationMutation.mutate(notification.notificationId, { onError: showMutationError })
-    }
+    if (!notification.isRead) markAsRead(notification)
     onOpenChange(false)
     void navigate(DESTINATION[notification.referenceType], { viewTransition: true })
   }
@@ -405,7 +433,9 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
                       <NotificationRow
                         key={notification.notificationId}
                         notification={notification}
+                        reading={readingIds.includes(notification.notificationId)}
                         onSelect={selectNotification}
+                        onRead={markAsRead}
                       />
                     ))}
                     {hasNextPage && (
