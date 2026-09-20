@@ -38,7 +38,7 @@ export function Header() {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) => `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap border-b-2 px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'border-primary font-bold text-primary' : 'border-transparent text-text'}`}
+              className={({ isActive }) => `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`}
             >
               {item.label}
             </NavLink>

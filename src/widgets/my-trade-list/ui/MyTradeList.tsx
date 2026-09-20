@@ -151,14 +151,19 @@ function ItemPhoto({ imageUrl, status }: { imageUrl: string | null; status: Trad
   return (
     <span
       style={{ clipPath: pixelBox(3) }}
-      className="relative grid size-16 shrink-0 place-items-center overflow-hidden bg-primary-subtle sm:size-20"
+      className="size-16 shrink-0 bg-primary-tint p-[2px] sm:size-20"
     >
-      <Photo src={imageUrl} fallback={MASCOTS.default} className="size-full object-cover" fallbackClassName="h-2/3" />
-      {inactive && (
-        <span className="absolute inset-0 grid place-items-center bg-text-strong/55 text-xs font-bold text-white">
-          {STATUS_LABEL[status]}
-        </span>
-      )}
+      <span
+        style={{ clipPath: pixelBox(2) }}
+        className="relative grid size-full place-items-center overflow-hidden bg-primary-subtle"
+      >
+        <Photo src={imageUrl} fallback={MASCOTS.default} className="size-full object-cover" fallbackClassName="h-2/3" />
+        {inactive && (
+          <span className="absolute inset-0 grid place-items-center bg-text-strong/55 text-xs font-bold text-white">
+            {STATUS_LABEL[status]}
+          </span>
+        )}
+      </span>
     </span>
   )
 }
@@ -362,7 +367,7 @@ export function MyTradeList() {
         {TABS.filter(({ key }) => key !== tab).map(({ key }) => (
           <div key={key} id={`${tabsId}-panel-${key}`} role="tabpanel" aria-labelledby={`${tabsId}-tab-${key}`} hidden />
         ))}
-        <div id={`${tabsId}-panel-${tab}`} role="tabpanel" aria-labelledby={`${tabsId}-tab-${tab}`} tabIndex={0} className={`mt-5 ${FOCUS_STYLE}`}>
+        <div id={`${tabsId}-panel-${tab}`} role="tabpanel" aria-labelledby={`${tabsId}-tab-${tab}`} tabIndex={0} className={`mt-5 min-h-80 ${FOCUS_STYLE}`}>
           {requestsQuery.isPending ? (
             <div className="space-y-3 py-2">
               <p role="status" className="sr-only">거래 내역을 불러오는 중이에요.</p>
@@ -422,7 +427,7 @@ export function MyTradeList() {
                         key={`${requestType}-${request.requestId}`}
                         data-trade-request-id={request.requestId}
                         aria-busy={busy}
-                        className="relative px-2 py-5 transition-colors first:pt-1 last:pb-0 hover:bg-primary-subtle/40 [contain-intrinsic-size:auto_180px] [content-visibility:auto]"
+                        className="relative min-h-28 px-2 py-4 transition-colors hover:bg-primary-subtle/40 sm:min-h-32"
                       >
                         <div className="flex items-start gap-3 sm:gap-4">
                           <ItemPhoto imageUrl={imageUrl} status={status} />
@@ -456,7 +461,7 @@ export function MyTradeList() {
                             </Link>
 
                             {/* 누가 무엇을 했는지와 내가 할 일을 한 줄에 둔다 */}
-                            <div className="mt-1.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                            <div className="mt-1.5 flex min-h-8 flex-wrap items-center justify-between gap-x-3 gap-y-2">
                               <p title={describe(request)} className="min-w-0 flex-1 truncate text-body-04 text-text-muted">
                                 {describe(request)}
                               </p>
@@ -473,11 +478,11 @@ export function MyTradeList() {
                                     {busy && pendingAction === actionType ? '처리 중' : ACTION_UI[actionType].label}
                                   </button>
                                 ))}
+                                {status === 'ACCEPTED' && actions.length === 0 && (
+                                  <span className="text-xs text-text-muted">상대방의 완료를 기다리고 있어요.</span>
+                                )}
                               </div>
                             </div>
-                            {status === 'ACCEPTED' && actions.length === 0 && (
-                              <p className="mt-1.5 text-xs text-text-muted">상대방의 거래 완료를 기다리고 있어요.</p>
-                            )}
                           </div>
                         </div>
                       </li>

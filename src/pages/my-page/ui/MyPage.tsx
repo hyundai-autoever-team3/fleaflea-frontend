@@ -93,7 +93,9 @@ export function MyPage() {
                   <div className="p-4 sm:p-5">
                     <h2 id="my-profile-title" className="text-body-04 font-bold text-text-muted">내 프로필</h2>
                     <div className="mt-4 flex items-center gap-4 lg:flex-col lg:items-start">
-                      <Avatar profileImageUrl={profile.profileImageUrl} size="lg" />
+                      <span style={{ clipPath: pixelBox(4) }} className="shrink-0 bg-primary-tint p-[3px]">
+                        <Avatar profileImageUrl={profile.profileImageUrl} size="lg" />
+                      </span>
                       <div className="min-w-0 flex-1 lg:w-full">
                         <p className="break-words text-body-02 font-bold leading-relaxed text-text-strong">{profile.nickname}</p>
                         <p className="mt-1 break-all text-body-04 leading-relaxed text-text-muted">{profile.email}</p>
