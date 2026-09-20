@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
   {
     path: '/invite/:code',
     lazy: async () => {
-      const { MarketJoinPage } = await import('../../pages/market')
+      const { MarketJoinPage } = await import('../../pages/market-join')
       return { element: <MarketJoinPage /> }
     },
   },
