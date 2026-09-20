@@ -40,7 +40,7 @@ export function CollectionForm({
   const submitting = useRef(false)
   const [title, setTitle] = useState(initialValue?.title ?? '')
   const [description, setDescription] = useState(initialValue?.description ?? '')
-  // 새 물건은 공개가 기본. 스위치를 켜면 비공개가 된다
+  // 새 물건은 공개가 기본. 스위치를 켜 둔 상태가 공개다
   const [isPublic, setIsPublic] = useState(initialValue?.isPublic ?? true)
   const [image, setImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -115,20 +115,21 @@ export function CollectionForm({
             <span className="text-body-03 font-bold text-text-strong">물건 사진</span>
             <div className="flex items-center gap-2">
               <span className="text-body-04 font-bold text-text-muted">{isPublic ? '공개' : '비공개'}</span>
-              {/* 켜면 비공개가 되는 스위치라 켜짐 판정은 !isPublic. 글자는 현재 상태를 그대로 보여줌 */}
+              {/* 스위치는 라벨이 가리키는 상태를 켜는 것으로 읽힌다.
+                  '공개로 설정'이라 적고 켜짐 = 공개로 맞춰야 헷갈리지 않는다 */}
               <button
                 type="button"
                 role="switch"
-                aria-checked={!isPublic}
-                aria-label="비공개로 설정"
+                aria-checked={isPublic}
+                aria-label="공개로 설정"
                 onClick={() => setIsPublic((current) => !current)}
                 className={`flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60 ${
-                  !isPublic ? 'bg-primary' : 'bg-bg-subtle'
+                  isPublic ? 'bg-primary' : 'bg-bg-subtle'
                 }`}
               >
                 <span
                   className={`block size-5 rounded-full bg-white transition-transform duration-200 motion-reduce:transition-none ${
-                    !isPublic ? 'translate-x-5' : 'translate-x-0'
+                    isPublic ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
