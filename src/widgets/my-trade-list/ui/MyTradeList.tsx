@@ -53,6 +53,11 @@ function requestLabel({ requestType, tradeType }: MyTradeRequest) {
 }
 
 // 상품은 상품 상세로, 도감 물건(거래·구걸)은 도감 물건 상세로 보낸다
+// 종류가 다르면 requestId가 겹칠 수 있어 둘을 합쳐 한 줄을 가리킨다
+function requestKeyOf({ requestType, requestId }: MyTradeRequest) {
+  return `${requestType}:${requestId}`
+}
+
 function targetLink({ requestType, targetItemId }: MyTradeRequest) {
   return requestType === 'ITEM' ? `/items/${targetItemId}` : `/collection-items/${targetItemId}`
 }
@@ -180,13 +185,19 @@ export function MyTradeList() {
   const sourceMenuRef = useRef<HTMLDivElement>(null)
   const pendingKeysRef = useRef(new Set<string>())
   const [pendingRequests, setPendingRequests] = useState<Record<string, TradeAction>>({})
+  // 방금 처리한 요청. 상태가 바뀌면 다른 탭으로 옮겨가지만, 눈앞에서 바로 빼면
+  // 아래 줄들이 한 칸씩 튀어 올라 목록이 들썩인다. 탭을 옮기기 전까지는 자리에 둬서
+  // 무엇이 어떻게 바뀌었는지 그 자리에서 확인하게 한다
+  const [justHandled, setJustHandled] = useState<string[]>([])
   const [error, setError] = useState('')
   const requestsQuery = useMyTradeRequests()
   const action = useTradeAction()
 
   const requests = requestsQuery.data ?? []
   const inSource = requests.filter((request) => matchesSource(request, source))
-  const visible = inSource.filter((request) => matchesTab(request, tab))
+  const visible = inSource.filter(
+    (request) => matchesTab(request, tab) || justHandled.includes(requestKeyOf(request)),
+  )
   const visibleSourceCount = inSource.length
   const pageCount = Math.max(1, Math.ceil(visible.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount - 1)
@@ -215,6 +226,8 @@ export function MyTradeList() {
   function selectTab(nextTab: TabKey) {
     setTab(nextTab)
     setPage(0)
+    // 탭을 옮기면 붙잡아 두던 줄도 제자리를 찾아간다
+    setJustHandled([])
     tabRefs.current[nextTab]?.focus()
   }
 
@@ -231,20 +244,16 @@ export function MyTradeList() {
   }
 
   async function run(request: MyTradeRequest, actionType: TradeAction) {
-    const requestKey = `${request.requestType}:${request.requestId}`
+    const requestKey = requestKeyOf(request)
     if (pendingKeysRef.current.has(requestKey)) return
     pendingKeysRef.current.add(requestKey)
     setError('')
     setPendingRequests((current) => ({ ...current, [requestKey]: actionType }))
     try {
       await action.mutateAsync({ kind: request.requestType, requestId: request.requestId, action: actionType })
-      setPage(0)
+      // 처리한 줄을 자리에 붙잡아 둔다. 목록에서 바로 빼면 아래 줄들이 튀어 오른다
+      setJustHandled((current) => current.includes(requestKey) ? current : [...current, requestKey])
       useToastStore.getState().showToast(ACTION_UI[actionType].toast)
-      // 처리한 행이 다른 탭으로 옮겨지기 전에 키보드 포커스를 이어준다.
-      const focusedRow = document.activeElement?.closest('[data-trade-request-id]')
-      if (focusedRow?.getAttribute('data-trade-request-id') === String(request.requestId)) {
-        tabRefs.current[tab]?.focus()
-      }
     } catch (actionError) {
       setError(getTradeActionErrorMessage(actionError, actionType))
     } finally {
@@ -299,6 +308,7 @@ export function MyTradeList() {
                               onClick={() => {
                                 setSource(key)
                                 setPage(0)
+                                setJustHandled([])
                                 setSourceOpen(false)
                               }}
                               className={`flex min-h-10 w-full items-center justify-between px-3 text-left text-body-04 transition-colors hover:bg-primary-subtle ${
@@ -419,7 +429,7 @@ export function MyTradeList() {
                 <ul className="mt-4 divide-y divide-primary-tint/60">
                   {pageItems.map((request) => {
                     const { status, isRequester, requestType, targetItemTitle, imageUrl } = request
-                    const requestKey = `${requestType}:${request.requestId}`
+                    const requestKey = requestKeyOf(request)
                     const pendingAction = pendingRequests[requestKey]
                     const busy = pendingAction !== undefined
                     const actions = availableActions(request)
