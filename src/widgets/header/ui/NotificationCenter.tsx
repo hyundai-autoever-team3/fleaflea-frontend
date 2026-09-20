@@ -145,12 +145,12 @@ function NotificationRow({
     // 읽은 줄은 지우지 않고 가라앉히되, 종류 라벨의 색은 그대로 둔다
     <li
       aria-busy={busy}
-      className={`relative flex min-h-[4.25rem] items-start gap-2.5 rounded-xl p-2.5 transition-colors ${
-        unread ? 'bg-glass' : 'bg-glass-faint'
+      className={`relative flex min-h-[3.75rem] items-start gap-2.5 rounded-xl px-2.5 py-2 transition-colors ${
+        unread ? 'bg-glass-strong' : 'bg-glass'
       }`}
     >
       <span
-        className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-glass-strong ${
+        className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-primary-subtle ${
           unread ? 'text-glass-ink/92' : 'text-glass-ink/58'
         }`}
       >
@@ -192,10 +192,11 @@ function NotificationRow({
           title={unread ? '읽음으로 표시' : '읽은 알림'}
           aria-label={unread ? `${typeStyle.label} 알림을 읽음으로 표시` : `${typeStyle.label} 알림, 읽음`}
           style={{ clipPath: pixelBox(2) }}
-          className={`grid size-6 place-items-center transition-colors disabled:opacity-100 ${
+          className={`grid size-6 place-items-center transition-colors disabled:cursor-default disabled:opacity-100 ${
             unread
-              ? 'bg-glass-strong text-transparent hover:text-primary'
-              : 'bg-primary text-white'
+              // 빈 칸이지만 테두리와 옅은 체크로 '누르면 체크된다'를 먼저 보여준다
+              ? 'bg-bg text-primary/25 ring-1 ring-inset ring-primary hover:text-primary/60'
+              : 'bg-primary text-white ring-1 ring-inset ring-primary'
           } ${FOCUS_RING}`}
         >
           <Sprite rows={GLYPHS.check} className="w-3" />
@@ -217,10 +218,10 @@ function NotificationRow({
 
 function NotificationSkeleton() {
   return (
-    <div role="status" aria-label="알림을 불러오는 중" className="space-y-2 p-3">
+    <div role="status" aria-label="알림을 불러오는 중" className="space-y-2.5 px-3 pb-3 pt-1">
       {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="flex min-h-[4.25rem] items-start gap-2.5 rounded-xl bg-glass-faint p-2.5 motion-safe:animate-pulse">
-          <span className="size-9 shrink-0 rounded-lg bg-glass-strong" />
+        <div key={index} className="flex min-h-[3.75rem] items-start gap-2.5 rounded-xl bg-glass px-2.5 py-2 motion-safe:animate-pulse">
+          <span className="size-8 shrink-0 rounded-lg bg-primary-subtle" />
           <span className="mt-1 h-10 flex-1 rounded-lg bg-glass" />
         </div>
       ))}
@@ -404,7 +405,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
               <p className="mt-1 max-w-56 text-balance text-xs text-glass-ink/58">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
             </div>
           ) : (
-            <ul aria-label="최근 알림" className="space-y-2 p-3">
+            <ul aria-label="최근 알림" className="space-y-2.5 px-3 pb-3 pt-1">
               {notifications.map((notification) => (
                 <NotificationRow
                   key={notification.notificationId}
