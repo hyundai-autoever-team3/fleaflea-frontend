@@ -401,8 +401,8 @@ export function MyTradeList() {
               {visible.length === 0 ? (
                 <div className="flex min-h-72 flex-col items-center justify-center px-3 py-10 text-center sm:min-h-80 sm:py-12">
                   <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
-                  <p className="mt-5 text-body-03 font-bold text-text-strong">{EMPTY_STATE[tab].title}</p>
-                  <p className="mt-2 max-w-xs text-body-04 leading-relaxed text-text-muted">{EMPTY_STATE[tab].description}</p>
+                  <p className="mt-5 text-balance text-body-03 font-bold text-text-strong">{EMPTY_STATE[tab].title}</p>
+                  <p className="mt-2 max-w-xs text-balance text-body-04 leading-relaxed text-text-muted">{EMPTY_STATE[tab].description}</p>
                   {tab === 'ongoing' && counts.received > 0 ? (
                     <button type="button" onClick={() => selectTab('received')} style={{ clipPath: pixelBox(4) }} className={`mt-6 ${PRIMARY_ACTION}`}>
                       받은 요청 확인하기 <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0" />
