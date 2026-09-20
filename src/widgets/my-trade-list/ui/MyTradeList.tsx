@@ -171,8 +171,8 @@ export function MyTradeList() {
   const [sourceOpen, setSourceOpen] = useState(false)
   const [page, setPage] = useState(0)
   const sourceMenuRef = useRef<HTMLDivElement>(null)
-  const [pendingId, setPendingId] = useState<number | null>(null)
-  const [pendingAction, setPendingAction] = useState<TradeAction | null>(null)
+  const pendingKeysRef = useRef(new Set<string>())
+  const [pendingRequests, setPendingRequests] = useState<Record<string, TradeAction>>({})
   const [error, setError] = useState('')
   const requestsQuery = useMyTradeRequests()
   const action = useTradeAction()
@@ -182,9 +182,8 @@ export function MyTradeList() {
   const visible = inSource.filter((request) => matchesTab(request, tab))
   const visibleSourceCount = inSource.length
   const pageCount = Math.max(1, Math.ceil(visible.length / PAGE_SIZE))
-  // 요청을 처리해 줄이 줄면 마지막 장이 사라질 수 있어 앞 장으로 당긴다
-  if (page > pageCount - 1) setPage(pageCount - 1)
-  const pageItems = visible.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const currentPage = Math.min(page, pageCount - 1)
+  const pageItems = visible.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE)
   const counts = Object.fromEntries(
     TABS.map(({ key }) => [key, inSource.filter((request) => matchesTab(request, key)).length]),
   ) as Record<TabKey, number>
@@ -225,12 +224,14 @@ export function MyTradeList() {
   }
 
   async function run(request: MyTradeRequest, actionType: TradeAction) {
-    if (pendingId !== null) return
+    const requestKey = `${request.requestType}:${request.requestId}`
+    if (pendingKeysRef.current.has(requestKey)) return
+    pendingKeysRef.current.add(requestKey)
     setError('')
-    setPendingId(request.requestId)
-    setPendingAction(actionType)
+    setPendingRequests((current) => ({ ...current, [requestKey]: actionType }))
     try {
       await action.mutateAsync({ kind: request.requestType, requestId: request.requestId, action: actionType })
+      setPage(0)
       useToastStore.getState().showToast(ACTION_UI[actionType].toast)
       // 처리한 행이 다른 탭으로 옮겨지기 전에 키보드 포커스를 이어준다.
       const focusedRow = document.activeElement?.closest('[data-trade-request-id]')
@@ -240,8 +241,12 @@ export function MyTradeList() {
     } catch (actionError) {
       setError(getTradeActionErrorMessage(actionError, actionType))
     } finally {
-      setPendingId(null)
-      setPendingAction(null)
+      pendingKeysRef.current.delete(requestKey)
+      setPendingRequests((current) => {
+        const next = { ...current }
+        delete next[requestKey]
+        return next
+      })
     }
   }
 
@@ -326,7 +331,7 @@ export function MyTradeList() {
                 aria-controls={`${tabsId}-panel-${key}`}
                 tabIndex={active ? 0 : -1}
                 onKeyDown={(event) => handleTabKeyDown(event, key)}
-                onClick={() => setTab(key)}
+                onClick={() => selectTab(key)}
                 style={{ clipPath: pixelBox(3) }}
                 className={`flex min-h-12 min-w-0 flex-col items-center justify-center sm:flex-row gap-x-1.5 gap-y-0.5 px-1 py-2 text-xs transition-colors sm:px-2 sm:text-body-04 ${
                   active ? 'bg-bg font-bold text-text-strong' : 'text-text-muted hover:bg-primary-tint/50'
@@ -350,7 +355,9 @@ export function MyTradeList() {
             <p>{error}</p>
           </div>
         )}
-        <p role="status" className="sr-only">{pendingId !== null ? '거래 요청을 처리하는 중이에요.' : ''}</p>
+        <p role="status" className="sr-only">
+          {Object.keys(pendingRequests).length > 0 ? '거래 요청을 처리하는 중이에요.' : ''}
+        </p>
 
         {TABS.filter(({ key }) => key !== tab).map(({ key }) => (
           <div key={key} id={`${tabsId}-panel-${key}`} role="tabpanel" aria-labelledby={`${tabsId}-tab-${key}`} hidden />
@@ -405,7 +412,9 @@ export function MyTradeList() {
                 <ul className="mt-4 divide-y divide-primary-tint/60">
                   {pageItems.map((request) => {
                     const { status, isRequester, requestType, targetItemTitle, imageUrl } = request
-                    const busy = pendingId === request.requestId
+                    const requestKey = `${requestType}:${request.requestId}`
+                    const pendingAction = pendingRequests[requestKey]
+                    const busy = pendingAction !== undefined
                     const actions = availableActions(request)
                     const needsMyAction = status === 'PENDING' && !isRequester
                     return (
@@ -456,7 +465,7 @@ export function MyTradeList() {
                                   <button
                                     key={actionType}
                                     type="button"
-                                    disabled={pendingId !== null}
+                                    disabled={busy}
                                     onClick={() => void run(request, actionType)}
                                     style={{ clipPath: pixelBox(2) }}
                                     className={ACTION_UI[actionType].primary ? ROW_PRIMARY : ROW_SECONDARY}
@@ -487,10 +496,10 @@ export function MyTradeList() {
                       type="button"
                       onClick={() => setPage(index)}
                       aria-label={`${index + 1}페이지`}
-                      aria-current={page === index ? 'page' : undefined}
+                      aria-current={currentPage === index ? 'page' : undefined}
                       style={{ clipPath: pixelBox(2) }}
                       className={
-                        page === index
+                        currentPage === index
                           ? `size-8 bg-primary text-body-04 font-bold text-white ${FOCUS_STYLE}`
                           : `size-8 bg-primary-subtle text-body-04 font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong ${FOCUS_STYLE}`
                       }
