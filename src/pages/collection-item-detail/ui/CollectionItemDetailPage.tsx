@@ -7,6 +7,7 @@ import { useMyProfile } from '../../../entities/user'
 import { BegRequestModal, TradeRequestModal } from '../../../features/collection-trade'
 import type { CollectionTradeType } from '../../../features/collection-trade'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { Header } from '../../../widgets/header'
@@ -27,6 +28,16 @@ function getDetailErrorMessage(error: unknown) {
   if (status === 403 || status === 404) return '볼 수 없는 물건이에요.'
   if (status === 401) return '로그인이 필요해요. 다시 로그인해 주세요.'
   return '물건 정보를 불러오지 못했어요.'
+}
+
+// 돌아갈 곳은 들어온 경로에 따라 달라진다 (도감 목록 / 마이페이지 거래 목록)
+function BackLink({ fallback }: { fallback: BackTarget }) {
+  const back = useBackTarget(fallback)
+  return (
+    <Link to={back.to} viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
+      ← {back.label}
+    </Link>
+  )
 }
 
 export function CollectionItemDetailPage() {
@@ -63,13 +74,12 @@ export function CollectionItemDetailPage() {
           <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">물건을 불러오는 중이에요...</p>
         ) : (
           <>
-            <Link
-              to={isMine ? '/item-dex' : `/members/${detail.ownerId}/item-dex`}
-              viewTransition
-              className="text-body-04 text-text-muted hover:text-text-strong"
-            >
-              ← {isMine ? '내 물건 도감' : `${detail.ownerNickname}님의 물건 도감`}
-            </Link>
+            <BackLink
+              fallback={{
+                to: isMine ? '/item-dex' : `/members/${detail.ownerId}/item-dex`,
+                label: isMine ? '내 물건 도감' : `${detail.ownerNickname}님의 물건 도감`,
+              }}
+            />
             {/* 누구의 도감인지는 제목이 말해주므로 프로필 줄을 따로 두지 않는다 */}
             <h1 className="mt-3 text-head-02 font-bold text-text-strong">
               {isMine ? '내 물건 도감' : `${detail.ownerNickname}의 물건 도감`}

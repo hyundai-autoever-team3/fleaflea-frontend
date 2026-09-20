@@ -16,6 +16,7 @@ import { useMyProfile } from '../../../entities/user'
 import { deleteProduct, getDeleteProductErrorMessage } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
@@ -28,6 +29,16 @@ function getDetailErrorMessage(error: unknown) {
   if (status === 403) return '이 상품이 등록된 마켓에 참여해야 볼 수 있어요.'
   if (status === 404) return '상품을 찾을 수 없어요.'
   return '상품 정보를 불러오지 못했어요.'
+}
+
+// 돌아갈 곳은 들어온 경로에 따라 달라진다 (마켓 / 마이페이지 거래 목록)
+function BackLink({ fallback }: { fallback: BackTarget }) {
+  const back = useBackTarget(fallback)
+  return (
+    <Link to={back.to} viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
+      ← {back.label}
+    </Link>
+  )
 }
 
 export function ProductDetailPage() {
@@ -94,13 +105,7 @@ export function ProductDetailPage() {
           <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
         ) : (
           <>
-            <Link
-              to={`/market/${product.marketId}`}
-              viewTransition
-              className="text-body-04 text-text-muted hover:text-text-strong"
-            >
-              ← {marketQuery.data?.title ?? '마켓'}
-            </Link>
+            <BackLink fallback={{ to: `/market/${product.marketId}`, label: marketQuery.data?.title ?? '마켓' }} />
             <h1 className="mt-3 text-head-02 font-bold text-text-strong">상품 상세</h1>
             <p className="mt-1 text-body-04 text-text-muted">
               {marketQuery.data?.title ?? '마켓'}
