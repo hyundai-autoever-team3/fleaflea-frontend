@@ -1,4 +1,17 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import {
+  ArrowPathIcon,
+  ArrowUturnLeftIcon,
+  ArrowsRightLeftIcon,
+  BellIcon,
+  CheckBadgeIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  HandRaisedIcon,
+  UserGroupIcon,
+  UserPlusIcon,
+  XCircleIcon,
+} from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router'
 
 import {
@@ -14,70 +27,50 @@ import {
   useReadNotification,
 } from '../../../features/notification-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { pixelBox } from '../../../shared/lib/pixel'
-import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
-const PANEL_BUTTON = 'flex min-h-9 items-center gap-1.5 bg-bg px-3 text-body-04 font-bold text-text-strong transition-colors hover:bg-primary-tint'
+const PANEL_BUTTON = 'flex min-h-9 items-center gap-1.5 rounded-lg bg-bg px-3 text-body-04 font-bold text-text transition-colors hover:bg-primary-tint'
 
 interface NotificationTypeStyle {
   label: string
-  glyph: readonly string[]
-  tileClass: string
   textClass: string
 }
 
-// 종류별 색은 tokens.css의 status 토큰만 쓴다 (design.md 9장 — 컴포넌트에 hex 금지)
+// 종류를 알아보는 건 라벨 한 단어가 맡는다. 색도 그 단어에만 주고
+// 아이콘·바탕은 무채색으로 둬 줄마다 색이 튀지 않게 한다.
+// 색 값은 tokens.css의 status 토큰만 쓴다 (design.md 9장 — 컴포넌트에 hex 금지)
 const TYPE_STYLE: Record<NotificationType, NotificationTypeStyle> = {
-  TRADE_REQUESTED: {
-    label: '거래 요청',
-    glyph: GLYPHS.swap,
-    tileClass: 'bg-primary-tint text-status-brand',
-    textClass: 'text-status-brand',
-  },
-  TRADE_ACCEPTED: {
-    label: '요청 수락',
-    glyph: GLYPHS.check,
-    tileClass: 'bg-status-success-subtle text-status-success',
-    textClass: 'text-status-success',
-  },
-  TRADE_REJECTED: {
-    label: '요청 거절',
-    glyph: GLYPHS.cross,
-    tileClass: 'bg-status-danger-subtle text-status-danger',
-    textClass: 'text-status-danger',
-  },
-  TRADE_CANCELLED: {
-    label: '요청 취소',
-    glyph: GLYPHS.undo,
-    tileClass: 'bg-bg-subtle text-text-muted',
-    textClass: 'text-text-muted',
-  },
-  TRADE_COMPLETED: {
-    label: '거래 완료',
-    glyph: GLYPHS.parcel,
-    tileClass: 'bg-status-success-subtle text-status-success',
-    textClass: 'text-status-success',
-  },
-  FRIEND_REQUESTED: {
-    label: '친구 요청',
-    glyph: GLYPHS.personPlus,
-    tileClass: 'bg-status-info-subtle text-status-info',
-    textClass: 'text-status-info',
-  },
-  FRIEND_ACCEPTED: {
-    label: '친구 수락',
-    glyph: GLYPHS.friends,
-    tileClass: 'bg-status-success-subtle text-status-success',
-    textClass: 'text-status-success',
-  },
-  POKE_RECEIVED: {
-    label: '콕찌르기',
-    glyph: GLYPHS.hand,
-    tileClass: 'bg-status-warning-subtle text-status-warning',
-    textClass: 'text-status-warning',
-  },
+  TRADE_REQUESTED: { label: '교환', textClass: 'text-status-brand' },
+  TRADE_ACCEPTED: { label: '수락', textClass: 'text-status-info' },
+  TRADE_REJECTED: { label: '거절', textClass: 'text-status-danger' },
+  TRADE_CANCELLED: { label: '취소', textClass: 'text-text-muted' },
+  TRADE_COMPLETED: { label: '완료', textClass: 'text-status-success' },
+  FRIEND_REQUESTED: { label: '친구 요청', textClass: 'text-status-accent' },
+  FRIEND_ACCEPTED: { label: '친구 수락', textClass: 'text-status-info' },
+  POKE_RECEIVED: { label: '콕 찌르기', textClass: 'text-status-warning' },
+}
+
+function NotificationIcon({ type }: { type: NotificationType }) {
+  const className = 'size-5'
+  switch (type) {
+    case 'TRADE_REQUESTED':
+      return <ArrowsRightLeftIcon aria-hidden="true" className={className} />
+    case 'TRADE_ACCEPTED':
+      return <CheckCircleIcon aria-hidden="true" className={className} />
+    case 'TRADE_REJECTED':
+      return <XCircleIcon aria-hidden="true" className={className} />
+    case 'TRADE_CANCELLED':
+      return <ArrowUturnLeftIcon aria-hidden="true" className={className} />
+    case 'TRADE_COMPLETED':
+      return <CheckBadgeIcon aria-hidden="true" className={className} />
+    case 'FRIEND_REQUESTED':
+      return <UserPlusIcon aria-hidden="true" className={className} />
+    case 'FRIEND_ACCEPTED':
+      return <UserGroupIcon aria-hidden="true" className={className} />
+    case 'POKE_RECEIVED':
+      return <HandRaisedIcon aria-hidden="true" className={className} />
+  }
 }
 
 const DESTINATION: Record<NotificationReferenceType, string> = {
@@ -140,16 +133,14 @@ function NotificationRow({
   const typeStyle = TYPE_STYLE[notification.type]
 
   return (
-    // 읽은 알림은 지우지 않고 색을 죽여 가라앉힌다 (design.md 1장 4번)
-    <li
-      style={{ clipPath: pixelBox(3) }}
-      className={`relative flex items-start gap-2.5 p-2.5 transition-colors ${unread ? 'bg-bg' : 'bg-bg/55'}`}
-    >
+    // 읽은 알림은 지우지 않고 색을 죽여 가라앉힌다
+    <li className={`relative flex items-start gap-2.5 rounded-xl p-2.5 transition-colors ${unread ? 'bg-bg' : 'bg-bg/55'}`}>
       <span
-        style={{ clipPath: pixelBox(2) }}
-        className={`mt-0.5 grid size-9 shrink-0 place-items-center ${unread ? typeStyle.tileClass : 'bg-bg-subtle text-text-muted'}`}
+        className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary-subtle ${
+          unread ? 'text-text' : 'text-text-muted'
+        }`}
       >
-        <Sprite rows={typeStyle.glyph} className="w-4" />
+        <NotificationIcon type={notification.type} />
       </span>
 
       <div className="min-w-0 flex-1">
@@ -185,10 +176,9 @@ function NotificationRow({
           onClick={() => onRead(notification)}
           disabled={reading}
           aria-label={`${typeStyle.label} 알림을 읽음으로 표시`}
-          style={{ clipPath: pixelBox(2) }}
-          className={`relative z-10 mt-0.5 flex min-h-9 shrink-0 items-center gap-1 self-start bg-primary-subtle px-2 text-[11px] font-bold text-text-strong transition-colors hover:bg-primary-tint disabled:opacity-50 ${FOCUS_RING}`}
+          className={`relative z-10 mt-0.5 flex min-h-9 shrink-0 items-center gap-1 self-start rounded-lg bg-primary-subtle px-2 text-[11px] font-bold text-text transition-colors hover:bg-primary-tint disabled:opacity-50 ${FOCUS_RING}`}
         >
-          <Sprite rows={GLYPHS.check} className="w-2.5 shrink-0" />
+          <CheckIcon aria-hidden="true" className="size-3.5 shrink-0" />
           {reading ? '처리 중' : '읽음'}
         </button>
       )}
@@ -200,13 +190,9 @@ function NotificationSkeleton() {
   return (
     <div role="status" aria-label="알림을 불러오는 중" className="space-y-2 p-3">
       {[0, 1, 2].map((item) => (
-        <div
-          key={item}
-          style={{ clipPath: pixelBox(3) }}
-          className="flex items-start gap-2.5 bg-bg/55 p-2.5 motion-safe:animate-pulse"
-        >
-          <span style={{ clipPath: pixelBox(2) }} className="size-9 shrink-0 bg-primary-tint" />
-          <span className="mt-1 h-10 flex-1 bg-primary-subtle" />
+        <div key={item} className="flex items-start gap-2.5 rounded-xl bg-bg/55 p-2.5 motion-safe:animate-pulse">
+          <span className="size-9 shrink-0 rounded-lg bg-primary-tint" />
+          <span className="mt-1 h-10 flex-1 rounded-lg bg-primary-subtle" />
         </div>
       ))}
     </div>
@@ -346,12 +332,11 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           open || unreadCount > 0 ? 'text-text-strong' : 'text-text-muted'
         } ${FOCUS_RING}`}
       >
-        <Sprite rows={GLYPHS.bell} className="w-5" />
+        <BellIcon aria-hidden="true" className="size-6" />
         {unreadCount > 0 && (
           <span
             aria-hidden="true"
-            style={{ clipPath: pixelBox(2) }}
-            className="absolute right-0 top-0.5 min-w-5 bg-status-danger px-1 py-0.5 text-[10px] font-bold leading-3 text-white"
+            className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-danger px-1 text-[10px] font-bold leading-none text-white ring-2 ring-bg"
           >
             {badgeLabel}
           </span>
@@ -359,109 +344,95 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
       </button>
 
       {open && (
-        // 그림자는 clip-path가 잘라내지 못하도록 바깥 래퍼에 필터로 건다 (design.md 4장 폴라로이드)
-        <div className="fixed inset-x-4 top-[6.75rem] z-50 drop-shadow-[0_10px_24px_rgba(20,24,29,0.18)] md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:w-96">
-          {/* 픽셀 테두리 2겹 — 바깥 연보라 판, 안쪽 반투명 연보라 면 */}
-          <section
-            id={panelId}
-            role="dialog"
-            aria-labelledby={titleId}
-            aria-busy={notificationsQuery.isPending || isFetchingNextPage}
-            style={{ clipPath: pixelBox(6) }}
-            className="flex max-h-[calc(100dvh-7.75rem)] flex-col bg-primary-tint/75 p-[2px] backdrop-blur-md md:max-h-[calc(100dvh-5rem)]"
-          >
-            <div
-              style={{ clipPath: pixelBox(6) }}
-              className="flex min-h-0 flex-1 flex-col bg-primary-subtle/85"
-            >
-              <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3.5">
-                <div className="min-w-0">
-                  <h2 id={titleId} className="text-body-03 font-bold text-text-strong">알림</h2>
-                  <p className="mt-0.5 text-xs text-text-muted">
-                    {unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '새 소식을 확인해 보세요'}
-                  </p>
-                </div>
-                {hasUnread && (
-                  <button
-                    type="button"
-                    onClick={readAll}
-                    disabled={readAllMutation.isPending}
-                    style={{ clipPath: pixelBox(3) }}
-                    className={`shrink-0 disabled:opacity-50 ${PANEL_BUTTON} ${FOCUS_RING}`}
-                  >
-                    {readAllMutation.isPending ? '처리 중...' : '모두 읽음'}
-                  </button>
-                )}
-              </div>
-
-              <div
-                ref={scrollAreaRef}
-                className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {notificationsQuery.isPending ? (
-                  <NotificationSkeleton />
-                ) : notificationsQuery.isError && !notificationsQuery.data ? (
-                  <div role="alert" className="flex flex-col items-center px-6 py-10 text-center">
-                    <img
-                      src={MASCOTS.surprised}
-                      alt=""
-                      className="size-12 object-contain [image-rendering:pixelated]"
-                    />
-                    <p className="mt-3 text-body-04 font-bold text-text-strong">알림을 불러오지 못했어요</p>
-                    <button
-                      type="button"
-                      onClick={() => void notificationsQuery.refetch()}
-                      style={{ clipPath: pixelBox(3) }}
-                      className={`mt-4 ${PANEL_BUTTON} ${FOCUS_RING}`}
-                    >
-                      다시 시도 <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0" />
-                    </button>
-                  </div>
-                ) : notifications.length === 0 ? (
-                  <div className="flex flex-col items-center px-6 py-9 text-center">
-                    <img
-                      src={MASCOTS.basket}
-                      alt=""
-                      className="size-14 object-contain [image-rendering:pixelated]"
-                    />
-                    <p className="mt-3 text-body-04 font-bold text-text-strong">아직 도착한 알림이 없어요</p>
-                    <p className="mt-1 text-xs text-text-muted">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
-                  </div>
-                ) : (
-                  <ul aria-label="최근 알림" className="space-y-2 p-3">
-                    {notifications.map((notification) => (
-                      <NotificationRow
-                        key={notification.notificationId}
-                        notification={notification}
-                        reading={readingIds.includes(notification.notificationId)}
-                        onSelect={selectNotification}
-                        onRead={markAsRead}
-                      />
-                    ))}
-                    {hasNextPage && (
-                      <li ref={loadMoreRef} className="flex min-h-12 items-center justify-center px-4 py-2 text-xs text-text-muted">
-                        {isFetchNextPageError ? (
-                          <button
-                            type="button"
-                            onClick={() => void fetchNextPage()}
-                            style={{ clipPath: pixelBox(3) }}
-                            className={`${PANEL_BUTTON} ${FOCUS_RING}`}
-                          >
-                            알림 더 불러오기 <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0" />
-                          </button>
-                        ) : isFetchingNextPage ? (
-                          <span role="status">이전 알림을 불러오는 중...</span>
-                        ) : (
-                          <span className="sr-only">이전 알림을 불러올 준비가 됐어요</span>
-                        )}
-                      </li>
-                    )}
-                  </ul>
-                )}
-              </div>
+        // 잠깐 떴다 사라지는 조작용 판이라 픽셀 계단 대신 둥근 모서리를 쓴다
+        // (프로필 메뉴·거래 출처 목록과 같은 예외 — design.md 1장)
+        <section
+          id={panelId}
+          role="dialog"
+          aria-labelledby={titleId}
+          aria-busy={notificationsQuery.isPending || isFetchingNextPage}
+          className="fixed inset-x-4 top-[6.75rem] z-50 flex max-h-[calc(100dvh-7.75rem)] flex-col overflow-hidden rounded-2xl border border-primary-tint/60 bg-primary-subtle/85 shadow-lg backdrop-blur-md md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96"
+        >
+          <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3.5">
+            <div className="min-w-0">
+              <h2 id={titleId} className="text-body-03 font-bold text-text-strong">알림</h2>
+              <p className="mt-0.5 text-xs text-text-muted">
+                {unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '새 소식을 확인해 보세요'}
+              </p>
             </div>
-          </section>
-        </div>
+            {hasUnread && (
+              <button
+                type="button"
+                onClick={readAll}
+                disabled={readAllMutation.isPending}
+                className={`shrink-0 disabled:opacity-50 ${PANEL_BUTTON} ${FOCUS_RING}`}
+              >
+                {readAllMutation.isPending ? '처리 중...' : '모두 읽음'}
+              </button>
+            )}
+          </div>
+
+          <div
+            ref={scrollAreaRef}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {notificationsQuery.isPending ? (
+              <NotificationSkeleton />
+            ) : notificationsQuery.isError && !notificationsQuery.data ? (
+              <div role="alert" className="flex flex-col items-center px-6 py-10 text-center">
+                <img src={MASCOTS.surprised} alt="" className="size-12 object-contain [image-rendering:pixelated]" />
+                <p className="mt-3 text-body-04 font-bold text-text-strong">알림을 불러오지 못했어요</p>
+                <button
+                  type="button"
+                  onClick={() => void notificationsQuery.refetch()}
+                  className={`mt-4 ${PANEL_BUTTON} ${FOCUS_RING}`}
+                >
+                  <ArrowPathIcon aria-hidden="true" className="size-4" />
+                  다시 시도
+                </button>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="flex flex-col items-center px-6 py-9 text-center">
+                <img src={MASCOTS.basket} alt="" className="size-14 object-contain [image-rendering:pixelated]" />
+                <p className="mt-3 text-body-04 font-bold text-text-strong">아직 도착한 알림이 없어요</p>
+                <p className="mt-1 text-xs text-text-muted">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
+              </div>
+            ) : (
+              <ul aria-label="최근 알림" className="space-y-2 p-3">
+                {notifications.map((notification) => (
+                  <NotificationRow
+                    key={notification.notificationId}
+                    notification={notification}
+                    reading={readingIds.includes(notification.notificationId)}
+                    onSelect={selectNotification}
+                    onRead={markAsRead}
+                  />
+                ))}
+                {hasNextPage && (
+                  <li ref={loadMoreRef} className="flex min-h-12 items-center justify-center px-4 py-2 text-xs text-text-muted">
+                    {isFetchNextPageError ? (
+                      <button
+                        type="button"
+                        onClick={() => void fetchNextPage()}
+                        className={`${PANEL_BUTTON} ${FOCUS_RING}`}
+                      >
+                        <ArrowPathIcon aria-hidden="true" className="size-4" />
+                        알림 더 불러오기
+                      </button>
+                    ) : isFetchingNextPage ? (
+                      <span role="status" className="flex items-center gap-2">
+                        <ArrowPathIcon aria-hidden="true" className="size-4 motion-safe:animate-spin" />
+                        이전 알림을 불러오는 중...
+                      </span>
+                    ) : (
+                      <span className="sr-only">이전 알림을 불러올 준비가 됐어요</span>
+                    )}
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+        </section>
       )}
     </div>
   )

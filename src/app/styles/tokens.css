@@ -53,6 +53,7 @@
   --red-700: #99394e;
   --amber-100: #fff1da;
   --amber-700: #7d5524;
+  --pink-700: #97417a;
 
   /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
   --cosmic-950: #100c2c;
@@ -95,6 +96,8 @@
   --color-status-danger-subtle: var(--red-100);
   --color-status-warning: var(--amber-700);
   --color-status-warning-subtle: var(--amber-100);
+  /* 콕 찌르기처럼 좋고 나쁨이 아닌 알림 — 성공·경고로 읽히지 않게 따로 둔다 */
+  --color-status-accent: var(--pink-700);
 
   /* Text */
   --color-text-strong: var(--gray-900);
