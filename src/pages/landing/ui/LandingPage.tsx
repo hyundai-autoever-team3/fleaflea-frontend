@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import {
   CheckCircleIcon,
   HeartIcon,
@@ -10,6 +10,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 
+import { withRedirect } from '../../../shared/lib/redirect'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
 import { LandingHeader } from './LandingHeader'
@@ -92,8 +93,10 @@ export function LandingPage() {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [invite, setInvite] = useState('')
   const [inviteError, setInviteError] = useState('')
+  // 코드를 확인하면 모달 안에서 다음 단계로 넘어간다. 여기서 화면을 옮겨 버리면
+  // 모달로 시작한 흐름이 갑자기 페이지로 바뀌어 끊긴 느낌이 난다
+  const [invitedCode, setInvitedCode] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
-  const navigate = useNavigate()
 
   const heroRevealRef = useScrollReveal<HTMLDivElement>()
   const introRevealRef = useStaggerReveal<HTMLElement>()
@@ -139,8 +142,7 @@ export function LandingPage() {
       setInviteError('올바른 초대 코드를 입력해 주세요.')
       return
     }
-    dialogRef.current?.close()
-    navigate(`/invite/${encodeURIComponent(code)}`)
+    setInvitedCode(encodeURIComponent(code))
   }
 
   return (
@@ -397,6 +399,7 @@ export function LandingPage() {
         onClose={() => {
           setInvite('')
           setInviteError('')
+          setInvitedCode('')
         }}
       >
         <button
@@ -408,63 +411,106 @@ export function LandingPage() {
           <XMarkIcon className="size-6" />
         </button>
 
-        <h2 className="text-center text-gray-800 text-head-03 font-bold">
-          이웃의 초대를 받으셨나요?
-        </h2>
-        <p className="mt-2 text-gray-800 text-center text-body-03">
-          받은 초대 링크나 코드를 붙여 넣어 주세요.
-        </p>
+        {invitedCode ? (
+          <>
+            <h2 className="text-center text-gray-800 text-head-03 font-bold">초대받은 마켓이에요</h2>
+            <p className="mt-2 text-center text-body-03 text-text-muted">
+              로그인하면 이 마켓으로 바로 들어가요.
+            </p>
 
-        <img src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
+            <img src="/mascot/flea10.png" alt="" className="mx-auto my-6 w-32 [image-rendering:pixelated]" />
 
-        <form onSubmit={joinMarket} noValidate className="text-left">
-          <label htmlFor="flea-invite-input" className="text-gray-800 text-body-04 font-bold ">
-            초대 링크 또는 코드
-          </label>
-          <input
-            id="flea-invite-input"
-            name="invite"
-            value={invite}
-            onChange={(event) => {
-              setInvite(event.target.value)
-              setInviteError('')
-            }}
-            placeholder="초대 링크 또는 코드 붙여넣기"
-            required
-            maxLength={2048}
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            aria-invalid={Boolean(inviteError)}
-            className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03"
-          />
-          {inviteError && <p className="mt-2 text-body-04 text-red-600">{inviteError}</p>}
-          <button
-            type="submit"
-            data-hover-lift
-            className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-body-03 font-bold text-white"
-          >
-            마켓 참여하기
-          </button>
-        </form>
+            <Link
+              to={withRedirect('/login', `/invite/${invitedCode}?join=1`)}
+              viewTransition
+              onClick={() => dialogRef.current?.close()}
+              data-hover-lift
+              className="flex h-12 w-full items-center justify-center rounded-lg bg-primary text-body-03 font-bold text-white"
+            >
+              로그인하고 참여하기
+            </Link>
 
-        <div className="mt-6 flex items-center gap-3">
-          <hr className="flex-1 border-border" />
-          <span className="text-body-04 text-text-muted">또는</span>
-          <hr className="flex-1 border-border" />
-        </div>
+            <p className="mt-6 text-center text-body-04 text-text-muted">
+              아직 계정이 없으신가요?{' '}
+              <Link
+                to={withRedirect('/signup', `/invite/${invitedCode}?join=1`)}
+                viewTransition
+                onClick={() => dialogRef.current?.close()}
+                className="font-bold text-primary"
+              >
+                회원가입
+              </Link>
+            </p>
 
-        <p className="mt-6 text-center text-body-04 text-text-muted">
-          아직 계정이 없으신가요?{' '}
-          <Link
-            to="/signup"
-            viewTransition
-            onClick={() => dialogRef.current?.close()}
-            className="font-bold text-primary"
-          >
-            회원가입
-          </Link>
-        </p>
+            <button
+              type="button"
+              onClick={() => setInvitedCode('')}
+              className="mt-4 text-body-04 text-text-muted underline underline-offset-2"
+            >
+              다른 링크 넣기
+            </button>
+          </>
+        ) : (
+          <>
+          <h2 className="text-center text-gray-800 text-head-03 font-bold">
+            이웃의 초대를 받으셨나요?
+          </h2>
+          <p className="mt-2 text-gray-800 text-center text-body-03">
+            받은 초대 링크나 코드를 붙여 넣어 주세요.
+          </p>
+
+          <img src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
+
+          <form onSubmit={joinMarket} noValidate className="text-left">
+            <label htmlFor="flea-invite-input" className="text-gray-800 text-body-04 font-bold ">
+              초대 링크 또는 코드
+            </label>
+            <input
+              id="flea-invite-input"
+              name="invite"
+              value={invite}
+              onChange={(event) => {
+                setInvite(event.target.value)
+                setInviteError('')
+              }}
+              placeholder="초대 링크 또는 코드 붙여넣기"
+              required
+              maxLength={2048}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              aria-invalid={Boolean(inviteError)}
+              className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03"
+            />
+            {inviteError && <p className="mt-2 text-body-04 text-red-600">{inviteError}</p>}
+            <button
+              type="submit"
+              data-hover-lift
+              className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-body-03 font-bold text-white"
+            >
+              마켓 참여하기
+            </button>
+          </form>
+
+          <div className="mt-6 flex items-center gap-3">
+            <hr className="flex-1 border-border" />
+            <span className="text-body-04 text-text-muted">또는</span>
+            <hr className="flex-1 border-border" />
+          </div>
+
+          <p className="mt-6 text-center text-body-04 text-text-muted">
+            아직 계정이 없으신가요?{' '}
+            <Link
+              to="/signup"
+              viewTransition
+              onClick={() => dialogRef.current?.close()}
+              className="font-bold text-primary"
+            >
+              회원가입
+            </Link>
+          </p>
+          </>
+        )}
       </dialog>
     </div>
   )
