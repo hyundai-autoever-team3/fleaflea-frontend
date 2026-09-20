@@ -190,13 +190,21 @@ function NotificationRow({
           title={unread ? '읽음으로 표시' : '읽은 알림'}
           aria-label={unread ? `${typeStyle.label} 알림을 읽음으로 표시` : `${typeStyle.label} 알림, 읽음`}
           style={{ clipPath: pixelBox(2) }}
-          className={`grid size-6 place-items-center transition-colors disabled:cursor-default disabled:opacity-100 ${
-            unread
-              ? 'bg-bg text-primary/25 ring-1 ring-inset ring-primary hover:text-primary/60'
-              : 'bg-primary text-white ring-1 ring-inset ring-primary'
-          } ${FOCUS_RING}`}
+          className={`group/check grid size-6 shrink-0 place-items-center bg-primary p-[2px] transition-opacity disabled:cursor-default ${FOCUS_RING}`}
         >
-          <Sprite rows={GLYPHS.check} className="w-3" />
+          {/* clip-path는 테두리선(ring)을 잘라 계단 자리를 끊어 놓는다.
+              그래서 바깥 보라 판 + 안쪽 면을 겹치는 픽셀 테두리 2겹으로 그린다 */}
+          <span
+            style={{ clipPath: pixelBox(2) }}
+            className={`grid size-full place-items-center transition-colors ${
+              unread
+                // 빈 칸이지만 옅은 체크를 미리 비춰 '누르면 체크된다'를 보여준다
+                ? 'bg-bg text-primary/25 group-hover/check:text-primary/60'
+                : 'bg-primary text-white'
+            }`}
+          >
+            <Sprite rows={GLYPHS.check} className="w-2.5" />
+          </span>
         </button>
         <button
           type="button"
