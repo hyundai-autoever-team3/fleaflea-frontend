@@ -6,7 +6,6 @@ import {
   BellIcon,
   CheckBadgeIcon,
   CheckCircleIcon,
-  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   HandRaisedIcon,
@@ -31,11 +30,13 @@ import {
   useReadNotification,
 } from '../../../features/notification-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { pixelBox } from '../../../shared/lib/pixel'
+import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
-const PANEL_BUTTON = 'flex min-h-9 items-center gap-1.5 rounded-lg bg-bg px-3 text-body-04 font-bold text-text transition-colors hover:bg-primary-tint disabled:opacity-50'
-const ROW_ICON_BUTTON = 'grid size-8 place-items-center rounded-lg text-text-muted transition-colors hover:bg-primary-subtle hover:text-text-strong disabled:opacity-50'
+const PANEL_BUTTON = 'flex min-h-9 items-center gap-1.5 rounded-lg bg-glass-strong px-3 text-body-04 font-bold text-glass-ink/92 transition-colors hover:bg-bg disabled:opacity-50'
+const ROW_ICON_BUTTON = 'grid size-8 place-items-center rounded-lg text-glass-ink/58 transition-colors hover:bg-glass-strong hover:text-glass-ink/92 disabled:opacity-50'
 
 interface NotificationTypeStyle {
   label: string
@@ -140,16 +141,17 @@ function NotificationRow({
   const typeStyle = TYPE_STYLE[notification.type]
 
   return (
-    // 읽은 알림은 지우지 않고 바탕을 죽여 가라앉힌다. 종류 라벨의 색은 읽어도 그대로 둔다
+    // 읽음 여부는 유리면의 투명도와 픽셀 체크로 드러낸다.
+    // 읽은 줄은 지우지 않고 가라앉히되, 종류 라벨의 색은 그대로 둔다
     <li
       aria-busy={busy}
       className={`relative flex min-h-[4.25rem] items-start gap-2.5 rounded-xl p-2.5 transition-colors ${
-        unread ? 'bg-bg' : 'bg-bg/55'
+        unread ? 'bg-glass' : 'bg-glass-faint'
       }`}
     >
       <span
-        className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary-subtle ${
-          unread ? 'text-text' : 'text-text-muted'
+        className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-glass-strong ${
+          unread ? 'text-glass-ink/92' : 'text-glass-ink/58'
         }`}
       >
         <NotificationIcon type={notification.type} />
@@ -161,7 +163,7 @@ function NotificationRow({
           <time
             dateTime={notification.createdAt}
             title={fullDate(notification.createdAt)}
-            className="ml-auto shrink-0 text-[11px] text-text-muted"
+            className="ml-auto shrink-0 text-[11px] text-glass-ink/58"
           >
             {relativeTime(notification.createdAt)}
           </time>
@@ -171,28 +173,33 @@ function NotificationRow({
         <button
           type="button"
           onClick={() => onSelect(notification)}
-          className={`mt-1 block w-full text-left text-body-04 leading-5 after:absolute after:inset-0 after:content-[''] ${
-            unread ? 'font-bold text-text-strong' : 'text-text-muted'
+          className={`mt-1 block w-full break-keep text-left text-body-04 leading-5 after:absolute after:inset-0 after:content-[''] ${
+            unread ? 'font-bold text-glass-ink/92' : 'text-glass-ink/58'
           } ${FOCUS_RING}`}
         >
           {notification.message}
         </button>
       </div>
 
-      <div className="relative z-10 flex shrink-0 items-center gap-0.5">
-        {unread && (
-          // 화면을 옮기지 않고 이 알림만 읽음으로 넘기고 싶을 때 쓴다
-          <button
-            type="button"
-            onClick={() => onRead(notification)}
-            disabled={busy}
-            title="읽음으로 표시"
-            aria-label={`${typeStyle.label} 알림을 읽음으로 표시`}
-            className={`${ROW_ICON_BUTTON} ${FOCUS_RING}`}
-          >
-            <CheckIcon aria-hidden="true" className="size-4" />
-          </button>
-        )}
+      <div className="relative z-10 flex shrink-0 items-center gap-1">
+        {/* 읽음 표시는 눌러서 체크하는 칸으로 둔다. 읽고 나면 체크가 찍혀 그대로 남아
+            어느 알림을 봤는지 한눈에 들어온다 (읽지 않음으로 되돌리는 API는 없다) */}
+        <button
+          type="button"
+          onClick={() => onRead(notification)}
+          disabled={!unread || busy}
+          aria-pressed={!unread}
+          title={unread ? '읽음으로 표시' : '읽은 알림'}
+          aria-label={unread ? `${typeStyle.label} 알림을 읽음으로 표시` : `${typeStyle.label} 알림, 읽음`}
+          style={{ clipPath: pixelBox(2) }}
+          className={`grid size-6 place-items-center transition-colors disabled:opacity-100 ${
+            unread
+              ? 'bg-glass-strong text-transparent hover:text-primary'
+              : 'bg-primary text-white'
+          } ${FOCUS_RING}`}
+        >
+          <Sprite rows={GLYPHS.check} className="w-3" />
+        </button>
         <button
           type="button"
           onClick={() => onDelete(notification)}
@@ -212,9 +219,9 @@ function NotificationSkeleton() {
   return (
     <div role="status" aria-label="알림을 불러오는 중" className="space-y-2 p-3">
       {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="flex min-h-[4.25rem] items-start gap-2.5 rounded-xl bg-bg/55 p-2.5 motion-safe:animate-pulse">
-          <span className="size-9 shrink-0 rounded-lg bg-primary-tint" />
-          <span className="mt-1 h-10 flex-1 rounded-lg bg-primary-subtle" />
+        <div key={index} className="flex min-h-[4.25rem] items-start gap-2.5 rounded-xl bg-glass-faint p-2.5 motion-safe:animate-pulse">
+          <span className="size-9 shrink-0 rounded-lg bg-glass-strong" />
+          <span className="mt-1 h-10 flex-1 rounded-lg bg-glass" />
         </div>
       ))}
     </div>
@@ -354,12 +361,12 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           role="dialog"
           aria-labelledby={titleId}
           aria-busy={notificationsQuery.isPending}
-          className="fixed inset-x-4 top-[6.75rem] z-50 max-h-[calc(100dvh-7.75rem)] overflow-y-auto overscroll-contain rounded-2xl border border-primary-tint/60 bg-primary-subtle/85 shadow-lg backdrop-blur-md [scrollbar-width:none] md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96 [&::-webkit-scrollbar]:hidden"
+          className="glass-panel fixed inset-x-4 top-[6.75rem] z-50 max-h-[calc(100dvh-7.75rem)] overflow-y-auto overscroll-contain rounded-2xl [scrollbar-width:none] md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96 [&::-webkit-scrollbar]:hidden"
         >
           <div className="flex items-center justify-between gap-4 px-4 py-3.5">
             <div className="min-w-0">
-              <h2 id={titleId} className="text-body-03 font-bold text-text-strong">알림</h2>
-              <p className="mt-0.5 text-xs text-text-muted">
+              <h2 id={titleId} className="text-body-03 font-bold text-glass-ink/92">알림</h2>
+              <p className="mt-0.5 text-xs text-glass-ink/58">
                 {unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '새 소식을 확인해 보세요'}
               </p>
             </div>
@@ -380,7 +387,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           ) : notificationsQuery.isError && !notificationsQuery.data ? (
             <div role="alert" className="flex flex-col items-center px-6 py-10 text-center">
               <img src={MASCOTS.surprised} alt="" className="size-12 object-contain [image-rendering:pixelated]" />
-              <p className="mt-3 text-body-04 font-bold text-text-strong">알림을 불러오지 못했어요</p>
+              <p className="mt-3 text-body-04 font-bold text-glass-ink/92">알림을 불러오지 못했어요</p>
               <button
                 type="button"
                 onClick={() => void notificationsQuery.refetch()}
@@ -393,8 +400,8 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center px-6 py-9 text-center">
               <img src={MASCOTS.basket} alt="" className="size-14 object-contain [image-rendering:pixelated]" />
-              <p className="mt-3 text-body-04 font-bold text-text-strong">아직 도착한 알림이 없어요</p>
-              <p className="mt-1 text-xs text-text-muted">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
+              <p className="mt-3 break-keep text-body-04 font-bold text-glass-ink/92">아직 도착한 알림이 없어요</p>
+              <p className="mt-1 max-w-56 text-balance text-xs text-glass-ink/58">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
             </div>
           ) : (
             <ul aria-label="최근 알림" className="space-y-2 p-3">
@@ -412,7 +419,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           )}
 
           {totalPages > 1 && (
-            <nav aria-label="알림 페이지" className="flex items-center justify-between gap-2 border-t border-primary-tint/60 px-3 py-2.5">
+            <nav aria-label="알림 페이지" className="flex items-center justify-between gap-2 border-t border-glass-line px-3 py-2.5">
               <button
                 type="button"
                 onClick={() => setPage((current) => Math.max(0, current - 1))}
@@ -422,7 +429,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
               >
                 <ChevronLeftIcon aria-hidden="true" className="size-4" />
               </button>
-              <span aria-live="polite" className="text-[11px] text-text-muted">
+              <span aria-live="polite" className="text-[11px] text-glass-ink/58">
                 {page + 1} / {totalPages}
                 {notificationsQuery.data?.totalElements
                   ? ` · 전체 ${notificationsQuery.data.totalElements}개`
