@@ -4,13 +4,11 @@ import { Link, useNavigate } from 'react-router'
 import { useSessionStore } from '../../../entities/session'
 import { useMyProfile } from '../../../entities/user'
 import { logout } from '../../../features/auth'
-import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
-import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
-const MENU_ITEM = 'flex min-h-11 w-full items-center gap-2.5 px-3 text-left text-body-04 font-bold text-text-strong transition-colors hover:bg-primary-subtle'
+const MENU_ITEM = 'flex min-h-11 w-full items-center px-4 text-left text-body-04 text-text-strong transition-colors hover:bg-primary-subtle'
 
 // 프로필 사진을 누르면 열리는 작은 메뉴. 로그아웃처럼 자주 쓰는 동작을
 // 마이페이지 안쪽까지 들어가지 않고 어디서든 할 수 있게 한다
@@ -72,39 +70,36 @@ export function ProfileMenu() {
       </button>
 
       {open && (
+        // 잠깐 떴다 사라지는 조작용 판이라 픽셀 계단 대신 둥근 모서리를 쓴다
+        // (검색 입력칸·공개 스위치와 같은 예외 — design.md 1장)
         <div
           id={menuId}
           role="menu"
           aria-label="내 프로필"
-          style={{ clipPath: pixelBox(4) }}
-          className="absolute right-0 top-full z-20 mt-1 w-52 bg-primary-tint p-[2px] shadow-lg"
+          className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-xl border border-border/60 bg-bg py-1 shadow-lg"
         >
-          <div style={{ clipPath: pixelBox(4) }} className="bg-bg py-2">
-            {/* 누구로 로그인했는지 먼저 보여준다 — 계정이 여럿인 사람에게 필요한 정보 */}
-            <p className="truncate px-3 pb-2 text-xs text-text-muted">
-              {profileQuery.data?.nickname ?? '내 계정'}
-            </p>
-            <Link
-              to="/my-page"
-              role="menuitem"
-              viewTransition
-              onClick={() => setOpen(false)}
-              className={`${MENU_ITEM} ${FOCUS_RING}`}
-            >
-              <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0 text-text-muted" />
-              내 정보 보기
-            </Link>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => void handleLogout()}
-              disabled={isLoggingOut}
-              className={`${MENU_ITEM} disabled:opacity-50 ${FOCUS_RING}`}
-            >
-              <Sprite rows={GLYPHS.exit} className="w-3.5 shrink-0 text-text-muted" />
-              {isLoggingOut ? '로그아웃하는 중...' : '로그아웃'}
-            </button>
-          </div>
+          {/* 누구로 로그인했는지 먼저 보여준다 — 계정이 여럿인 사람에게 필요한 정보 */}
+          <p className="truncate border-b border-border/60 px-4 pb-2 pt-1.5 text-xs text-text-muted">
+            {profileQuery.data?.nickname ?? '내 계정'}
+          </p>
+          <Link
+            to="/my-page"
+            role="menuitem"
+            viewTransition
+            onClick={() => setOpen(false)}
+            className={`${MENU_ITEM} ${FOCUS_RING}`}
+          >
+            내 정보 보기
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void handleLogout()}
+            disabled={isLoggingOut}
+            className={`${MENU_ITEM} disabled:opacity-50 ${FOCUS_RING}`}
+          >
+            {isLoggingOut ? '로그아웃하는 중...' : '로그아웃'}
+          </button>
         </div>
       )}
     </div>
