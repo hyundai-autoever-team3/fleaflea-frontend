@@ -50,7 +50,7 @@ export function MyPage() {
     <div className="min-h-dvh bg-primary-subtle/30">
       <Header sticky />
 
-      <main className="mx-auto w-full max-w-7xl px-5 pb-12 pt-8 sm:px-6 md:px-14 md:pb-16 md:pt-12 lg:px-16">
+      <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
         <p className="mt-2 text-body-04 leading-relaxed text-text-muted">나의 물건, 이웃과의 거래를 한곳에서 관리해요.</p>
 
