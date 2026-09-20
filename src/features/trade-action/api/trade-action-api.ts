@@ -35,16 +35,22 @@ export function useTradeAction() {
   return useMutation({
     mutationFn: ({ kind, requestId, action }: { kind: TradeRequestKind; requestId: number; action: TradeAction }) =>
       actOnTradeRequest(kind, requestId, action),
-    onSuccess: (_response, { kind }) => {
+    onSuccess: async (_response, { kind }) => {
       // 목록의 상태 배지와 상품·도감 화면의 버튼이 함께 바뀌어야 한다
-      void queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
-      void queryClient.invalidateQueries({ queryKey: ['trade-requests'] }).catch(() => undefined)
+      const refreshing = [
+        queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ['trade-requests'] }),
+      ]
       // 도감 물건은 거래가 끝나면 주인이 바뀌어 내 도감에서 빠진다.
       // 받아둔 목록은 1분간 그대로 쓰이므로(query-client의 staleTime),
       // 여기서 비워주지 않으면 넘긴 물건이 한동안 도감에 남아 보인다
       if (kind !== 'ITEM') {
-        void queryClient.invalidateQueries({ queryKey: collectionKeys.all }).catch(() => undefined)
+        refreshing.push(queryClient.invalidateQueries({ queryKey: collectionKeys.all }))
       }
+      // 새 목록이 도착할 때까지 기다렸다 끝낸다. 기다리지 않으면 버튼이 '처리 중'에서
+      // 원래 모습으로 잠깐 돌아왔다가 그제서야 줄이 사라져 깜박이는 것처럼 보인다.
+      // 목록을 다시 받는 데 실패해도 거래 자체는 성공이므로 실패로 바꾸지 않는다
+      await Promise.all(refreshing.map((task) => task.catch(() => undefined)))
     },
   })
 }
