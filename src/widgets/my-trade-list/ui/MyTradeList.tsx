@@ -123,8 +123,8 @@ const FOCUS_STYLE = 'focus-visible:outline-2 focus-visible:-outline-offset-2 foc
 const PRIMARY_ACTION = `inline-flex min-h-11 items-center justify-center gap-2 bg-primary px-4 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-50 ${FOCUS_STYLE}`
 const SECONDARY_ACTION = `inline-flex min-h-11 items-center justify-center gap-2 bg-primary-subtle px-4 text-body-04 text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong disabled:opacity-50 ${FOCUS_STYLE}`
 // 줄 안에 들어가는 버튼은 목록을 밀어내지 않도록 작게 (탭 영역은 32px 유지)
-const ROW_PRIMARY = `inline-flex h-8 items-center bg-primary px-3 text-xs font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-50 ${FOCUS_STYLE}`
-const ROW_SECONDARY = `inline-flex h-8 items-center bg-primary-subtle px-3 text-xs font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong disabled:opacity-50 ${FOCUS_STYLE}`
+const ROW_PRIMARY = `inline-flex h-8 items-center whitespace-nowrap bg-primary px-3 text-xs font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-50 ${FOCUS_STYLE}`
+const ROW_SECONDARY = `inline-flex h-8 items-center whitespace-nowrap bg-primary-subtle px-3 text-xs font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong disabled:opacity-50 ${FOCUS_STYLE}`
 
 function matchesTab(request: MyTradeRequest, tab: TabKey) {
   const { status, isRequester } = request
@@ -441,7 +441,7 @@ export function MyTradeList() {
                               {tab !== 'received' && (
                                 <span
                                   style={{ clipPath: pixelBox(2) }}
-                                  className={`shrink-0 px-2 py-1 text-[11px] leading-4 font-semibold ${
+                                  className={`shrink-0 whitespace-nowrap px-2 py-1 text-[11px] leading-4 font-semibold ${
                                     needsMyAction ? NEEDS_ME_TONE : STATUS_TONE[status]
                                   }`}
                                 >
@@ -478,11 +478,11 @@ export function MyTradeList() {
                                     {busy && pendingAction === actionType ? '처리 중' : ACTION_UI[actionType].label}
                                   </button>
                                 ))}
-                                {status === 'ACCEPTED' && actions.length === 0 && (
-                                  <span className="text-xs text-text-muted">상대방의 완료를 기다리고 있어요.</span>
-                                )}
                               </div>
                             </div>
+                            {status === 'ACCEPTED' && actions.length === 0 && (
+                              <p className="mt-1.5 text-xs text-text-muted">상대방의 거래 완료를 기다리고 있어요.</p>
+                            )}
                           </div>
                         </div>
                       </li>
