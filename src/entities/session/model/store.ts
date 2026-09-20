@@ -3,7 +3,6 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import type { StateStorage } from 'zustand/middleware'
 
 import { queryClient } from '../../../shared/api/query-client'
-import type { User } from '../../user'
 
 interface SessionTokens {
     accessToken: string
@@ -13,9 +12,7 @@ interface SessionTokens {
 interface SessionState {
     accessToken: string | null
     refreshToken: string | null
-    currentUser: User | null
     setSession: (tokens: SessionTokens, rememberMe?: boolean) => void
-    setCurrentUser: (user: User | null) => void
     clearSession: () => void
 }
 
@@ -60,7 +57,6 @@ export const useSessionStore = create<SessionState>()(
         (set) => ({
             accessToken: null,
             refreshToken: null,
-            currentUser: null,
 
             setSession: (
                 { accessToken, refreshToken },
@@ -72,10 +68,6 @@ export const useSessionStore = create<SessionState>()(
                 set({ accessToken, refreshToken })
             },
 
-            setCurrentUser: (user) => {
-                set({ currentUser: user })
-            },
-
             clearSession: () => {
                 // 로그아웃 뒤 다른 계정으로 로그인했을 때 이전 사용자의 데이터가 보이지 않도록 캐시 비움
                 queryClient.clear()
@@ -83,8 +75,7 @@ export const useSessionStore = create<SessionState>()(
                 set({
                     accessToken: null,
                     refreshToken: null,
-                    currentUser: null,
-                })
+                        })
 
                 dualStorage.removeItem(SESSION_STORAGE_KEY)
                 remember = true
@@ -98,7 +89,6 @@ export const useSessionStore = create<SessionState>()(
             partialize: (state) => ({
                 accessToken: state.accessToken,
                 refreshToken: state.refreshToken,
-                currentUser: state.currentUser,
             }),
         },
     ),
