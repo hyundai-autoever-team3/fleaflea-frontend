@@ -104,6 +104,50 @@ export function useCreateTradeRequest(itemId: number) {
   })
 }
 
+// 거래 요청에 취할 수 있는 동작. 경로가 동작 이름과 1:1이라 문자열을 그대로 쓴다.
+// complete는 요청자만 부를 수 있고, 한 번 부르면 바로 COMPLETED가 된다 (백엔드 확인 완료)
+export type TradeRequestAction = 'accept' | 'reject' | 'cancel' | 'complete'
+
+export function actOnTradeRequest(requestId: number, action: TradeRequestAction) {
+  return api.post<void>(`/api/v1/item-trade-requests/${requestId}/${action}`)
+}
+
+export function useTradeRequestAction() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ requestId, action }: { requestId: number; action: TradeRequestAction }) =>
+      actOnTradeRequest(requestId, action),
+    onSuccess: () => {
+      // 목록의 상태 배지와 상품 화면의 버튼이 함께 바뀌어야 한다
+      void queryClient.invalidateQueries({ queryKey: tradeRequestKeys.all }).catch(() => undefined)
+    },
+  })
+}
+
+const ACTION_LABEL: Record<TradeRequestAction, string> = {
+  accept: '수락',
+  reject: '거절',
+  cancel: '취소',
+  complete: '완료',
+}
+
+export function getTradeRequestActionErrorMessage(error: unknown, action: TradeRequestAction) {
+  const status = isAxiosError(error) ? error.response?.status : undefined
+  switch (status) {
+    case 401:
+      return '로그인이 필요해요. 다시 로그인해 주세요.'
+    case 403:
+      // 수락은 판매자만, 완료는 요청자만 할 수 있어 역할이 맞지 않으면 여기로 온다
+      return `이 거래를 ${ACTION_LABEL[action]}할 수 있는 사람이 아니에요.`
+    case 404:
+      return '거래 요청을 찾을 수 없어요.'
+    case 409:
+      return `이미 처리된 거래라 ${ACTION_LABEL[action]}할 수 없어요. 새로고침해 주세요.`
+    default:
+      return `거래를 ${ACTION_LABEL[action]}하지 못했어요. 잠시 후 다시 시도해 주세요.`
+  }
+}
+
 export function getTradeRequestErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
   switch (status) {

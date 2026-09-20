@@ -12,6 +12,7 @@ import { getSendFriendRequestErrorMessage, sendFriendRequest } from '../../../fe
 import { InviteLinkModal } from '../../../features/market-invite'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
@@ -269,12 +270,7 @@ export function MarketDetailPage() {
                     const chipClass = 'flex items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
                     const content = (
                       <>
-                        <img
-                          src={member.profileImageUrl || MASCOTS.default}
-                          alt=""
-                          style={{ clipPath: pixelBox(2) }}
-                          className="size-8 bg-white object-cover"
-                        />
+                        <Avatar profileImageUrl={member.profileImageUrl} size="sm" className="bg-white" />
                         <span className="text-body-04 font-semibold text-text-strong">
                           {member.nickname}
                           {isMe && ' (나)'}
@@ -319,12 +315,7 @@ export function MarketDetailPage() {
             >
               {selectedMember && (
                 <div className="py-6 text-center">
-                  <img
-                    src={selectedMember.profileImageUrl || MASCOTS.default}
-                    alt=""
-                    style={{ clipPath: pixelBox(3) }}
-                    className="mx-auto size-20 object-contain [image-rendering:pixelated]"
-                  />
+                  <Avatar profileImageUrl={selectedMember.profileImageUrl} size="lg" className="mx-auto" />
                   <h2 id="member-modal-title" className="mt-6 text-head-03 font-bold text-text-strong">
                     {selectedMember.nickname}
                   </h2>

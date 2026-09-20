@@ -80,7 +80,12 @@ export function Modal({ open, onRequestClose, labelledBy, size = 'md', showClose
       className={`m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
     >
       {showClose && (
-        <button type="button" onClick={onRequestClose} aria-label="닫기" className="absolute right-4 top-4">
+        <button
+          type="button"
+          onClick={onRequestClose}
+          aria-label="닫기"
+          className="absolute right-2 top-2 flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-strong"
+        >
           <XMarkIcon className="size-6" />
         </button>
       )}
