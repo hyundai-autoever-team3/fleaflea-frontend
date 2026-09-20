@@ -13,17 +13,11 @@ const navItems = [
 
 const focusStyle = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
 
-interface HeaderProps {
-  // 목록이 긴 화면에서는 스크롤해도 메뉴가 따라오게 한다.
-  // 모든 화면에 걸면 짧은 화면에서는 공간만 차지하므로 필요한 곳에서만 켠다
-  sticky?: boolean
-}
-
-export function Header({ sticky = false }: HeaderProps) {
+export function Header() {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
 
   return (
-    <header className={`bg-bg ${sticky ? 'sticky top-0 z-30' : ''}`}>
+    <header className="sticky top-0 z-30 bg-bg">
       <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-6 py-2 md:grid-cols-[1fr_auto_1fr] md:py-3 lg:px-8">
         <Link
           to="/market"

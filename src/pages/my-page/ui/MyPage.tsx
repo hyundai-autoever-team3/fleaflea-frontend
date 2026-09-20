@@ -48,7 +48,7 @@ export function MyPage() {
 
   return (
     <div className="min-h-dvh bg-primary-subtle/30">
-      <Header sticky />
+      <Header />
 
       <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
