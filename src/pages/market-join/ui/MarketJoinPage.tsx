@@ -51,7 +51,9 @@ export function MarketJoinPage() {
       <div className="w-full max-w-md drop-shadow-[0_10px_20px_rgba(0,0,0,0.12)]">
         <div style={{ clipPath: pixelBox(6) }} className="bg-bg px-8 py-10 text-center">
           <img src="/mascot/flea10.png" alt="" className="mx-auto h-24 object-contain [image-rendering:pixelated]" />
-          <h1 className="mt-4 text-head-03 font-bold text-text-strong">마켓 초대가 도착했어요</h1>
+          <h1 className="mt-4 text-head-03 font-bold text-text-strong">
+            {!inviteCode ? '링크를 확인해 주세요' : accessToken ? '이 마켓에 참여할까요?' : '초대받은 마켓이에요'}
+          </h1>
 
           {!inviteCode ? (
             <>
@@ -66,8 +68,7 @@ export function MarketJoinPage() {
             </>
           ) : !accessToken ? (
             <>
-              <p className="mt-2 text-body-03 text-text-muted">로그인하면 친구가 연 마켓에 참여할 수 있어요.</p>
-              <p className="mt-1 text-body-04 text-text-muted">로그인을 마치면 이 마켓에 바로 참여시켜 드릴게요.</p>
+              <p className="mt-2 text-body-03 text-text-muted">로그인하면 이 마켓으로 바로 들어가요.</p>
               <Link
                 to={authPathWithReturn('/login')}
                 style={{ clipPath: pixelBox(4) }}
