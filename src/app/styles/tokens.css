@@ -21,6 +21,7 @@
   --purple-100: #f5f0fc;
   --purple-300: #b196dc;
   --purple-500: #e0d3f6;
+  --purple-700: #674b86;
 
   /* 보라 그라데이션 보더 — background-clip 트릭(padding-box + border-box)으로 쓰는 용도라 Tailwind 컬러 유틸이 아닌 순수 CSS 변수로 둠 */
   --gradient-primary-border: linear-gradient(135deg, var(--purple-100), var(--purple-300));
@@ -43,6 +44,15 @@
 
   /* 인트로 섹션 배경 그라데이션용 (design.md "카테고리 칩" 규칙 중 blue만 실사용) */
   --blue-100: #e5edf8;
+  --blue-700: #365b88;
+
+  /* 알림 상태 칩 — 옅은 면과 함께 써도 작은 글자가 읽히는 짙은 톤 */
+  --green-100: #e7f4eb;
+  --green-700: #356a4b;
+  --red-100: #fbe9ed;
+  --red-700: #99394e;
+  --amber-100: #fff1da;
+  --amber-700: #7d5524;
 
   /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
   --cosmic-950: #100c2c;
@@ -74,6 +84,17 @@
   --color-primary: var(--purple-300); /* 채도 높은 쪽을 액션 컬러로 1차 추정 (버튼 등) */
   --color-primary-tint: var(--purple-500); /* 파스텔 카드/배경 강조 (design.md의 "라벤더 SaaS 카드") */
   --color-primary-subtle: var(--purple-100); /* 옅은 배경 틴트 */
+
+  /* Notification status */
+  --color-status-brand: var(--purple-700);
+  --color-status-info: var(--blue-700);
+  --color-status-info-subtle: var(--blue-100);
+  --color-status-success: var(--green-700);
+  --color-status-success-subtle: var(--green-100);
+  --color-status-danger: var(--red-700);
+  --color-status-danger-subtle: var(--red-100);
+  --color-status-warning: var(--amber-700);
+  --color-status-warning-subtle: var(--amber-100);
 
   /* Text */
   --color-text-strong: var(--gray-900);
