@@ -1,11 +1,11 @@
 export { ProductForm } from './ui/ProductForm'
 export type { ProductFormInitialValue } from './ui/ProductForm'
 export {
-  createProduct,
-  deleteProduct,
   getCreateProductErrorMessage,
   getDeleteProductErrorMessage,
   getUpdateProductErrorMessage,
-  updateProduct,
+  useCreateProduct,
+  useDeleteProduct,
+  useUpdateProduct,
 } from './api/product-api'
 export type { CreateProductPayload } from './api/product-api'

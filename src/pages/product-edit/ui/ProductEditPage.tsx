@@ -1,9 +1,8 @@
 import { Link, useNavigate, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 
-import { productKeys, useMarketProducts, useProduct } from '../../../entities/product'
+import { useMarketProducts, useProduct } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { getUpdateProductErrorMessage, ProductForm, updateProduct } from '../../../features/product-manage'
+import { getUpdateProductErrorMessage, ProductForm, useUpdateProduct } from '../../../features/product-manage'
 import type { CreateProductPayload } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -16,7 +15,6 @@ export function ProductEditPage() {
   const isValidId = Number.isInteger(itemId) && itemId > 0
 
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const productQuery = useProduct(itemId)
   const meQuery = useMyProfile()
   const product = productQuery.data
@@ -26,12 +24,13 @@ export function ProductEditPage() {
   const imageUrl = productsQuery.data?.find((item) => item.itemId === itemId)?.imageUrl ?? null
 
   const isOwner = product !== undefined && product.seller.id === meQuery.data?.memberId
+  // 상세를 받기 전에는 마켓을 몰라 0으로 두지만, 폼은 상품이 있어야 보이므로 그때만 쓰인다
+  const updateMutation = useUpdateProduct(itemId, product?.marketId ?? 0)
 
   async function handleSubmit(payload: CreateProductPayload) {
     if (!product) return
-    await updateProduct(product.itemId, payload)
-    void queryClient.invalidateQueries({ queryKey: productKeys.detail(product.itemId) })
-    void queryClient.invalidateQueries({ queryKey: productKeys.market(product.marketId) })
+    // 목록·상세 새로고침은 useUpdateProduct 안에서 한다
+    await updateMutation.mutateAsync(payload)
     useToastStore.getState().showToast('상품 정보를 수정했어요')
     navigate(`/items/${product.itemId}`, { replace: true, viewTransition: true })
   }

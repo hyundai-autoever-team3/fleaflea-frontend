@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { useMarket } from '../../../entities/market'
@@ -8,12 +7,11 @@ import {
   formatProductPrice,
   getRequestActionLabel,
   getStatusTagLabel,
-  productKeys,
   useMarketProducts,
   useProduct,
 } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { deleteProduct, getDeleteProductErrorMessage } from '../../../features/product-manage'
+import { getDeleteProductErrorMessage, useDeleteProduct } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
@@ -47,7 +45,6 @@ export function ProductDetailPage() {
   const isValidId = Number.isInteger(itemId) && itemId > 0
 
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const productQuery = useProduct(itemId)
   const meQuery = useMyProfile()
   const product = productQuery.data
@@ -65,23 +62,22 @@ export function ProductDetailPage() {
   const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  // 상세를 받기 전에는 마켓을 몰라 0으로 두지만, 삭제 버튼은 상품이 있어야 보인다
+  const deleteMutation = useDeleteProduct(itemId, product?.marketId ?? 0)
+  const isDeleting = deleteMutation.isPending
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!product) return
-    setIsDeleting(true)
     setDeleteError('')
-    try {
-      await deleteProduct(product.itemId)
-      void queryClient.invalidateQueries({ queryKey: productKeys.market(product.marketId) })
-      useToastStore.getState().showToast('상품을 삭제했어요')
-      navigate(`/market/${product.marketId}`, { replace: true, viewTransition: true })
-    } catch (error) {
-      setDeleteError(getDeleteProductErrorMessage(error))
-    } finally {
-      setIsDeleting(false)
-    }
+    // 마켓 상품 목록 새로고침은 useDeleteProduct 안에서 한다
+    deleteMutation.mutate(undefined, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('상품을 삭제했어요')
+        navigate(`/market/${product.marketId}`, { replace: true, viewTransition: true })
+      },
+      onError: (error) => setDeleteError(getDeleteProductErrorMessage(error)),
+    })
   }
 
   return (

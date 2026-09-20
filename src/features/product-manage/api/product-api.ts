@@ -1,6 +1,8 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import type { ProductSummary, TradeType } from '../../../entities/product'
+import { productKeys } from '../../../entities/product'
 import { api } from '../../../shared/api/axios'
 
 export interface CreateProductPayload {
@@ -39,6 +41,49 @@ export function updateProduct(itemId: number, { title, description, tradeType, p
 
 export function deleteProduct(itemId: number) {
   return api.delete(`/api/v1/items/${itemId}`)
+}
+
+// 상품을 올리고 고치고 지우면 그 마켓의 상품 목록과 상세가 같이 달라진다.
+// 무효화를 화면마다 적어 두면 한 곳만 빠뜨려도 낡은 목록이 남으므로 여기에 모은다.
+// 새 목록이 도착할 때까지 기다렸다 끝내야 화면을 옮긴 뒤에도 바뀐 내용이 보인다
+async function refreshMarketProducts(
+  queryClient: ReturnType<typeof useQueryClient>,
+  marketId: number,
+  itemId?: number,
+) {
+  const refreshing = [queryClient.invalidateQueries({ queryKey: productKeys.market(marketId) })]
+  if (itemId !== undefined) refreshing.push(queryClient.invalidateQueries({ queryKey: productKeys.detail(itemId) }))
+  await Promise.all(refreshing.map((task) => task.catch(() => undefined)))
+}
+
+export function useCreateProduct(marketId: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: CreateProductPayload) => (await createProduct(marketId, payload)).data,
+    onSuccess: () => refreshMarketProducts(queryClient, marketId),
+  })
+}
+
+export function useUpdateProduct(itemId: number, marketId: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: CreateProductPayload) => updateProduct(itemId, payload),
+    onSuccess: () => refreshMarketProducts(queryClient, marketId, itemId),
+  })
+}
+
+export function useDeleteProduct(itemId: number, marketId: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => deleteProduct(itemId),
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: productKeys.detail(itemId), exact: true })
+      await refreshMarketProducts(queryClient, marketId)
+    },
+  })
 }
 
 export function getUpdateProductErrorMessage(error: unknown) {

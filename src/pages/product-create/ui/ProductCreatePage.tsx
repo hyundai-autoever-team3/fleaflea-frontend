@@ -1,9 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 
 import { useMarket } from '../../../entities/market'
-import { productKeys } from '../../../entities/product'
-import { createProduct, getCreateProductErrorMessage, ProductForm } from '../../../features/product-manage'
+import { getCreateProductErrorMessage, ProductForm, useCreateProduct } from '../../../features/product-manage'
 import type { CreateProductPayload } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -16,12 +14,12 @@ export function ProductCreatePage() {
   const isValidId = Number.isInteger(marketId) && marketId > 0
 
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const marketQuery = useMarket(marketId)
+  const createMutation = useCreateProduct(marketId)
 
   async function handleSubmit(payload: CreateProductPayload) {
-    const { data: product } = await createProduct(marketId, payload)
-    void queryClient.invalidateQueries({ queryKey: productKeys.market(marketId) })
+    // 목록 새로고침은 useCreateProduct 안에서 한다
+    const product = await createMutation.mutateAsync(payload)
     // 도감 사진 재사용이 지원되지 않는 응답도 등록 자체는 성공한 상태다. 재등록을 유도하지 않는다.
     if (payload.collectionItemId !== undefined && !payload.image && !product.imageUrl) {
       useToastStore.getState().showToast('상품은 등록했지만 사진이 반영되지 않았어요. 수정 화면에서 사진을 확인해 주세요.')
