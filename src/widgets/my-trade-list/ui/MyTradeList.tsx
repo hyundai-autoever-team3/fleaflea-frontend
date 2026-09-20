@@ -42,13 +42,6 @@ const STATUS_TONE: Record<TradeRequestStatus, string> = {
   CANCELLED: 'bg-bg-subtle text-text-muted',
 }
 
-const TAB_DESCRIPTION: Record<TabKey, string> = {
-  received: '받은 요청을 확인하고 거래를 시작해 보세요.',
-  sent: '내가 보낸 요청과 상대방의 응답을 확인해 보세요.',
-  ongoing: '물건을 받은 뒤 요청자가 거래 완료를 누르면 마무리돼요.',
-  past: '완료한 거래와 거절·취소한 요청을 모아뒀어요.',
-}
-
 const EMPTY_STATE: Record<TabKey, { title: string; description: string }> = {
   received: {
     title: '아직 받은 요청이 없어요',
@@ -262,7 +255,6 @@ export function MyTradeList() {
             </div>
           ) : (
             <>
-              <p className="text-xs leading-relaxed text-text-muted sm:text-body-04">{TAB_DESCRIPTION[tab]}</p>
               {visible.length === 0 ? (
                 <div className="flex min-h-72 flex-col items-center justify-center px-3 py-10 text-center sm:min-h-80 sm:py-12">
                   <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
