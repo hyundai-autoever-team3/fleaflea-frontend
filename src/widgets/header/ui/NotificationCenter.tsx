@@ -409,7 +409,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
                 type="button"
                 onClick={readAll}
                 disabled={readAllMutation.isPending}
-                className={`shrink-0 ${PANEL_BUTTON} ${FOCUS_RING}`}
+                className={`shrink-0 whitespace-nowrap text-[11px] text-glass-ink/58 underline-offset-2 transition-colors hover:text-glass-ink/92 hover:underline disabled:no-underline disabled:opacity-50 ${FOCUS_RING}`}
               >
                 {readAllMutation.isPending ? '처리 중...' : '모두 읽음'}
               </button>
