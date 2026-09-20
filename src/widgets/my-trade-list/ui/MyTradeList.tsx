@@ -100,22 +100,24 @@ const STATUS_TONE: Record<TradeRequestStatus, string> = {
   CANCELLED: 'bg-bg-subtle text-text-muted',
 }
 
+// 안내 문구는 줄 나눌 자리를 직접 정한다. 브라우저에 맡기면 마지막 줄에
+// 몇 글자만 남아 어색해진다. 줄바꿈은 whitespace-pre-line으로 그대로 살린다
 const EMPTY_STATE: Record<TabKey, { title: string; description: string }> = {
   received: {
     title: '아직 받은 요청이 없어요',
-    description: '마켓에 올린 내 물건에 요청이 오면 이곳에서 확인할 수 있어요.',
+    description: '마켓에 올린 내 물건에 요청이 오면\n이곳에서 확인할 수 있어요.',
   },
   sent: {
     title: '아직 보낸 요청이 없어요',
-    description: '마켓에서 마음에 드는 물건을 찾아 거래를 요청해 보세요.',
+    description: '마켓에서 마음에 드는 물건을 찾아\n거래를 요청해 보세요.',
   },
   ongoing: {
     title: '진행 중인 거래가 없어요',
-    description: '서로 수락한 거래를 여기에서 이어갈 수 있어요.',
+    description: '서로 수락한 거래를\n여기에서 이어갈 수 있어요.',
   },
   past: {
     title: '아직 지난 거래가 없어요',
-    description: '거래가 끝나면 완료한 거래와 거절·취소한 요청이 여기에 남아요.',
+    description: '거래가 끝나면 완료한 거래와\n거절·취소한 요청이 여기에 남아요.',
   },
 }
 
@@ -402,7 +404,7 @@ export function MyTradeList() {
                 <div className="flex min-h-72 flex-col items-center justify-center px-3 py-10 text-center sm:min-h-80 sm:py-12">
                   <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                   <p className="mt-5 text-balance text-body-03 font-bold text-text-strong">{EMPTY_STATE[tab].title}</p>
-                  <p className="mt-2 max-w-xs text-balance text-body-04 leading-relaxed text-text-muted">{EMPTY_STATE[tab].description}</p>
+                  <p className="mt-2 whitespace-pre-line text-body-04 leading-relaxed text-text-muted">{EMPTY_STATE[tab].description}</p>
                   {tab === 'ongoing' && counts.received > 0 ? (
                     <button type="button" onClick={() => selectTab('received')} style={{ clipPath: pixelBox(4) }} className={`mt-6 ${PRIMARY_ACTION}`}>
                       받은 요청 확인하기 <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0" />
