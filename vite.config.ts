@@ -3,6 +3,15 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
+// 개발 서버와 미리보기가 같은 규칙을 쓰도록 한곳에 둔다.
+// vite preview는 server.proxy를 읽지 않으므로 따로 넘겨야 한다
+const apiProxy = {
+  '/api': {
+    target: 'https://fleaflea.duckdns.org',
+    changeOrigin: true,
+  },
+}
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
@@ -13,11 +22,10 @@ export default defineConfig({
     // 백엔드 경로가 /api/v1/... 이라 경로를 그대로 넘긴다 (예전에 /api를 떼어내 401이 났다).
     // 배포 환경에는 프록시가 없으므로 VITE_API_BASE_URL에 전체 주소를 넣어야 하고,
     // 그때는 백엔드 CORS에 배포 도메인이 등록돼 있어야 함
-    proxy: {
-      '/api': {
-        target: 'https://fleaflea.duckdns.org',
-        changeOrigin: true,
-      },
-    },
+    proxy: apiProxy,
+  },
+  preview: {
+    port: 4173,
+    proxy: apiProxy,
   },
 })
