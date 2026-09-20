@@ -1,9 +1,7 @@
 import { useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 
-import { useSessionStore } from '../../../entities/session'
 import { useMyProfile } from '../../../entities/user'
-import { logout } from '../../../features/auth'
 import {
   AccountSettingsModal,
   PasswordChangeModal,
@@ -14,7 +12,6 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { Avatar } from '../../../shared/ui/avatar'
-import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 import { MyTradeList } from '../../../widgets/my-trade-list'
 
@@ -22,35 +19,31 @@ type OpenModal = 'profile' | 'account' | 'password' | 'withdraw' | null
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-text-strong'
 const SHORTCUTS = [
-  { to: '/item-dex', label: '내 물건 도감', description: '아끼는 물건을 모아두는 곳' },
-  { to: '/friends', label: '내 친구', description: '함께 거래하는 친구들' },
+  { to: '/item-dex', label: '내 물건 도감', glyph: GLYPHS.book },
+  { to: '/friends', label: '내 친구', glyph: GLYPHS.friends },
 ]
 
+// 글리프를 연보라 판에 얹은 작은 액자. 줄마다 같은 크기로 서서 목록이 가지런해진다
+function GlyphTile({ rows }: { rows: readonly string[] }) {
+  return (
+    <span
+      style={{ clipPath: pixelBox(2) }}
+      className="grid size-8 shrink-0 place-items-center bg-primary-subtle text-primary transition-colors group-hover:bg-bg"
+    >
+      <Sprite rows={rows} className="w-3.5" />
+    </span>
+  )
+}
+
 export function MyPage() {
-  const navigate = useNavigate()
   const profileQuery = useMyProfile()
   const [openModal, setOpenModal] = useState<OpenModal>(null)
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null)
   const profile = profileQuery.data
 
   function closeAccountSettingsFlow() {
     setOpenModal(null)
     requestAnimationFrame(() => accountSettingsButtonRef.current?.focus())
-  }
-
-  async function handleLogout() {
-    if (isLoggingOut) return
-    setIsLoggingOut(true)
-    try {
-      // 서버의 refresh token을 지운다. 실패해도 이 기기에서는 로그아웃돼야 하므로 막지 않는다
-      await logout()
-    } catch {
-      // 무시 — 아래에서 로컬 세션을 비운다
-    }
-    useSessionStore.getState().clearSession()
-    useToastStore.getState().showToast('로그아웃했어요')
-    void navigate('/login', { replace: true, viewTransition: true })
   }
 
   return (
@@ -97,10 +90,9 @@ export function MyPage() {
             <div className="mt-8 grid items-start gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
               <section aria-labelledby="my-profile-title" style={{ clipPath: pixelBox(6) }} className="min-w-0 bg-primary-tint p-[2px]">
                 <div style={{ clipPath: pixelBox(6) }} className="bg-bg">
-                  <div className="h-2 bg-primary-tint" />
-                  <div className="p-5 sm:p-6">
+                  <div className="p-4 sm:p-5">
                     <h2 id="my-profile-title" className="text-body-04 font-bold text-text-muted">내 프로필</h2>
-                    <div className="mt-5 flex items-center gap-4 lg:flex-col lg:items-start">
+                    <div className="mt-4 flex items-center gap-4 lg:flex-col lg:items-start">
                       <Avatar profileImageUrl={profile.profileImageUrl} size="lg" />
                       <div className="min-w-0 flex-1 lg:w-full">
                         <p className="break-words text-body-02 font-bold leading-relaxed text-text-strong">{profile.nickname}</p>
@@ -111,38 +103,38 @@ export function MyPage() {
                       type="button"
                       onClick={() => setOpenModal('profile')}
                       style={{ clipPath: pixelBox(3) }}
-                      className={`mt-5 flex min-h-11 w-full items-center justify-center gap-2 bg-primary-tint px-4 text-body-04 font-bold text-text-strong transition-colors hover:bg-primary ${FOCUS_RING}`}
+                      className={`mt-4 flex min-h-11 w-full items-center justify-center bg-primary-tint px-4 text-body-04 font-bold text-text-strong transition-colors hover:bg-primary ${FOCUS_RING}`}
                     >
                       프로필 수정
                     </button>
-                  </div>
-                  <nav aria-label="내 활동 바로가기" className="grid grid-cols-2 divide-x divide-primary-subtle border-t border-primary-subtle p-2 pb-0 lg:block lg:divide-x-0">
-                    {SHORTCUTS.map(({ to, label, description }) => (
-                      <Link
-                        key={to}
-                        to={to}
-                        viewTransition
-                        className={`group flex min-h-11 items-center gap-2 px-2 py-3 transition-colors hover:bg-primary-subtle lg:min-h-18 lg:gap-3 lg:px-3 lg:py-4 ${FOCUS_RING}`}
+
+                    <nav aria-label="내 활동 바로가기" className="mt-4 grid grid-cols-2 gap-1 border-t border-primary-subtle pt-3 lg:grid-cols-1">
+                      {SHORTCUTS.map(({ to, label, glyph }) => (
+                        <Link
+                          key={to}
+                          to={to}
+                          viewTransition
+                          style={{ clipPath: pixelBox(2) }}
+                          className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
+                        >
+                          <GlyphTile rows={glyph} />
+                          <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">{label}</span>
+                          <Sprite rows={GLYPHS.arrowRight} className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block" />
+                        </Link>
+                      ))}
+                      <button
+                        ref={accountSettingsButtonRef}
+                        type="button"
+                        onClick={() => setOpenModal('account')}
+                        aria-haspopup="dialog"
+                        style={{ clipPath: pixelBox(2) }}
+                        className={`group col-span-full flex min-h-12 items-center gap-2.5 px-2 text-left transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
                       >
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-body-04 font-bold text-text-strong">{label}</span>
-                          <span className="mt-1 hidden text-xs leading-relaxed text-text-muted lg:block">{description}</span>
-                        </span>
-                        <Sprite rows={GLYPHS.arrowRight} className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block" />
-                      </Link>
-                    ))}
-                  </nav>
-                  <div className="mx-2 border-t border-primary-subtle pb-2 pt-2">
-                    <button
-                      ref={accountSettingsButtonRef}
-                      type="button"
-                      onClick={() => setOpenModal('account')}
-                      aria-haspopup="dialog"
-                      className={`group flex min-h-11 w-full items-center gap-2 px-2 py-3 text-left transition-colors hover:bg-primary-subtle lg:min-h-14 lg:gap-3 lg:px-3 ${FOCUS_RING}`}
-                    >
-                      <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">계정 설정</span>
-                      <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5" />
-                    </button>
+                        <GlyphTile rows={GLYPHS.gear} />
+                        <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">계정 설정</span>
+                        <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5" />
+                      </button>
+                    </nav>
                   </div>
                 </div>
               </section>
@@ -160,10 +152,8 @@ export function MyPage() {
       )}
       {openModal === 'account' && (
         <AccountSettingsModal
-          isLoggingOut={isLoggingOut}
           onClose={closeAccountSettingsFlow}
           onPasswordChange={() => setOpenModal('password')}
-          onLogout={() => void handleLogout()}
           onWithdraw={() => setOpenModal('withdraw')}
         />
       )}

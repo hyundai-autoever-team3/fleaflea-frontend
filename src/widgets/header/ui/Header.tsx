@@ -1,6 +1,8 @@
 import { Link, NavLink } from "react-router";
 import { BellIcon } from "@heroicons/react/24/outline";
 
+import { ProfileMenu } from './ProfileMenu';
+
 const navItems = [
   { to: '/market', label: '마켓' },
   { to: '/item-dex', label: '물건 도감' },
@@ -42,15 +44,7 @@ export function Header() {
 
         <div className="col-start-2 row-start-1 flex items-center justify-end gap-3 md:col-start-3">
           <BellIcon aria-hidden="true" className="size-6 text-text-muted" />
-          <Link
-            to="/my-page"
-            aria-label="내 프로필, 마이페이지로 이동"
-            className={`flex size-11 items-center justify-center transition-opacity hover:opacity-80 ${focusStyle}`}
-          >
-            <div className="size-8 overflow-hidden rounded-full ring-1 ring-border shadow-md">
-              <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover [image-rendering:pixelated]" />
-            </div>
-          </Link>
+          <ProfileMenu />
         </div>
       </div>
     </header>
