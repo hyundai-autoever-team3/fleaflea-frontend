@@ -423,14 +423,17 @@ export function MyTradeList() {
                               <p className="truncate text-xs text-text-muted">
                                 {SOURCE_LABEL[requestType]} · {requestLabel(request)}
                               </p>
-                              <span
-                                style={{ clipPath: pixelBox(2) }}
-                                className={`shrink-0 px-2 py-1 text-[11px] leading-4 font-semibold ${
-                                  needsMyAction ? NEEDS_ME_TONE : STATUS_TONE[status]
-                                }`}
-                              >
-                                {needsMyAction ? '응답 필요' : STATUS_LABEL[status]}
-                              </span>
+                              {/* 받은 요청 탭은 모든 줄이 '응답 필요'라 배지가 탭 이름을 되풀이한다 */}
+                              {tab !== 'received' && (
+                                <span
+                                  style={{ clipPath: pixelBox(2) }}
+                                  className={`shrink-0 px-2 py-1 text-[11px] leading-4 font-semibold ${
+                                    needsMyAction ? NEEDS_ME_TONE : STATUS_TONE[status]
+                                  }`}
+                                >
+                                  {needsMyAction ? '응답 필요' : STATUS_LABEL[status]}
+                                </span>
+                              )}
                             </div>
 
                             <Link
