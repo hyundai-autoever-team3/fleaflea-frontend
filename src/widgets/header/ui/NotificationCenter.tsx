@@ -180,7 +180,7 @@ function NotificationRow({
         </button>
       </div>
 
-      <div className="relative z-10 flex shrink-0 items-center gap-1">
+      <div className="relative z-10 -mr-1 flex shrink-0 items-center">
         {/* 읽음 표시는 눌러서 체크하는 칸으로 둔다. 읽고 나면 체크가 찍혀 그대로 남아
             어느 알림을 봤는지 한눈에 들어온다 (읽지 않음으로 되돌리는 API는 없다) */}
         <button
