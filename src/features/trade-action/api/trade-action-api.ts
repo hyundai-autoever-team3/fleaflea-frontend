@@ -52,6 +52,13 @@ export function useTradeAction() {
       // 목록을 다시 받는 데 실패해도 거래 자체는 성공이므로 실패로 바꾸지 않는다
       await Promise.all(refreshing.map((task) => task.catch(() => undefined)))
     },
+    // 상대가 먼저 처리했거나 이미 끝난 거래를 누른 것이다. 내 화면이 낡았다는 뜻이므로
+    // 목록을 다시 받아 맞춘다. 그러지 않으면 누를 수 없는 버튼이 계속 남아 같은 실패가 반복된다
+    onError: async (error) => {
+      const status = isAxiosError(error) ? error.response?.status : undefined
+      if (status !== 403 && status !== 404 && status !== 409) return
+      await queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
+    },
   })
 }
 
@@ -72,7 +79,7 @@ export function getTradeActionErrorMessage(error: unknown, action: TradeAction) 
     case 404:
       return '거래 요청을 찾을 수 없어요.'
     case 409:
-      return `이미 처리된 거래라 ${ACTION_LABEL[action]}할 수 없어요. 새로고침해 주세요.`
+      return `이미 처리된 거래라 ${ACTION_LABEL[action]}할 수 없어요. 목록을 새로 받아왔어요.`
     default:
       return `거래를 ${ACTION_LABEL[action]}하지 못했어요. 잠시 후 다시 시도해 주세요.`
   }
