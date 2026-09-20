@@ -1,0 +1,28 @@
+/**
+ * 글래스모피즘 패널 — 반투명 흰 면 + 뒤 배경 블러.
+ * 값은 tokens.css의 --glass-* / --shadow-glass-* 를 쓴다.
+ * 랜딩의 알림 카드에서 시작해 알림 드롭다운까지 같은 규칙으로 맞춘다.
+ */
+
+@utility glass {
+  border: 1px solid var(--color-glass-line);
+  background-color: var(--color-glass);
+  backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}
+
+/* 알약 배지용 — 같은 톤이지만 크기에 맞춰 블러·그림자를 줄임 */
+@utility glass-pill {
+  border: 1px solid var(--color-glass-line);
+  background-color: var(--color-glass);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: var(--shadow-glass-pill);
+}
+
+/* 파스텔 그라데이션을 깐 글래스 판. 뒤 화면이 비치면서도 우리 톤을 유지한다 */
+@utility glass-panel {
+  border: 1px solid var(--color-glass-line);
+  background-image: var(--gradient-glass-panel);
+  backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: var(--shadow-glass);
+}

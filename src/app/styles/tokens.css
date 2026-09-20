@@ -63,6 +63,28 @@
   /* 글래스모피즘 표면(반투명 흰 배경) 위에 올라가는 텍스트 전용 남색. 투명도는 Tailwind opacity modifier(/92, /58)로 조절. */
   --navy-900: #1c1e32;
 
+  /* 글래스 패널 — 반투명 흰 면 + 뒤 배경 블러. 랜딩의 알림 카드에서 쓰던 값을
+   * 토큰으로 올려 컴포넌트가 rgba를 직접 적지 않게 했다 (9장) */
+  --glass-white: rgba(255, 255, 255, 0.7);
+  --glass-white-strong: rgba(252, 252, 254, 0.92);
+  --glass-white-faint: rgba(255, 255, 255, 0.35);
+  --glass-line: rgba(0, 0, 0, 0.1);
+  --shadow-glass-panel:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 20px 48px -10px rgba(20, 30, 60, 0.28);
+  --shadow-glass-pill:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 8px 20px -6px rgba(20, 30, 60, 0.22);
+
+  /* 글래스 패널 바탕 — 라벤더 파스텔 그라데이션을 반투명으로 깔아
+   * 뒤 화면이 비치면서도 우리 톤을 유지한다 (--gradient-dreamy의 옅은 판) */
+  --gradient-glass-panel: linear-gradient(
+    in oklch 145deg,
+    rgba(245, 240, 252, 0.84),
+    rgba(224, 211, 246, 0.78) 55%,
+    rgba(251, 225, 239, 0.8)
+  );
+
   /* 핀테크 앱 카드 배경 느낌의 부드러운 다색 블러 그라데이션(살구/하늘/라벤더 3개 블롭). 카드/플레이스홀더 배경용. */
   --gradient-mesh-soft:
     radial-gradient(120% 120% at 15% 10%, #f7ddc7 0%, transparent 55%),
@@ -120,6 +142,12 @@
 
   /* 글래스모피즘 카드/모달 전용 텍스트 색 — text-glass-ink/92, text-glass-ink/58 처럼 opacity modifier로 사용 */
   --color-glass-ink: var(--navy-900);
+  --color-glass: var(--glass-white);
+  --color-glass-strong: var(--glass-white-strong);
+  --color-glass-faint: var(--glass-white-faint);
+  --color-glass-line: var(--glass-line);
+  --shadow-glass: var(--shadow-glass-panel);
+  --shadow-glass-pill: var(--shadow-glass-pill);
 
   /* ---- 3) TYPOGRAPHY ---- */
   /* 전역 기본 폰트 — Tailwind의 font-sans + 기본 body 폰트를 덮어씀 (클래스 없이 전체 적용) */

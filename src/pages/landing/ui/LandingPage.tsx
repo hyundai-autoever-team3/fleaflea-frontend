@@ -15,12 +15,11 @@ import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
 import { LandingHeader } from './LandingHeader'
 
 // Apple(macOS) 글래스모피즘 — 반투명 흰색 레이어 + 블러/채도 + 3겹 그림자(외곽선/남색 큰 그림자/상단 하이라이트).
-const glass =
-  'rounded-2xl border border-[rgba(0,0,0,0.1)] bg-white/70 backdrop-blur-[30px] backdrop-saturate-[180%] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_20px_48px_-10px_rgba(20,30,60,0.28)]'
+// 값은 app/styles/glass.css의 유틸리티에 있다 — 알림 드롭다운도 같은 규칙을 쓴다
+const glass = 'glass rounded-2xl'
 
-// 알약 배지용 가벼운 글래스 — 위 glass와 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임.
-const glassPill =
-  'rounded-full border border-[rgba(0,0,0,0.1)] bg-white/70 backdrop-blur-[16px] backdrop-saturate-[180%] shadow-[inset_0_1px_0_rgba(255,255,255,0.6),0_8px_20px_-6px_rgba(20,30,60,0.22)]'
+// 알약 배지용 가벼운 글래스 — 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임
+const glassPill = 'glass-pill rounded-full'
 
 
 function Mascot({ className = 'size-10' }: { className?: string }) {

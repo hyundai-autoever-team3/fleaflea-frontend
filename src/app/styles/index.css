@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './animations.css';
+@import './glass.css';
 
 /* 한글은 글자 단위로 끊으면 '프로필 수 / 정'처럼 단어 한가운데가 갈라져 읽기 나쁘다.
    keep-all로 단어를 붙여 두고, 그래도 넘치는 것(공백 없는 긴 주소, 이메일)만
