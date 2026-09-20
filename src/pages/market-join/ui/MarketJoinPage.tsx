@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 
-import { marketKeys } from '../../../entities/market'
 import { useSessionStore } from '../../../entities/session'
-import { getJoinErrorMessage, isAlreadyJoinedError, joinMarket } from '../../../features/market-join'
+import { getJoinErrorMessage, isAlreadyJoinedError, useJoinMarket } from '../../../features/market-join'
 import { parseInviteCode } from '../../../shared/lib/invite'
 import { pixelBox } from '../../../shared/lib/pixel'
 
@@ -12,28 +10,25 @@ import { pixelBox } from '../../../shared/lib/pixel'
 export function MarketJoinPage() {
   const { code = '' } = useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const accessToken = useSessionStore((state) => state.accessToken)
 
   const [error, setError] = useState('')
   const [alreadyJoined, setAlreadyJoined] = useState(false)
-  const [isJoining, setIsJoining] = useState(false)
   const inviteCode = parseInviteCode(code)
+  // 내 마켓 목록 새로고침은 useJoinMarket 안에서 한다
+  const joinMutation = useJoinMarket()
+  const isJoining = joinMutation.isPending
 
-  async function handleJoin() {
+  function handleJoin() {
     if (!inviteCode) return
-    setIsJoining(true)
     setError('')
-    try {
-      const { data } = await joinMarket(inviteCode)
-      void queryClient.invalidateQueries({ queryKey: marketKeys.all })
-      navigate(`/market/${data.marketId}`, { replace: true })
-    } catch (joinError) {
-      setAlreadyJoined(isAlreadyJoinedError(joinError))
-      setError(getJoinErrorMessage(joinError))
-    } finally {
-      setIsJoining(false)
-    }
+    joinMutation.mutate(inviteCode, {
+      onSuccess: (market) => navigate(`/market/${market.marketId}`, { replace: true }),
+      onError: (joinError) => {
+        setAlreadyJoined(isAlreadyJoinedError(joinError))
+        setError(getJoinErrorMessage(joinError))
+      },
+    })
   }
 
   return (

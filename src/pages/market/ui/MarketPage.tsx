@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { Header } from '../../../widgets/header'
-import { MarketCard, marketKeys, useMyMarkets } from '../../../entities/market'
+import { MarketCard, useMyMarkets } from '../../../entities/market'
 import { useSessionStore } from '../../../entities/session'
 import { useMyProfile } from '../../../entities/user'
 import { InviteLinkContent } from '../../../features/market-invite'
@@ -41,7 +40,6 @@ type ModalKind = 'create' | 'join' | null
 
 export function MarketPage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const marketsQuery = useMyMarkets()
   const meQuery = useMyProfile()
 
@@ -98,14 +96,13 @@ export function MarketPage() {
     closeModal()
   }
 
+  // 목록 새로고침은 useCreateMarket·useJoinMarket 안에서 끝난다
   function handleCreated(market: CreateMarketResponse) {
     setCreatedMarket(market)
-    void queryClient.invalidateQueries({ queryKey: marketKeys.all })
   }
 
   function handleJoined(market: JoinMarketResponse) {
     closeModal()
-    void queryClient.invalidateQueries({ queryKey: marketKeys.all })
     navigate(`/market/${market.marketId}`, { viewTransition: true })
   }
 
