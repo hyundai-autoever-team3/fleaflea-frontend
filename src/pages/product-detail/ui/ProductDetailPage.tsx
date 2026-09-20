@@ -17,6 +17,7 @@ import { deleteProduct, getDeleteProductErrorMessage } from '../../../features/p
 import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -150,12 +151,7 @@ export function ProductDetailPage() {
 
                 {/* 판매자 */}
                 <div className="mt-6 flex items-center gap-2">
-                  <img
-                    src={product.seller.profileImageUrl || MASCOTS.default}
-                    alt=""
-                    style={{ clipPath: pixelBox(2) }}
-                    className="size-8 bg-primary-subtle object-cover"
-                  />
+                  <Avatar profileImageUrl={product.seller.profileImageUrl} size="sm" />
                   <span className="text-body-04 text-text-muted">
                     <span className="font-bold text-text-strong">{product.seller.nickname}</span>
                     {isOwner && ' (나)'}

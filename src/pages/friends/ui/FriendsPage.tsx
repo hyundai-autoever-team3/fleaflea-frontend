@@ -22,6 +22,7 @@ import {
   sendFriendRequest,
 } from '../../../features/friend-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { Avatar } from '../../../shared/ui/avatar'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -35,17 +36,6 @@ const SEARCH_CAPTION: Record<RelationshipStatus, string> = {
   REQUESTED: '요청을 보냈어요',
   REQUEST_RECEIVED: '나에게 친구 요청을 보냈어요',
   FRIEND: '이미 친구예요',
-}
-
-function Avatar({ profileImageUrl }: { profileImageUrl: string | null }) {
-  return (
-    <img
-      src={profileImageUrl || MASCOTS.default}
-      alt=""
-      style={{ clipPath: pixelBox(2) }}
-      className="size-12 shrink-0 bg-primary-subtle object-cover [image-rendering:pixelated]"
-    />
-  )
 }
 
 // 한 줄 = 아바타 + 닉네임(+ 보조 문구) + 오른쪽 동작 버튼들
