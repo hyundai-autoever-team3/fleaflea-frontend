@@ -5,9 +5,10 @@ export type {
   NotificationUnreadCount,
 } from './model/types'
 export {
+  NOTIFICATION_PAGE_SIZE,
   getNotifications,
   getUnreadNotificationCount,
   notificationKeys,
-  useInfiniteNotifications,
+  useNotifications,
   useUnreadNotificationCount,
 } from './api/notification-api'

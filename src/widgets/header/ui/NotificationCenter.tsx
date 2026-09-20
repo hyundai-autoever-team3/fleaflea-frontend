@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import {
   ArrowPathIcon,
   ArrowUturnLeftIcon,
@@ -7,7 +7,10 @@ import {
   CheckBadgeIcon,
   CheckCircleIcon,
   CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   HandRaisedIcon,
+  TrashIcon,
   UserGroupIcon,
   UserPlusIcon,
   XCircleIcon,
@@ -18,11 +21,12 @@ import {
   type NotificationItem,
   type NotificationReferenceType,
   type NotificationType,
-  useInfiniteNotifications,
+  useNotifications,
   useUnreadNotificationCount,
 } from '../../../entities/notification'
 import {
   getNotificationActionErrorMessage,
+  useDeleteNotification,
   useReadAllNotifications,
   useReadNotification,
 } from '../../../features/notification-manage'
@@ -30,7 +34,8 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
-const PANEL_BUTTON = 'flex min-h-9 items-center gap-1.5 rounded-lg bg-bg px-3 text-body-04 font-bold text-text transition-colors hover:bg-primary-tint'
+const PANEL_BUTTON = 'flex min-h-9 items-center gap-1.5 rounded-lg bg-bg px-3 text-body-04 font-bold text-text transition-colors hover:bg-primary-tint disabled:opacity-50'
+const ROW_ICON_BUTTON = 'grid size-8 place-items-center rounded-lg text-text-muted transition-colors hover:bg-primary-subtle hover:text-text-strong disabled:opacity-50'
 
 interface NotificationTypeStyle {
   label: string
@@ -120,21 +125,28 @@ function fullDate(value: string) {
 
 function NotificationRow({
   notification,
-  reading,
+  busy,
   onSelect,
   onRead,
+  onDelete,
 }: {
   notification: NotificationItem
-  reading: boolean
+  busy: boolean
   onSelect: (notification: NotificationItem) => void
   onRead: (notification: NotificationItem) => void
+  onDelete: (notification: NotificationItem) => void
 }) {
   const unread = !notification.isRead
   const typeStyle = TYPE_STYLE[notification.type]
 
   return (
-    // 읽은 알림은 지우지 않고 색을 죽여 가라앉힌다
-    <li className={`relative flex items-start gap-2.5 rounded-xl p-2.5 transition-colors ${unread ? 'bg-bg' : 'bg-bg/55'}`}>
+    // 읽은 알림은 지우지 않고 바탕을 죽여 가라앉힌다. 종류 라벨의 색은 읽어도 그대로 둔다
+    <li
+      aria-busy={busy}
+      className={`relative flex min-h-[4.25rem] items-start gap-2.5 rounded-xl p-2.5 transition-colors ${
+        unread ? 'bg-bg' : 'bg-bg/55'
+      }`}
+    >
       <span
         className={`mt-0.5 grid size-9 shrink-0 place-items-center rounded-lg bg-primary-subtle ${
           unread ? 'text-text' : 'text-text-muted'
@@ -145,9 +157,7 @@ function NotificationRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className={`text-[11px] font-bold ${unread ? typeStyle.textClass : 'text-text-muted'}`}>
-            {typeStyle.label}
-          </span>
+          <span className={`text-[11px] font-bold ${typeStyle.textClass}`}>{typeStyle.label}</span>
           <time
             dateTime={notification.createdAt}
             title={fullDate(notification.createdAt)}
@@ -157,7 +167,7 @@ function NotificationRow({
           </time>
         </div>
 
-        {/* 줄 전체가 눌리도록 넓히되, 옆의 읽음 버튼은 z-10으로 위에 띄운다 */}
+        {/* 줄 어디를 눌러도 관련 화면으로 넘어가게 넓히되, 옆의 버튼은 z-10으로 위에 띄운다 */}
         <button
           type="button"
           onClick={() => onSelect(notification)}
@@ -169,19 +179,31 @@ function NotificationRow({
         </button>
       </div>
 
-      {unread && (
-        // 화면을 옮기지 않고 이 알림만 읽음으로 넘기고 싶을 때 쓴다
+      <div className="relative z-10 flex shrink-0 items-center gap-0.5">
+        {unread && (
+          // 화면을 옮기지 않고 이 알림만 읽음으로 넘기고 싶을 때 쓴다
+          <button
+            type="button"
+            onClick={() => onRead(notification)}
+            disabled={busy}
+            title="읽음으로 표시"
+            aria-label={`${typeStyle.label} 알림을 읽음으로 표시`}
+            className={`${ROW_ICON_BUTTON} ${FOCUS_RING}`}
+          >
+            <CheckIcon aria-hidden="true" className="size-4" />
+          </button>
+        )}
         <button
           type="button"
-          onClick={() => onRead(notification)}
-          disabled={reading}
-          aria-label={`${typeStyle.label} 알림을 읽음으로 표시`}
-          className={`relative z-10 mt-0.5 flex min-h-9 shrink-0 items-center gap-1 self-start rounded-lg bg-primary-subtle px-2 text-[11px] font-bold text-text transition-colors hover:bg-primary-tint disabled:opacity-50 ${FOCUS_RING}`}
+          onClick={() => onDelete(notification)}
+          disabled={busy}
+          title="알림 삭제"
+          aria-label={`${typeStyle.label} 알림 삭제`}
+          className={`${ROW_ICON_BUTTON} hover:text-status-danger ${FOCUS_RING}`}
         >
-          <CheckIcon aria-hidden="true" className="size-3.5 shrink-0" />
-          {reading ? '처리 중' : '읽음'}
+          <TrashIcon aria-hidden="true" className="size-4" />
         </button>
-      )}
+      </div>
     </li>
   )
 }
@@ -189,8 +211,8 @@ function NotificationRow({
 function NotificationSkeleton() {
   return (
     <div role="status" aria-label="알림을 불러오는 중" className="space-y-2 p-3">
-      {[0, 1, 2].map((item) => (
-        <div key={item} className="flex items-start gap-2.5 rounded-xl bg-bg/55 p-2.5 motion-safe:animate-pulse">
+      {Array.from({ length: 3 }, (_, index) => (
+        <div key={index} className="flex min-h-[4.25rem] items-start gap-2.5 rounded-xl bg-bg/55 p-2.5 motion-safe:animate-pulse">
           <span className="size-9 shrink-0 rounded-lg bg-primary-tint" />
           <span className="mt-1 h-10 flex-1 rounded-lg bg-primary-subtle" />
         </div>
@@ -210,30 +232,16 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
   const navigate = useNavigate()
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const loadMoreRef = useRef<HTMLLIElement>(null)
-  const [readingIds, setReadingIds] = useState<number[]>([])
-  const notificationsQuery = useInfiniteNotifications({ enabled: open })
+  const [page, setPage] = useState(0)
+  const [busyIds, setBusyIds] = useState<number[]>([])
+  const notificationsQuery = useNotifications({ page, enabled: open })
   const unreadCountQuery = useUnreadNotificationCount()
   const readNotificationMutation = useReadNotification()
   const readAllMutation = useReadAllNotifications()
-  const {
-    data: notificationPages,
-    fetchNextPage,
-    hasNextPage,
-    isFetchNextPageError,
-    isFetchingNextPage,
-  } = notificationsQuery
+  const deleteMutation = useDeleteNotification()
 
-  const notifications = useMemo(() => {
-    const byId = new Map<number, NotificationItem>()
-    for (const page of notificationPages?.pages ?? []) {
-      for (const notification of page.content) {
-        if (!byId.has(notification.notificationId)) byId.set(notification.notificationId, notification)
-      }
-    }
-    return [...byId.values()]
-  }, [notificationPages])
+  const notifications = notificationsQuery.data?.content ?? []
+  const totalPages = Math.max(1, notificationsQuery.data?.totalPages ?? 1)
   const rawUnreadCount = unreadCountQuery.data?.unreadCount ?? 0
   const unreadCount = Math.max(0, Number.isFinite(rawUnreadCount) ? rawUnreadCount : 0)
   const hasUnread = unreadCount > 0 || notifications.some((notification) => !notification.isRead)
@@ -260,33 +268,14 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
     }
   }, [onOpenChange, open])
 
-  useEffect(() => {
-    const target = loadMoreRef.current
-    const root = scrollAreaRef.current
-    if (!open || !target || !root || !hasNextPage || isFetchNextPageError) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isFetchingNextPage) {
-          void fetchNextPage()
-        }
-      },
-      { root, rootMargin: '96px 0px' },
-    )
-    observer.observe(target)
-    return () => observer.disconnect()
-  }, [
-    fetchNextPage,
-    hasNextPage,
-    isFetchNextPageError,
-    isFetchingNextPage,
-    open,
-  ])
-
   function togglePanel() {
     const nextOpen = !open
     onOpenChange(nextOpen)
-    if (nextOpen) void unreadCountQuery.refetch()
+    // 다시 열 때는 늘 첫 장부터 — 지난번에 보던 장은 이미 낡았다
+    if (nextOpen) {
+      setPage(0)
+      void unreadCountQuery.refetch()
+    }
   }
 
   function showMutationError(error: unknown) {
@@ -294,14 +283,26 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
   }
 
   // 알림마다 따로 눌리므로, 어느 줄이 처리 중인지도 줄 단위로 기억한다
-  function markAsRead(notification: NotificationItem) {
-    const { notificationId } = notification
-    if (readingIds.includes(notificationId)) return
-    setReadingIds((current) => [...current, notificationId])
-    readNotificationMutation.mutate(notificationId, {
+  function runOnNotification(
+    notificationId: number,
+    run: (id: number, options: { onError: (error: unknown) => void; onSettled: () => void }) => void,
+  ) {
+    if (busyIds.includes(notificationId)) return
+    setBusyIds((current) => [...current, notificationId])
+    run(notificationId, {
       onError: showMutationError,
-      onSettled: () => setReadingIds((current) => current.filter((id) => id !== notificationId)),
+      onSettled: () => setBusyIds((current) => current.filter((id) => id !== notificationId)),
     })
+  }
+
+  function markAsRead(notification: NotificationItem) {
+    runOnNotification(notification.notificationId, (id, options) => readNotificationMutation.mutate(id, options))
+  }
+
+  function removeNotification(notification: NotificationItem) {
+    // 마지막 장의 마지막 줄을 지우면 빈 장만 남으므로 앞 장으로 물러난다
+    if (notifications.length === 1 && page > 0) setPage(page - 1)
+    runOnNotification(notification.notificationId, (id, options) => deleteMutation.mutate(id, options))
   }
 
   function selectNotification(notification: NotificationItem) {
@@ -345,15 +346,17 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
 
       {open && (
         // 잠깐 떴다 사라지는 조작용 판이라 픽셀 계단 대신 둥근 모서리를 쓴다
-        // (프로필 메뉴·거래 출처 목록과 같은 예외 — design.md 1장)
+        // (프로필 메뉴·거래 출처 목록과 같은 예외 — design.md 1장).
+        // 판 안에서 스크롤하지 않도록 한 장에 다섯 줄만 그리고 나머지는 페이지로 넘긴다.
+        // max-h는 화면이 아주 낮을 때만 도는 안전장치다
         <section
           id={panelId}
           role="dialog"
           aria-labelledby={titleId}
-          aria-busy={notificationsQuery.isPending || isFetchingNextPage}
-          className="fixed inset-x-4 top-[6.75rem] z-50 flex max-h-[calc(100dvh-7.75rem)] flex-col overflow-hidden rounded-2xl border border-primary-tint/60 bg-primary-subtle/85 shadow-lg backdrop-blur-md md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96"
+          aria-busy={notificationsQuery.isPending}
+          className="fixed inset-x-4 top-[6.75rem] z-50 max-h-[calc(100dvh-7.75rem)] overflow-y-auto overscroll-contain rounded-2xl border border-primary-tint/60 bg-primary-subtle/85 shadow-lg backdrop-blur-md [scrollbar-width:none] md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96 [&::-webkit-scrollbar]:hidden"
         >
-          <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3.5">
+          <div className="flex items-center justify-between gap-4 px-4 py-3.5">
             <div className="min-w-0">
               <h2 id={titleId} className="text-body-03 font-bold text-text-strong">알림</h2>
               <p className="mt-0.5 text-xs text-text-muted">
@@ -365,73 +368,77 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
                 type="button"
                 onClick={readAll}
                 disabled={readAllMutation.isPending}
-                className={`shrink-0 disabled:opacity-50 ${PANEL_BUTTON} ${FOCUS_RING}`}
+                className={`shrink-0 ${PANEL_BUTTON} ${FOCUS_RING}`}
               >
                 {readAllMutation.isPending ? '처리 중...' : '모두 읽음'}
               </button>
             )}
           </div>
 
-          <div
-            ref={scrollAreaRef}
-            className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {notificationsQuery.isPending ? (
-              <NotificationSkeleton />
-            ) : notificationsQuery.isError && !notificationsQuery.data ? (
-              <div role="alert" className="flex flex-col items-center px-6 py-10 text-center">
-                <img src={MASCOTS.surprised} alt="" className="size-12 object-contain [image-rendering:pixelated]" />
-                <p className="mt-3 text-body-04 font-bold text-text-strong">알림을 불러오지 못했어요</p>
-                <button
-                  type="button"
-                  onClick={() => void notificationsQuery.refetch()}
-                  className={`mt-4 ${PANEL_BUTTON} ${FOCUS_RING}`}
-                >
-                  <ArrowPathIcon aria-hidden="true" className="size-4" />
-                  다시 시도
-                </button>
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center px-6 py-9 text-center">
-                <img src={MASCOTS.basket} alt="" className="size-14 object-contain [image-rendering:pixelated]" />
-                <p className="mt-3 text-body-04 font-bold text-text-strong">아직 도착한 알림이 없어요</p>
-                <p className="mt-1 text-xs text-text-muted">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
-              </div>
-            ) : (
-              <ul aria-label="최근 알림" className="space-y-2 p-3">
-                {notifications.map((notification) => (
-                  <NotificationRow
-                    key={notification.notificationId}
-                    notification={notification}
-                    reading={readingIds.includes(notification.notificationId)}
-                    onSelect={selectNotification}
-                    onRead={markAsRead}
-                  />
-                ))}
-                {hasNextPage && (
-                  <li ref={loadMoreRef} className="flex min-h-12 items-center justify-center px-4 py-2 text-xs text-text-muted">
-                    {isFetchNextPageError ? (
-                      <button
-                        type="button"
-                        onClick={() => void fetchNextPage()}
-                        className={`${PANEL_BUTTON} ${FOCUS_RING}`}
-                      >
-                        <ArrowPathIcon aria-hidden="true" className="size-4" />
-                        알림 더 불러오기
-                      </button>
-                    ) : isFetchingNextPage ? (
-                      <span role="status" className="flex items-center gap-2">
-                        <ArrowPathIcon aria-hidden="true" className="size-4 motion-safe:animate-spin" />
-                        이전 알림을 불러오는 중...
-                      </span>
-                    ) : (
-                      <span className="sr-only">이전 알림을 불러올 준비가 됐어요</span>
-                    )}
-                  </li>
-                )}
-              </ul>
-            )}
-          </div>
+          {notificationsQuery.isPending ? (
+            <NotificationSkeleton />
+          ) : notificationsQuery.isError && !notificationsQuery.data ? (
+            <div role="alert" className="flex flex-col items-center px-6 py-10 text-center">
+              <img src={MASCOTS.surprised} alt="" className="size-12 object-contain [image-rendering:pixelated]" />
+              <p className="mt-3 text-body-04 font-bold text-text-strong">알림을 불러오지 못했어요</p>
+              <button
+                type="button"
+                onClick={() => void notificationsQuery.refetch()}
+                className={`mt-4 ${PANEL_BUTTON} ${FOCUS_RING}`}
+              >
+                <ArrowPathIcon aria-hidden="true" className="size-4" />
+                다시 시도
+              </button>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="flex flex-col items-center px-6 py-9 text-center">
+              <img src={MASCOTS.basket} alt="" className="size-14 object-contain [image-rendering:pixelated]" />
+              <p className="mt-3 text-body-04 font-bold text-text-strong">아직 도착한 알림이 없어요</p>
+              <p className="mt-1 text-xs text-text-muted">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
+            </div>
+          ) : (
+            <ul aria-label="최근 알림" className="space-y-2 p-3">
+              {notifications.map((notification) => (
+                <NotificationRow
+                  key={notification.notificationId}
+                  notification={notification}
+                  busy={busyIds.includes(notification.notificationId)}
+                  onSelect={selectNotification}
+                  onRead={markAsRead}
+                  onDelete={removeNotification}
+                />
+              ))}
+            </ul>
+          )}
+
+          {totalPages > 1 && (
+            <nav aria-label="알림 페이지" className="flex items-center justify-between gap-2 border-t border-primary-tint/60 px-3 py-2.5">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(0, current - 1))}
+                disabled={page === 0 || notificationsQuery.isFetching}
+                aria-label="최근 알림으로"
+                className={`${ROW_ICON_BUTTON} ${FOCUS_RING}`}
+              >
+                <ChevronLeftIcon aria-hidden="true" className="size-4" />
+              </button>
+              <span aria-live="polite" className="text-[11px] text-text-muted">
+                {page + 1} / {totalPages}
+                {notificationsQuery.data?.totalElements
+                  ? ` · 전체 ${notificationsQuery.data.totalElements}개`
+                  : ''}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((current) => current + 1)}
+                disabled={!notificationsQuery.data?.hasNext || notificationsQuery.isFetching}
+                aria-label="지난 알림으로"
+                className={`${ROW_ICON_BUTTON} ${FOCUS_RING}`}
+              >
+                <ChevronRightIcon aria-hidden="true" className="size-4" />
+              </button>
+            </nav>
+          )}
         </section>
       )}
     </div>
