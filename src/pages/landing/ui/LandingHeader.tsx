@@ -1,7 +1,6 @@
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router'
 
-import { pixelBox } from '../../../shared/lib/pixel'
 
 export interface LandingNavItem {
   id: string
@@ -43,12 +42,12 @@ export function LandingHeader({
         </nav>
 
         {/* 소개를 다 읽지 않고 바로 들어가려는 사람을 위해 로그인을 헤더에 둔다.
+            목차 옆에 나란히 서는 자리라 버튼으로 세우지 않고 같은 글자 크기로 둔다.
             가입은 화면 아래 본래 자리에 있으므로 여기서 되풀이하지 않는다 */}
         <Link
           to="/login"
           viewTransition
-          style={{ clipPath: pixelBox(3) }}
-          className={`flex min-h-10 shrink-0 items-center whitespace-nowrap bg-primary px-4 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 ${FOCUS_RING}`}
+          className={`shrink-0 whitespace-nowrap text-body-03 text-text-muted transition-colors hover:text-primary ${FOCUS_RING}`}
         >
           로그인
         </Link>
