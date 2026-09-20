@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import { useMyCollectionItems } from '../../../entities/collection-item'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
 import {
@@ -16,29 +17,8 @@ import {
 import { MascotTip } from './MascotTip'
 import { PreviewSlot } from './PreviewSlot'
 
-// 스프라이트는 문자열 그리드로 그리고 <rect>로 렌더한다 (design.md 3장, PixelShops와 같은 방식)
-const ARROW_RIGHT = ['...#...', '...##..', '#######', '...##..', '...#...']
-const ARROW_LEFT = ['...#...', '..##...', '#######', '..##...', '...#...']
-const CHECK = ['......#', '.....##', '#...##.', '##.##..', '.####..', '..##...', '..#....']
-
 // 모달이 길어지지 않도록 접힌 상태에서 보여줄 칸 수
 const VISIBLE_COUNT = 4
-
-function Sprite({ rows, className = '' }: { rows: string[]; className?: string }) {
-  return (
-    <svg
-      viewBox={`0 0 ${rows[0].length} ${rows.length}`}
-      shapeRendering="crispEdges"
-      fill="currentColor"
-      aria-hidden
-      className={className}
-    >
-      {rows.flatMap((row, y) =>
-        [...row].map((cell, x) => (cell === '#' ? <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} /> : null)),
-      )}
-    </svg>
-  )
-}
 
 interface TradeRequestModalProps {
   open: boolean
@@ -119,8 +99,8 @@ export function TradeRequestModal({
           <div className="mx-auto flex max-w-[360px] items-center gap-3">
             <PreviewSlot label="내 물건" title={offered?.title} imageUrl={offered?.imageUrl} />
             <div className="flex shrink-0 flex-col gap-1 pt-4 text-primary">
-              <Sprite rows={ARROW_RIGHT} className="w-6" />
-              <Sprite rows={ARROW_LEFT} className="w-6" />
+              <Sprite rows={GLYPHS.arrowRight} className="w-6" />
+              <Sprite rows={GLYPHS.arrowLeft} className="w-6" />
             </div>
             <PreviewSlot label="상대 물건" title={itemTitle} imageUrl={itemImageUrl} />
           </div>
@@ -217,7 +197,7 @@ export function TradeRequestModal({
                             style={{ clipPath: pixelBox(2) }}
                             className="absolute right-1 top-1 grid size-5 place-items-center bg-primary text-white"
                           >
-                            <Sprite rows={CHECK} className="w-2.5" />
+                            <Sprite rows={GLYPHS.check} className="w-2.5" />
                           </span>
                         )}
                         {/* 왜 고를 수 없는지 칸 위에서 바로 보이게 */}
