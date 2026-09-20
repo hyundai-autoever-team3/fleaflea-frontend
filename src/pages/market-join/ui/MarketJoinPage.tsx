@@ -1,15 +1,17 @@
-import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 
 import { useSessionStore } from '../../../entities/session'
 import { getJoinErrorMessage, isAlreadyJoinedError, useJoinMarket } from '../../../features/market-join'
 import { parseInviteCode } from '../../../shared/lib/invite'
+import { withRedirect } from '../../../shared/lib/redirect'
 import { pixelBox } from '../../../shared/lib/pixel'
 
 // 로그인 전에도 들어올 수 있는 /invite/:code. 참여 전에는 마켓 상세를 볼 수 없어서(403) 코드만으로 참여시킴
 export function MarketJoinPage() {
   const { code = '' } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const accessToken = useSessionStore((state) => state.accessToken)
 
   const [error, setError] = useState('')
@@ -18,6 +20,19 @@ export function MarketJoinPage() {
   // 내 마켓 목록 새로고침은 useJoinMarket 안에서 한다
   const joinMutation = useJoinMarket()
   const isJoining = joinMutation.isPending
+  // 로그인·가입을 마치고 이 링크로 돌아온 경우에만 바로 참여시킨다.
+  // 그냥 링크를 연 사람에게는 참여 버튼을 눌러 확인받는다
+  const shouldAutoJoin = new URLSearchParams(location.search).get('join') === '1'
+  const authPathWithReturn = (path: string) => withRedirect(path, `/invite/${code}?join=1`)
+
+  const autoJoinedRef = useRef(false)
+  useEffect(() => {
+    if (!shouldAutoJoin || !accessToken || !inviteCode || autoJoinedRef.current) return
+    autoJoinedRef.current = true
+    handleJoin()
+    // handleJoin은 렌더마다 새로 만들어지지만, 위 ref가 한 번만 돌게 막는다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, inviteCode, shouldAutoJoin])
 
   function handleJoin() {
     if (!inviteCode) return
@@ -52,9 +67,9 @@ export function MarketJoinPage() {
           ) : !accessToken ? (
             <>
               <p className="mt-2 text-body-03 text-text-muted">로그인하면 친구가 연 마켓에 참여할 수 있어요.</p>
-              <p className="mt-1 text-body-04 text-text-muted">로그인 후 이 초대 링크를 다시 열어 주세요.</p>
+              <p className="mt-1 text-body-04 text-text-muted">로그인을 마치면 이 마켓에 바로 참여시켜 드릴게요.</p>
               <Link
-                to="/login"
+                to={authPathWithReturn('/login')}
                 style={{ clipPath: pixelBox(4) }}
                 className="mt-8 block h-12 bg-primary text-body-03 font-bold leading-[3rem] text-white hover:bg-primary/90"
               >
@@ -62,7 +77,7 @@ export function MarketJoinPage() {
               </Link>
               <p className="mt-4 text-body-04 text-text-muted">
                 아직 계정이 없으신가요?{' '}
-                <Link to="/signup" className="font-bold text-primary">
+                <Link to={authPathWithReturn('/signup')} className="font-bold text-primary">
                   회원가입
                 </Link>
               </p>

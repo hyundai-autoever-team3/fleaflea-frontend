@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
+import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { StarField } from '../../../shared/ui/star-field'
 import { login } from '../api/auth-api'
 import { useSessionStore } from '../../../entities/session'
 
 export function LoginForm() {
   const navigate = useNavigate()
+  // 초대 링크처럼 로그인 전에 들어왔던 화면이 있으면 그 자리로 돌려보낸다
+  const redirectTo = readRedirect(useLocation().search)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
@@ -33,7 +36,7 @@ export function LoginForm() {
     try {
       const { data } = await login({ email, password })
       useSessionStore.getState().setSession(data, rememberMe)
-      navigate('/market', { replace: true, viewTransition: true })
+      navigate(redirectTo ?? '/market', { replace: true, viewTransition: true })
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
     }
@@ -138,7 +141,7 @@ export function LoginForm() {
 
             <p className="text-center text-body-04 text-text-muted">
               계정이 없으신가요?{' '}
-              <Link to="/signup" className="font-bold text-primary">
+              <Link to={redirectTo ? withRedirect('/signup', redirectTo) : '/signup'} className="font-bold text-primary">
                 회원가입
               </Link>
             </p>
