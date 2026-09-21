@@ -38,12 +38,17 @@ export function LoadingScreen({
 
   useEffect(() => {
     if (holdMs) {
-      // 끝나는 시점을 아니까 그 시간에 맞춰 고르게 채운다
-      const startedAt = Date.now()
-      const timer = setInterval(() => {
-        setProgress(Math.min(100, ((Date.now() - startedAt) / holdMs) * 100))
-      }, TICK_MS)
-      return () => clearInterval(timer)
+      // 끝나는 시점을 아니까 그 시간에 맞춰 고르게 채운다.
+      // 일정 간격으로 끊어 올리면 막대가 계단처럼 움직여, 화면이 그리는 박자에 맞춰 잇는다
+      let frame = 0
+      const startedAt = performance.now()
+      const step = (now: number) => {
+        const ratio = Math.min(1, (now - startedAt) / holdMs)
+        setProgress(ratio * 100)
+        if (ratio < 1) frame = requestAnimationFrame(step)
+      }
+      frame = requestAnimationFrame(step)
+      return () => cancelAnimationFrame(frame)
     }
 
     const timer = setInterval(() => {
@@ -79,8 +84,12 @@ export function LoadingScreen({
             className="h-2.5 flex-1 overflow-hidden rounded-full bg-glass-faint"
           >
             <div
-              className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out motion-reduce:transition-none"
-              style={{ width: `${holdMs ? Math.min(progress, 100) : Math.min(progress, CEILING)}%` }}
+              // 정해진 시간에 맞춰 그릴 때는 프레임마다 값을 바꾸므로 전환을 걸지 않는다.
+              // 걸면 프레임과 전환이 서로 밀려 오히려 덜컹인다
+              className={`h-full rounded-full bg-primary ${
+                holdMs ? '' : 'transition-[width] duration-300 ease-out motion-reduce:transition-none'
+              }`}
+              style={{ width: `${holdMs ? progress : Math.min(progress, CEILING)}%` }}
             />
           </div>
           <span className="w-9 shrink-0 text-right text-[11px] font-bold tabular-nums text-glass-ink/58">
