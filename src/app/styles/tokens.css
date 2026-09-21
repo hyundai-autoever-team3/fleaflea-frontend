@@ -60,6 +60,7 @@
   --green-100: #e7f4eb;
   --green-700: #356a4b;
   --red-100: #fbe9ed;
+  --red-500: #e0334b; /* 안 읽은 알림 배지 — 멀리서도 '새것'으로 읽히는 선명한 빨강 */
   --red-700: #99394e;
   --amber-100: #fff1da;
   --amber-700: #7d5524;
@@ -127,6 +128,8 @@
   --color-status-success-subtle: var(--green-100);
   --color-status-danger: var(--red-700);
   --color-status-danger-subtle: var(--red-100);
+  /* 작은 면을 꽉 채우는 배지용. 글자에 쓰기엔 옅어 danger와 따로 둔다 */
+  --color-badge-danger: var(--red-500);
   --color-status-warning: var(--amber-700);
   --color-status-warning-subtle: var(--amber-100);
   /* 콕 찌르기처럼 좋고 나쁨이 아닌 알림 — 성공·경고로 읽히지 않게 따로 둔다 */

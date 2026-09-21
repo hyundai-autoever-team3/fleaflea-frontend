@@ -388,7 +388,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
         {unreadCount > 0 && (
           <span
             aria-hidden="true"
-            className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-status-danger px-1 text-[10px] font-bold leading-none text-white ring-2 ring-bg"
+            className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-badge-danger px-1 text-[10px] font-bold leading-none text-white ring-2 ring-bg"
           >
             {badgeLabel}
           </span>
