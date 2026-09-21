@@ -54,6 +54,8 @@ export function CollectionItemDetailPage() {
   const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const isMine = detail !== undefined && detail.ownerId === meQuery.data?.memberId
+  // 이미 거래가 걸린 물건에는 새 요청을 보낼 수 없다. 물건은 그대로 보여주되 고르기만 막는다
+  const inTrade = detail?.status === 'IN_PROGRESS'
 
   return (
     <div>
@@ -98,6 +100,8 @@ export function CollectionItemDetailPage() {
                   {/* 내 물건에는 요청을 보낼 수 없어 고르기 자체를 두지 않는다 */}
                   {isMine ? (
                     <p className="mt-8 text-body-04 text-text-muted">내가 등록한 물건이에요.</p>
+                  ) : inTrade ? (
+                    <p className="mt-8 text-body-04 text-text-muted">지금 거래가 진행 중인 물건이에요.</p>
                   ) : (
                     <div className="mt-8">
                       <p className="text-body-03 font-bold text-text-strong">무엇을 하고 싶나요?</p>
