@@ -31,7 +31,7 @@ export function ProductCard({ product, backTarget }: ProductCardProps) {
             <Photo
               src={product.imageUrl}
               fallback={MASCOTS.default}
-              className="size-full object-cover"
+              className={`size-full object-cover ${isClosed ? 'blur-sm' : ''}`}
               fallbackClassName="h-16"
             />
             {isClosed && (
