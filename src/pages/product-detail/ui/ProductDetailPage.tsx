@@ -112,11 +112,10 @@ export function ProductDetailPage() {
             </p>
 
             <div className="mt-8 grid gap-10 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-              {/* 사진 — 폴라로이드. 액자와 사진 칸 모두 픽셀 계단 모서리. 액자는 기울이지 않는다 */}
-              <PolaroidPhoto
-                imageUrl={imageUrl}
-                statusLabel={isClosed ? getStatusTagLabel(product.status, product.tradeType) : undefined}
-              />
+              {/* 사진 — 폴라로이드. 액자와 사진 칸 모두 픽셀 계단 모서리. 액자는 기울이지 않는다.
+                  목록에서는 고를 수 없다는 뜻으로 썸네일을 흐리게 덮지만, 여기까지 들어온 사람은
+                  이 물건을 보러 온 것이다. 상태는 옆 태그와 안내 문구가 이미 말해 준다 */}
+              <PolaroidPhoto imageUrl={imageUrl} />
 
               {/* 정보 */}
               <div className="flex flex-col py-2 md:py-4">
