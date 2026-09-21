@@ -57,10 +57,14 @@ export function registerAuthInterceptor() {
         const accessToken = await refreshAccessToken()
         request.headers.Authorization = `Bearer ${accessToken}`
         return await api.request(request)
-      } catch {
-        // 새로 고친 토큰마저 거절당하면 되살릴 방법이 없다. 세션을 비워 로그인으로 보낸다
-        useSessionStore.getState().clearSession()
-        throw error
+      } catch (retryError) {
+        // 재발급이나 재요청이 401일 때만 세션을 지운다.
+        // 네트워크·서버 오류나 입력 오류는 로그인 만료를 뜻하지 않는다.
+        if (axios.isAxiosError(retryError) && retryError.response?.status === 401) {
+          useSessionStore.getState().clearSession()
+        }
+        // 실제 실패 원인을 넘겨 화면이 입력 오류·충돌 등을 올바르게 안내하게 한다.
+        throw retryError
       }
     },
   )
