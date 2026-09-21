@@ -7,5 +7,11 @@ export {
   STATUS_LABEL,
   TRADE_TYPE_LABEL,
 } from './model/trade'
-export { productKeys, useMarketProducts, useProduct } from './api/product-api'
+export {
+  MARKET_PRODUCT_PAGE_SIZE,
+  productKeys,
+  useMarketProducts,
+  useMarketProductsPage,
+  useProduct,
+} from './api/product-api'
 export { ProductCard } from './ui/ProductCard'

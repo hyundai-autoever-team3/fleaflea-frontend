@@ -7,10 +7,16 @@ import type { ProductDetail, ProductSummary } from '../model/types'
 
 // 백엔드 최대 size가 100
 const LIST_SIZE = 100
+export const MARKET_PRODUCT_PAGE_SIZE = 12
 
 export const productKeys = {
   all: ['products'] as const,
   market: (marketId: number) => [...productKeys.all, 'market', marketId] as const,
+  marketPage: (marketId: number, page: number, size: number) => [
+    ...productKeys.market(marketId),
+    'page',
+    { page, size },
+  ] as const,
   detail: (itemId: number) => [...productKeys.all, 'detail', itemId] as const,
 }
 
@@ -23,9 +29,9 @@ function retryUnlessClientError(failureCount: number, error: unknown) {
   return failureCount < 3
 }
 
-export function getMarketProducts(marketId: number) {
+export function getMarketProducts(marketId: number, page = 0, size = LIST_SIZE) {
   return api.get<PageResponse<ProductSummary>>(`/api/v1/markets/${marketId}/items`, {
-    params: { page: 0, size: LIST_SIZE },
+    params: { page, size },
   })
 }
 
@@ -33,6 +39,15 @@ export function useMarketProducts(marketId: number) {
   return useQuery({
     queryKey: productKeys.market(marketId),
     queryFn: async () => (await getMarketProducts(marketId)).data.content,
+    enabled: isValidId(marketId),
+    retry: retryUnlessClientError,
+  })
+}
+
+export function useMarketProductsPage(marketId: number, page: number, size = MARKET_PRODUCT_PAGE_SIZE) {
+  return useQuery({
+    queryKey: productKeys.marketPage(marketId, page, size),
+    queryFn: async () => (await getMarketProducts(marketId, page, size)).data,
     enabled: isValidId(marketId),
     retry: retryUnlessClientError,
   })

@@ -5,11 +5,21 @@ import { pixelBox } from '../../../shared/lib/pixel'
 import { formatProductPrice, getStatusTagLabel, TRADE_TYPE_LABEL } from '../model/trade'
 import type { ProductSummary } from '../model/types'
 
-export function ProductCard({ product }: { product: ProductSummary }) {
+interface ProductCardProps {
+  product: ProductSummary
+  backTarget?: { to: string; label: string }
+}
+
+export function ProductCard({ product, backTarget }: ProductCardProps) {
   const isClosed = product.status !== 'AVAILABLE'
 
   return (
-    <Link to={`/items/${product.itemId}`} viewTransition className="block drop-shadow-[0_6px_14px_rgba(0,0,0,0.08)]">
+    <Link
+      to={`/items/${product.itemId}`}
+      state={backTarget ? { from: backTarget } : undefined}
+      viewTransition
+      className="block drop-shadow-[0_6px_14px_rgba(0,0,0,0.08)]"
+    >
       {/* 픽셀 테두리: 바깥 연보라 판 + 안쪽 카드 면 */}
       <div style={{ clipPath: pixelBox(4) }} className="bg-primary-tint p-[2px]">
         <div style={{ clipPath: pixelBox(4) }} className="bg-bg p-3">

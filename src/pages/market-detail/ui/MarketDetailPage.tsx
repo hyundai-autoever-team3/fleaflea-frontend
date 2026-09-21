@@ -1,10 +1,10 @@
-import { Fragment, useLayoutEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
 import { MarketCover, useMarket, useMarketInvitation, useMarketMembers } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
-import { ProductCard, useMarketProducts } from '../../../entities/product'
+import { ProductCard, useMarketProductsPage } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import { getSendFriendRequestErrorMessage, useSendFriendRequest } from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
@@ -31,6 +31,10 @@ function formatDate(isoDate: string) {
 // 옆에 놓인 커버(288px) 높이에 맞춘 줄 수. 이보다 적게 접으면 커버 옆에 빈 공간만 생김.
 // Tailwind는 소스의 문자열을 그대로 훑어 클래스를 만들므로 `line-clamp-${n}`처럼 조립하면 안 됨
 const DESCRIPTION_CLAMP_CLASS = 'line-clamp-8'
+
+function readProductPage(value: string | null) {
+  return value !== null && /^\d+$/.test(value) ? Number(value) : 0
+}
 
 // line-clamp는 잘렸는지를 알려주지 않아, 접힌 상태의 실제 내용 높이와 보이는 높이를 재서 판단.
 // 창 폭이 바뀌면 줄 수가 달라지므로 ResizeObserver로 다시 잼
@@ -79,16 +83,44 @@ export function MarketDetailPage() {
   const { marketId: marketIdParam } = useParams()
   const marketId = Number(marketIdParam)
   const isValidId = Number.isInteger(marketId) && marketId > 0
+  const [searchParams, setSearchParams] = useSearchParams()
+  const productPage = readProductPage(searchParams.get('productPage'))
 
   const marketQuery = useMarket(marketId)
   const membersQuery = useMarketMembers(marketId)
-  const productsQuery = useMarketProducts(marketId)
+  const productsQuery = useMarketProductsPage(marketId, productPage)
   const meQuery = useMyProfile()
 
   const market = marketQuery.data
   const isHost = market !== undefined && market.hostId === meQuery.data?.memberId
   const invitationQuery = useMarketInvitation(marketId, isHost)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+
+  const products = productsQuery.data?.content ?? []
+  const productPageCount = productsQuery.data?.totalPages ?? 0
+  const productListParams = new URLSearchParams(searchParams)
+  if (productPage === 0) productListParams.delete('productPage')
+  else productListParams.set('productPage', String(productPage))
+  const productListQuery = productListParams.toString()
+  const productListPath = productListQuery ? `/market/${marketId}?${productListQuery}` : `/market/${marketId}`
+
+  useEffect(() => {
+    if (!productsQuery.data) return
+    const lastPage = Math.max(0, productsQuery.data.totalPages - 1)
+    if (productPage <= lastPage) return
+
+    const params = new URLSearchParams(searchParams)
+    if (lastPage === 0) params.delete('productPage')
+    else params.set('productPage', String(lastPage))
+    setSearchParams(params, { replace: true })
+  }, [productPage, productsQuery.data, searchParams, setSearchParams])
+
+  function selectProductPage(page: number) {
+    const params = new URLSearchParams(searchParams)
+    if (page === 0) params.delete('productPage')
+    else params.set('productPage', String(page))
+    setSearchParams(params, { replace: true })
+  }
 
   // 닉네임 검색 API가 없어 memberId를 알 수 있는 곳이 참여자 목록뿐이라, 친구 추가를 여기서 함
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
@@ -213,7 +245,7 @@ export function MarketDetailPage() {
             {/* 상품 */}
             <section className="mt-14">
               <h2 className="text-head-03 font-bold text-text-strong">
-                상품 {productsQuery.data && <span className="text-primary">{productsQuery.data.length}</span>}
+                상품 {productsQuery.data && <span className="text-primary">{productsQuery.data.totalElements}</span>}
               </h2>
               {productsQuery.isPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">상품을 불러오는 중이에요...</p>
@@ -224,7 +256,7 @@ export function MarketDetailPage() {
                     다시 시도
                   </button>
                 </div>
-              ) : productsQuery.data.length === 0 ? (
+              ) : products.length === 0 ? (
                 <div className="mt-4 flex flex-col items-center bg-primary-subtle py-14 text-center" style={{ clipPath: pixelBox(6) }}>
                   <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                   <p className="mt-3 text-body-03 font-bold text-text-strong">아직 등록된 상품이 없어요</p>
@@ -239,13 +271,43 @@ export function MarketDetailPage() {
                   </Link>
                 </div>
               ) : (
-                <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-                  {productsQuery.data.map((product) => (
-                    <li key={product.itemId}>
-                      <ProductCard product={product} />
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+                    {products.map((product) => (
+                      <li key={product.itemId}>
+                        <ProductCard
+                          product={product}
+                          backTarget={{ to: productListPath, label: market.title }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+
+                  {productPageCount > 1 && (
+                    <nav
+                      aria-label="마켓 상품 목록 페이지"
+                      className="mt-6 flex flex-wrap justify-center gap-1.5 border-t border-primary-subtle pt-4"
+                    >
+                      {Array.from({ length: productPageCount }, (_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectProductPage(index)}
+                          aria-label={`${index + 1}페이지`}
+                          aria-current={productPage === index ? 'page' : undefined}
+                          style={{ clipPath: pixelBox(2) }}
+                          className={
+                            productPage === index
+                              ? 'size-8 bg-primary text-body-04 font-bold text-white'
+                              : 'size-8 bg-primary-subtle text-body-04 font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong'
+                          }
+                        >
+                          {index + 1}
+                        </button>
+                      ))}
+                    </nav>
+                  )}
+                </>
               )}
             </section>
 
