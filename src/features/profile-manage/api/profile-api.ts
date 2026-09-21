@@ -21,7 +21,9 @@ export function updateMyProfile({ nickname, image, deleteProfileImage }: Profile
   const formData = new FormData()
   formData.append('nickname', nickname)
   if (image) formData.append('profileImage', image)
-  if (deleteProfileImage) formData.append('deleteProfileImage', 'true')
+  // 서버가 이 값을 원시 boolean으로 받아, 빠지면 채울 값이 없어 400으로 막힌다.
+  // 도감 등록의 isPublic처럼 거짓일 때도 실어 보낸다
+  formData.append('deleteProfileImage', String(deleteProfileImage))
 
   return api.patch<void>('/api/v1/members/me', formData)
 }
