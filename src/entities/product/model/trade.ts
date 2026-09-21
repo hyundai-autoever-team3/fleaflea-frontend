@@ -25,6 +25,9 @@ export function getStatusTagLabel(status: ProductStatus, tradeType: TradeType) {
   // 대여는 수락된 그 순간부터 빌려준 상태라 '대여 중'이 실제와 맞다.
   // 띄어쓰기는 같은 대여의 앞 단계인 '대여 가능', 그리고 거래 목록의 '대여 중'에 맞춘다
   if (status === 'IN_PROGRESS') return tradeType === 'RENTAL' ? '대여 중' : '예약중'
+  // 대여가 끝난 상품은 다시 빌려줄 수 있어야 하므로 여기까지 오지 않는 것이 맞다.
+  // 그 처리가 들어가기 전에 끝난 대여가 COMPLETED로 남아 있어, 적어도 제 이름으로는 부른다
+  if (tradeType === 'RENTAL') return '대여 완료'
   return '거래 완료'
 }
 
