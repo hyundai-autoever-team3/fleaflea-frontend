@@ -40,10 +40,28 @@ export function MarketJoinPage() {
     joinMutation.mutate(inviteCode, {
       onSuccess: (market) => navigate(`/market/${market.marketId}`, { replace: true }),
       onError: (joinError) => {
-        setAlreadyJoined(isAlreadyJoinedError(joinError))
+        const joined = isAlreadyJoinedError(joinError)
+        // 로그인을 거쳐 돌아온 길이라면 묻지 않고 통과시킨다. 이미 들어가 있는
+        // 마켓이라고 굳이 멈춰 세울 이유가 없다
+        if (joined && shouldAutoJoin) {
+          navigate('/market', { replace: true })
+          return
+        }
+        setAlreadyJoined(joined)
         setError(getJoinErrorMessage(joinError))
       },
     })
+  }
+
+  // 로그인을 마치고 돌아온 길에서는 확인 카드를 띄우지 않는다.
+  // 이미 초대 링크를 눌러 로그인까지 한 사람에게 다시 묻는 건 한 단계가 헛돈다
+  if (shouldAutoJoin && accessToken && inviteCode && !error) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-bg-subtle p-6">
+        <img src="/mascot/flea10.png" alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+        <p role="status" className="text-body-03 text-text-muted">마켓에 참여하는 중이에요...</p>
+      </div>
+    )
   }
 
   return (
