@@ -22,8 +22,9 @@ const AVAILABLE_LABEL: Record<TradeType, string> = {
 export function getStatusTagLabel(status: ProductStatus, tradeType: TradeType) {
   if (status === 'AVAILABLE') return AVAILABLE_LABEL[tradeType]
   // 사고파는 물건은 아직 넘어가기 전이라 '예약중'이지만,
-  // 대여는 수락된 그 순간부터 빌려준 상태라 '대여중'이 실제와 맞다
-  if (status === 'IN_PROGRESS') return tradeType === 'RENTAL' ? '대여중' : '예약중'
+  // 대여는 수락된 그 순간부터 빌려준 상태라 '대여 중'이 실제와 맞다.
+  // 띄어쓰기는 같은 대여의 앞 단계인 '대여 가능', 그리고 거래 목록의 '대여 중'에 맞춘다
+  if (status === 'IN_PROGRESS') return tradeType === 'RENTAL' ? '대여 중' : '예약중'
   return '거래 완료'
 }
 
