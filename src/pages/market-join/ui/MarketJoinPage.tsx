@@ -36,8 +36,9 @@ export function MarketJoinPage() {
   }, [accessToken, inviteCode, shouldAutoJoin])
 
   // 참여 자체는 금방 끝나 안내 화면이 스쳐 지나간다. 무슨 일이 일어났는지 읽을 틈을
-  // 주려고 자동 참여일 때만 이만큼은 머무른다. 직접 누른 경우는 곧바로 넘어간다
-  const AUTO_JOIN_HOLD_MS = 8000
+  // 주려고 자동 참여일 때만 이만큼은 머무른다. 직접 누른 경우는 곧바로 넘어간다.
+  // 글을 한 번 읽을 만큼만 잡았다 — 더 길면 멈춘 것처럼 느껴진다
+  const AUTO_JOIN_HOLD_MS = 1800
 
   function handleJoin() {
     if (!inviteCode) return
