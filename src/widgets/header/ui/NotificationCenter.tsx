@@ -384,7 +384,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           open || unreadCount > 0 ? 'text-text-strong' : 'text-text-muted'
         } ${FOCUS_RING}`}
       >
-        <BellIcon aria-hidden="true" className="size-6" />
+        <BellIcon aria-hidden="true" className="size-7" />
         {unreadCount > 0 && (
           <span
             aria-hidden="true"

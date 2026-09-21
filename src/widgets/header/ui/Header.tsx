@@ -43,7 +43,7 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="col-start-2 row-start-1 flex items-center justify-end gap-3 md:col-start-3">
+        <div className="col-start-2 row-start-1 flex items-center justify-end gap-1 md:col-start-3">
           <NotificationCenter
             open={activePopover === 'notifications'}
             onOpenChange={(open) => setActivePopover(open ? 'notifications' : null)}
