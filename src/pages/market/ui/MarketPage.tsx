@@ -11,6 +11,7 @@ import { JoinMarketForm, type JoinMarketResponse } from '../../../features/marke
 import { CreateMarketForm, type CreateMarketResponse } from '../../../features/market-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { LoadingScreen } from '../../../shared/ui/loading-screen'
 import { Modal } from '../../../shared/ui/modal'
 import { PixelShops } from './PixelShops'
 
@@ -164,7 +165,7 @@ export function MarketPage() {
         </div>
 
         {isLoading ? (
-          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">마켓을 불러오는 중이에요...</p>
+          <LoadingScreen fullScreen={false} message="마켓을 불러오는 중이에요" />
         ) : isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <p className="text-body-03 text-text-muted">마켓 목록을 불러오지 못했어요.</p>

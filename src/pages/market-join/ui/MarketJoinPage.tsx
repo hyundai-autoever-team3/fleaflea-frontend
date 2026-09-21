@@ -5,6 +5,7 @@ import { useSessionStore } from '../../../entities/session'
 import { getJoinErrorMessage, isAlreadyJoinedError, useJoinMarket } from '../../../features/market-join'
 import { parseInviteCode } from '../../../shared/lib/invite'
 import { withRedirect } from '../../../shared/lib/redirect'
+import { LoadingScreen } from '../../../shared/ui/loading-screen'
 import { pixelBox } from '../../../shared/lib/pixel'
 
 // 로그인 전에도 들어올 수 있는 /invite/:code. 참여 전에는 마켓 상세를 볼 수 없어서(403) 코드만으로 참여시킴
@@ -56,12 +57,7 @@ export function MarketJoinPage() {
   // 로그인을 마치고 돌아온 길에서는 확인 카드를 띄우지 않는다.
   // 이미 초대 링크를 눌러 로그인까지 한 사람에게 다시 묻는 건 한 단계가 헛돈다
   if (shouldAutoJoin && accessToken && inviteCode && !error) {
-    return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-bg-subtle p-6">
-        <img src="/mascot/flea10.png" alt="" className="h-20 object-contain [image-rendering:pixelated]" />
-        <p role="status" className="text-body-03 text-text-muted">마켓에 참여하는 중이에요...</p>
-      </div>
-    )
+    return <LoadingScreen message="마켓에 참여하는 중이에요" hint="곧 마켓으로 들어갈게요." />
   }
 
   return (
