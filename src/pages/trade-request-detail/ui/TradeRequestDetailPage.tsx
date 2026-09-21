@@ -119,20 +119,14 @@ export function TradeRequestDetailPage() {
               <PolaroidPhoto imageUrl={detail.targetItemImageUrl} statusLabel={statusLabel(detail)} />
 
               <div className="flex flex-col py-2 md:py-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    style={{ clipPath: pixelBox(2) }}
-                    className="bg-primary-subtle px-2 py-1 text-xs font-bold text-primary"
-                  >
-                    {detail.tradeType ? TRADE_TYPE_LABEL[detail.tradeType] ?? detail.tradeType : KIND_LABEL[detail.requestType]}
-                  </span>
-                  <span
-                    style={{ clipPath: pixelBox(2) }}
-                    className="bg-primary-subtle px-2 py-1 text-xs font-bold text-text-muted"
-                  >
-                    {statusLabel(detail)}
-                  </span>
-                </div>
+                {/* 상태는 왼쪽 사진 위에 이미 크게 얹혀 있다. 바로 옆에 또 두면
+                    같은 말이 두 번 보이고, 누를 수 있는 것처럼도 읽힌다 */}
+                <span
+                  style={{ clipPath: pixelBox(2) }}
+                  className="w-fit bg-primary-subtle px-2 py-1 text-xs font-bold text-primary"
+                >
+                  {detail.tradeType ? TRADE_TYPE_LABEL[detail.tradeType] ?? detail.tradeType : KIND_LABEL[detail.requestType]}
+                </span>
 
                 <h2 className="mt-3 text-head-03 font-bold text-text-strong">{detail.targetItemTitle}</h2>
                 {formatPrice(detail) && (
