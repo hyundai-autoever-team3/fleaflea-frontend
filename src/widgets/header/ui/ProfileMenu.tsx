@@ -8,7 +8,7 @@ import { Avatar } from '../../../shared/ui/avatar'
 import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
-const MENU_ITEM = 'flex min-h-11 w-full items-center px-4 text-left text-body-04 text-text-strong transition-colors hover:bg-primary-subtle'
+const MENU_ITEM = 'flex min-h-11 w-full items-center px-4 text-left text-body-04 text-glass-ink/92 transition-colors hover:bg-glass-strong'
 
 // 프로필 사진을 누르면 열리는 작은 메뉴. 로그아웃처럼 자주 쓰는 동작을
 // 마이페이지 안쪽까지 들어가지 않고 어디서든 할 수 있게 한다
@@ -74,16 +74,16 @@ export function ProfileMenu({ open, onOpenChange }: ProfileMenuProps) {
       </button>
 
       {open && (
-        // 잠깐 떴다 사라지는 조작용 판이라 픽셀 계단 대신 둥근 모서리를 쓴다
-        // (검색 입력칸·공개 스위치와 같은 예외 — design.md 1장)
+        // 알림 판과 나란히 뜨는 자리라 같은 유리면으로 맞춘다.
+        // 잠깐 떴다 사라지는 조작용 판이라 픽셀 계단 대신 둥근 모서리를 쓴다 (design.md 1장)
         <div
           id={menuId}
           role="menu"
           aria-label="내 프로필"
-          className="absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-xl border border-border/60 bg-bg py-1 shadow-lg"
+          className="glass-panel absolute right-0 top-full z-20 mt-2 w-48 overflow-hidden rounded-2xl py-1"
         >
           {/* 누구로 로그인했는지 먼저 보여준다 — 계정이 여럿인 사람에게 필요한 정보 */}
-          <p className="truncate border-b border-border/60 px-4 pb-2 pt-1.5 text-xs text-text-muted">
+          <p className="truncate border-b border-glass-line px-4 pb-2 pt-1.5 text-xs text-glass-ink/58">
             {profileQuery.data?.nickname ?? '내 계정'}
           </p>
           <Link
