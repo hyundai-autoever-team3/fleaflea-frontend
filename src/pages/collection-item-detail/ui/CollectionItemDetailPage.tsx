@@ -7,7 +7,6 @@ import { useMyProfile } from '../../../entities/user'
 import { BegRequestModal, TradeRequestModal } from '../../../features/collection-trade'
 import type { CollectionTradeType } from '../../../features/collection-trade'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { isSettledTradeStatus, useIncomingTradeStatus } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { BackLink } from '../../../shared/ui/back-link'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
@@ -46,14 +45,8 @@ export function CollectionItemDetailPage() {
   const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const isMine = detail !== undefined && detail.ownerId === meQuery.data?.memberId
-  // 이미 거래가 걸린 물건에는 새 요청을 보낼 수 없다. 물건은 그대로 보여주되 고르기만 막는다.
-  // 거래 목록에서 들어온 경우엔 그 줄의 상태도 함께 본다
-  const incomingTradeStatus = useIncomingTradeStatus()
-  const inTrade = detail?.status === 'IN_PROGRESS' || isSettledTradeStatus(incomingTradeStatus)
-  // 끝난 거래와 진행 중인 거래는 다른 말이어야 한다
-  const tradeNotice = incomingTradeStatus === 'COMPLETED'
-    ? '거래가 완료된 물건이에요.'
-    : '지금 거래가 진행 중인 물건이에요.'
+  // 이미 거래가 걸린 물건에는 새 요청을 보낼 수 없다. 물건은 그대로 보여주되 고르기만 막는다
+  const inTrade = detail?.status === 'IN_PROGRESS'
 
   return (
     <div>
@@ -99,7 +92,7 @@ export function CollectionItemDetailPage() {
                   {isMine ? (
                     <p className="mt-8 text-body-04 text-text-muted">내가 등록한 물건이에요.</p>
                   ) : inTrade ? (
-                    <p className="mt-8 text-body-04 text-text-muted">{tradeNotice}</p>
+                    <p className="mt-8 text-body-04 text-text-muted">지금 거래가 진행 중인 물건이에요.</p>
                   ) : (
                     <div className="mt-8">
                       <p className="text-body-03 font-bold text-text-strong">무엇을 하고 싶나요?</p>
