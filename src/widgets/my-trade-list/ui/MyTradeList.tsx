@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { TRADE_TYPE_LABEL } from '../../../entities/product'
 import type { TradeType } from '../../../entities/product'
@@ -77,6 +77,29 @@ const SOURCES: { key: SourceKey; label: string }[] = [
   { key: 'ITEM', label: '마켓' },
   { key: 'DEX', label: '도감' },
 ]
+
+function readTab(value: string | null): TabKey {
+  return TABS.some(({ key }) => key === value) ? value as TabKey : 'received'
+}
+
+function readSource(value: string | null): SourceKey {
+  return SOURCES.some(({ key }) => key === value) ? value as SourceKey : 'ALL'
+}
+
+function readPage(value: string | null) {
+  return value !== null && /^\d+$/.test(value) ? Number(value) : 0
+}
+
+function writeTradeListParams(params: URLSearchParams, tab: TabKey, source: SourceKey, page: number) {
+  if (tab === 'received') params.delete('tradeTab')
+  else params.set('tradeTab', tab)
+
+  if (source === 'ALL') params.delete('tradeSource')
+  else params.set('tradeSource', source)
+
+  if (page === 0) params.delete('tradePage')
+  else params.set('tradePage', String(page))
+}
 
 // 도감 거래와 구걸은 둘 다 도감 물건에 대한 요청이라 한 갈래로 묶는다
 function matchesSource({ requestType }: MyTradeRequest, source: SourceKey) {
@@ -178,10 +201,11 @@ function ItemPhoto({ imageUrl, status }: { imageUrl: string | null; status: Trad
 export function MyTradeList() {
   const tabsId = useId()
   const tabRefs = useRef<Partial<Record<TabKey, HTMLButtonElement | null>>>({})
-  const [tab, setTab] = useState<TabKey>('received')
-  const [source, setSource] = useState<SourceKey>('ALL')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = readTab(searchParams.get('tradeTab'))
+  const source = readSource(searchParams.get('tradeSource'))
+  const page = readPage(searchParams.get('tradePage'))
   const [sourceOpen, setSourceOpen] = useState(false)
-  const [page, setPage] = useState(0)
   const sourceMenuRef = useRef<HTMLDivElement>(null)
   const pendingKeysRef = useRef(new Set<string>())
   const [pendingRequests, setPendingRequests] = useState<Record<string, TradeAction>>({})
@@ -205,6 +229,16 @@ export function MyTradeList() {
   const counts = Object.fromEntries(
     TABS.map(({ key }) => [key, inSource.filter((request) => matchesTab(request, key)).length]),
   ) as Record<TabKey, number>
+  const returnParams = new URLSearchParams(searchParams)
+  writeTradeListParams(returnParams, tab, source, currentPage)
+  const returnQuery = returnParams.toString()
+  const returnToMyPage = returnQuery ? `/my-page?${returnQuery}` : '/my-page'
+
+  function updateListLocation(next: Partial<{ tab: TabKey; source: SourceKey; page: number }>) {
+    const params = new URLSearchParams(searchParams)
+    writeTradeListParams(params, next.tab ?? tab, next.source ?? source, next.page ?? page)
+    setSearchParams(params, { replace: true })
+  }
 
   // 바깥을 누르거나 Esc를 누르면 필터 목록을 닫는다
   useEffect(() => {
@@ -224,8 +258,7 @@ export function MyTradeList() {
   }, [sourceOpen])
 
   function selectTab(nextTab: TabKey) {
-    setTab(nextTab)
-    setPage(0)
+    updateListLocation({ tab: nextTab, page: 0 })
     // 탭을 옮기면 붙잡아 두던 줄도 제자리를 찾아간다.
     // 앞선 실패 문구도 그 탭의 이야기라 같이 치운다
     setJustHandled([])
@@ -309,8 +342,7 @@ export function MyTradeList() {
                               role="option"
                               aria-selected={selected}
                               onClick={() => {
-                                setSource(key)
-                                setPage(0)
+                                updateListLocation({ source: key, page: 0 })
                                 setJustHandled([])
                                 setError('')
                                 setSourceOpen(false)
@@ -468,7 +500,7 @@ export function MyTradeList() {
 
                             <Link
                               to={targetLink(request)}
-                              state={{ from: { to: '/my-page', label: '마이페이지' }, tradeStatus: status }}
+                              state={{ from: { to: returnToMyPage, label: '마이페이지' }, tradeStatus: status }}
                               viewTransition
                               title={targetItemTitle}
                               className={`mt-1 block truncate text-body-03 font-bold text-text-strong after:absolute after:inset-0 after:content-[''] ${FOCUS_STYLE}`}
@@ -515,7 +547,7 @@ export function MyTradeList() {
                     <button
                       key={index}
                       type="button"
-                      onClick={() => setPage(index)}
+                      onClick={() => updateListLocation({ page: index })}
                       aria-label={`${index + 1}페이지`}
                       aria-current={currentPage === index ? 'page' : undefined}
                       style={{ clipPath: pixelBox(2) }}
