@@ -52,7 +52,6 @@ export function MyPage() {
 
       <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
-        <p className="mt-2 text-body-04 leading-relaxed text-text-muted">나의 물건, 이웃과의 거래를 한곳에서 관리해요.</p>
 
         {profileQuery.isPending ? (
           <div role="status" aria-label="내 정보를 불러오는 중이에요" className="mt-8 grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">

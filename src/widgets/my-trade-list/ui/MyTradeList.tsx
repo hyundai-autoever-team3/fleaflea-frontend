@@ -362,7 +362,6 @@ export function MyTradeList() {
               </div>
             )}
           </div>
-          <p className="mt-1.5 text-body-04 leading-relaxed text-text-muted">요청부터 완료까지, 거래의 모든 과정을 한곳에서.</p>
         </div>
 
         <div
