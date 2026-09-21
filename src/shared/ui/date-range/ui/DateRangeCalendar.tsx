@@ -101,6 +101,16 @@ export function DateRangeCalendar({
               const isEnd = day === end
               const inRange = Boolean(start && end) && day > start && day < end
               const edge = isStart || isEnd
+              const hasRange = Boolean(start && end)
+              const rangeTrack = !hasRange || (isStart && isEnd)
+                ? ''
+                : isStart
+                  ? 'bg-[linear-gradient(to_right,transparent_50%,var(--color-primary-subtle)_50%)]'
+                  : isEnd
+                    ? 'bg-[linear-gradient(to_right,var(--color-primary-subtle)_50%,transparent_50%)]'
+                    : inRange
+                      ? 'bg-primary-subtle'
+                      : ''
 
               return (
                 <button
@@ -111,16 +121,17 @@ export function DateRangeCalendar({
                   aria-pressed={edge || inRange}
                   aria-label={`${cursor.month + 1}월 ${Number(day.slice(-2))}일`}
                   onClick={() => pick(day)}
-                  style={edge ? { clipPath: pixelBox(2) } : undefined}
-                  className={`h-10 text-body-04 transition-colors disabled:cursor-default disabled:text-text-muted/40 ${
+                  className={`group grid h-10 place-items-center text-body-04 disabled:pointer-events-none disabled:text-text-muted/40 ${rangeTrack} ${FOCUS_RING}`}
+                >
+                  <span className={`relative z-10 grid size-9 place-items-center rounded-full transition-colors ${
                     edge
                       ? 'bg-primary font-bold text-white'
                       : inRange
-                        ? 'bg-primary-subtle text-text-strong'
-                        : 'text-text hover:bg-primary-subtle'
-                  } ${FOCUS_RING}`}
-                >
-                  {Number(day.slice(-2))}
+                        ? 'text-text-strong'
+                        : 'text-text group-hover:bg-primary-subtle'
+                  }`}>
+                    {Number(day.slice(-2))}
+                  </span>
                 </button>
               )
             })}

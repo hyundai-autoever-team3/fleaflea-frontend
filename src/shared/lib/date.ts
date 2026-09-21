@@ -11,9 +11,12 @@ export function todayString() {
   return toDateString(new Date())
 }
 
-// 두 날짜 사이의 '박' 수. 대여는 며칠 빌리는지가 바로 보여야 한다
-export function nightsBetween(start: string, end: string) {
-  const from = new Date(`${start}T00:00:00`)
-  const to = new Date(`${end}T00:00:00`)
-  return Math.round((to.getTime() - from.getTime()) / 86_400_000)
+// 시작일과 종료일을 모두 포함한 대여 일수.
+// 날짜 문자열을 UTC로 계산해 일광 절약 시간 전환 지역에서도 하루가 어긋나지 않게 한다
+export function daysBetween(start: string, end: string) {
+  const [startYear, startMonth, startDay] = start.split('-').map(Number)
+  const [endYear, endMonth, endDay] = end.split('-').map(Number)
+  const from = Date.UTC(startYear, startMonth - 1, startDay)
+  const to = Date.UTC(endYear, endMonth - 1, endDay)
+  return Math.round((to - from) / 86_400_000) + 1
 }

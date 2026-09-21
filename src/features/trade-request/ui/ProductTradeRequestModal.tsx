@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 
 import { REQUEST_ACTION_LABEL, type TradeType } from '../../../entities/product'
 import { pixelBox } from '../../../shared/lib/pixel'
-import { nightsBetween, todayString } from '../../../shared/lib/date'
+import { daysBetween, todayString } from '../../../shared/lib/date'
 import { DateRangeCalendar } from '../../../shared/ui/date-range'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { Modal } from '../../../shared/ui/modal'
@@ -96,7 +96,7 @@ export function ProductTradeRequestModal({
               ? '빌릴 첫날을 골라 주세요.'
               : !endDate
                 ? '반납할 날을 골라 주세요.'
-                : `${startDate} ~ ${endDate} · ${nightsBetween(startDate, endDate)}박`}
+                : `${startDate} ~ ${endDate} · ${daysBetween(startDate, endDate)}일`}
           </p>
           <div className="mt-3">
             <DateRangeCalendar
