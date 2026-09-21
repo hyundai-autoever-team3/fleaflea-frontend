@@ -4,9 +4,15 @@ import { isAxiosError } from 'axios'
 
 import { MarketCover, useMarket, useMarketInvitation, useMarketMembers } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
+import type { RelationshipStatus } from '../../../entities/friend'
 import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { getSendFriendRequestErrorMessage, useSendFriendRequest } from '../../../features/friend-manage'
+import {
+  getFriendRequestActionErrorMessage,
+  getSendFriendRequestErrorMessage,
+  useRespondToFriendRequest,
+  useSendFriendRequest,
+} from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -31,6 +37,16 @@ function formatDate(isoDate: string) {
 // 옆에 놓인 커버(288px) 높이에 맞춘 줄 수. 이보다 적게 접으면 커버 옆에 빈 공간만 생김.
 // Tailwind는 소스의 문자열을 그대로 훑어 클래스를 만들므로 `line-clamp-${n}`처럼 조립하면 안 됨
 const DESCRIPTION_CLAMP_CLASS = 'line-clamp-8'
+
+// 참여자 목록이 나와의 친구 관계를 함께 내려주므로, 눌러도 실패할 버튼을 미리 감출 수 있다.
+// 아무 관계도 없을 때(NONE)는 "친구 추가" 버튼이 그 자리를 대신하므로 문구를 두지 않는다
+const FRIEND_RELATIONSHIP_CAPTION: Record<RelationshipStatus, string> = {
+  SELF: '',
+  NONE: '',
+  REQUESTED: '친구 요청을 보냈어요',
+  REQUEST_RECEIVED: '나에게 친구 요청을 보냈어요',
+  FRIEND: '이미 친구예요',
+}
 const PRODUCTS_PER_PAGE = 12
 
 function readProductPage(value: string | null) {
@@ -131,7 +147,8 @@ export function MarketDetailPage() {
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
   const [friendError, setFriendError] = useState('')
   const sendFriendRequestMutation = useSendFriendRequest()
-  const isRequesting = sendFriendRequestMutation.isPending
+  const respondFriendRequestMutation = useRespondToFriendRequest()
+  const isRequesting = sendFriendRequestMutation.isPending || respondFriendRequestMutation.isPending
 
   function openMember(member: MarketMember) {
     setSelectedMember(member)
@@ -148,6 +165,18 @@ export function MarketDetailPage() {
         setSelectedMember(null)
       },
       onError: (error) => setFriendError(getSendFriendRequestErrorMessage(error)),
+    })
+  }
+
+  // 상대가 먼저 보낸 요청은 여기서 바로 받아 줄 수 있다. 친구 화면까지 가지 않아도 되게
+  function handleAcceptFriendRequest(memberId: number) {
+    setFriendError('')
+    respondFriendRequestMutation.mutate({ action: 'accept', memberId }, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구가 되었어요')
+        setSelectedMember(null)
+      },
+      onError: (error) => setFriendError(getFriendRequestActionErrorMessage(error, '수락')),
     })
   }
 
@@ -328,7 +357,7 @@ export function MarketDetailPage() {
               ) : (
                 <ul className="mt-4 flex flex-wrap gap-3">
                   {membersQuery.data.map((member) => {
-                    const isMe = member.memberId === meQuery.data?.memberId
+                    const isMe = member.relationshipStatus === 'SELF'
                     const chipClass = 'flex items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
                     const content = (
                       <>
@@ -384,12 +413,17 @@ export function MarketDetailPage() {
                   <p className="mt-2 text-body-04 text-text-muted">
                     {selectedMember.host ? '이 마켓을 연 호스트예요' : '이 마켓에 참여하고 있어요'}
                   </p>
+                  {FRIEND_RELATIONSHIP_CAPTION[selectedMember.relationshipStatus] && (
+                    <p className="mt-1 text-body-04 font-bold text-primary">
+                      {FRIEND_RELATIONSHIP_CAPTION[selectedMember.relationshipStatus]}
+                    </p>
+                  )}
                   {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  {/* X를 없앤 대신 닫기를 둠. 주요 동작인 친구 추가를 왼쪽에 */}
+                  {/* X를 없앤 대신 닫기를 둠. 주요 동작인 친구 관련 버튼을 왼쪽에 */}
                   <div className="mt-8 flex gap-3">
-                    {/* 나 자신에게는 보낼 수 없어(400) 숨김 */}
-                    {selectedMember.memberId !== meQuery.data?.memberId && (
+                    {/* 이미 친구거나 요청이 오간 사이에 다시 보내면 409라서, 관계에 맞는 버튼만 둔다 */}
+                    {selectedMember.relationshipStatus === 'NONE' && (
                       <button
                         type="button"
                         disabled={isRequesting}
@@ -398,6 +432,17 @@ export function MarketDetailPage() {
                         className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                       >
                         {isRequesting ? '보내는 중...' : '친구 추가'}
+                      </button>
+                    )}
+                    {selectedMember.relationshipStatus === 'REQUEST_RECEIVED' && (
+                      <button
+                        type="button"
+                        disabled={isRequesting}
+                        onClick={() => handleAcceptFriendRequest(selectedMember.memberId)}
+                        style={{ clipPath: pixelBox(4) }}
+                        className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                      >
+                        {isRequesting ? '받는 중...' : '친구 수락'}
                       </button>
                     )}
                     <button
@@ -411,7 +456,7 @@ export function MarketDetailPage() {
                   </div>
 
                   {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
-                  {selectedMember.memberId !== meQuery.data?.memberId && (
+                  {selectedMember.relationshipStatus !== 'SELF' && (
                     <Link
                       to={`/members/${selectedMember.memberId}/item-dex`}
                       state={{ nickname: selectedMember.nickname }}
