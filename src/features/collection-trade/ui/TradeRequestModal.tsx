@@ -6,6 +6,7 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { Modal } from '../../../shared/ui/modal'
+import { Photo } from '../../../shared/ui/photo'
 import { useToastStore } from '../../../shared/ui/toast'
 import {
   TRADE_TYPE_LABEL,
@@ -187,11 +188,12 @@ export function TradeRequestModal({
                         style={{ clipPath: pixelBox(3) }}
                         className="relative flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
                       >
-                        {item.imageUrl ? (
-                          <img src={item.imageUrl} alt="" loading="lazy" className="size-full object-cover" />
-                        ) : (
-                          <img src={MASCOTS.default} alt="" className="h-2/3 object-contain [image-rendering:pixelated]" />
-                        )}
+                        <Photo
+                          src={item.imageUrl}
+                          fallback={MASCOTS.default}
+                          className="size-full object-cover"
+                          fallbackClassName="h-2/3"
+                        />
                         {selected && (
                           <span
                             style={{ clipPath: pixelBox(2) }}

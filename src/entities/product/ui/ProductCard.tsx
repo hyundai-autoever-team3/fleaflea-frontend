@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { Photo } from '../../../shared/ui/photo'
 import { formatProductPrice, getStatusTagLabel, TRADE_TYPE_LABEL } from '../model/trade'
 import type { ProductSummary } from '../model/types'
 
@@ -27,11 +28,12 @@ export function ProductCard({ product, backTarget }: ProductCardProps) {
             style={{ clipPath: pixelBox(3) }}
             className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-primary-subtle"
           >
-            {product.imageUrl ? (
-              <img src={product.imageUrl} alt="" className={`size-full object-cover ${isClosed ? 'blur-sm' : ''}`} />
-            ) : (
-              <img src={MASCOTS.default} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
-            )}
+            <Photo
+              src={product.imageUrl}
+              fallback={MASCOTS.default}
+              className={`size-full object-cover ${isClosed ? 'blur-sm' : ''}`}
+              fallbackClassName="h-16"
+            />
             {isClosed && (
               <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-body-03 font-bold text-white">
                 {getStatusTagLabel(product.status, product.tradeType)}

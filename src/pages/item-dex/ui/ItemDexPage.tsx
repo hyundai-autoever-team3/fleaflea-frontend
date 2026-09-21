@@ -13,6 +13,7 @@ import {
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Modal } from '../../../shared/ui/modal'
+import { Photo } from '../../../shared/ui/photo'
 import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 
@@ -331,11 +332,7 @@ export function ItemDexPage() {
               style={{ clipPath: pixelBox(4) }}
               className="flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
             >
-              {detail.imageUrl ? (
-                <img src={detail.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                <img src={MASCOTS.default} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
-              )}
+              <Photo src={detail.imageUrl} fallback={MASCOTS.default} className="size-full object-cover" fallbackClassName="h-20" />
             </div>
 
             <span

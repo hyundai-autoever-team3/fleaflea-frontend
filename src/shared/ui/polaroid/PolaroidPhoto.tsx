@@ -1,6 +1,7 @@
 import { MASCOTS } from '../../config/mascots'
 import { pixelBox } from '../../lib/pixel'
 import { TapeStrip } from '../doodle'
+import { Photo } from '../photo'
 
 interface PolaroidPhotoProps {
   imageUrl: string | null
@@ -25,11 +26,14 @@ export function PolaroidPhoto({ imageUrl, statusLabel }: PolaroidPhotoProps) {
             style={{ clipPath: pixelBox(2) }}
             className="relative flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
           >
-            {imageUrl ? (
-              <img src={imageUrl} alt="" className={`size-full object-cover ${isClosed ? 'blur-sm' : ''}`} />
-            ) : (
-              <img src={MASCOTS.default} alt="" className="h-28 object-contain [image-rendering:pixelated]" />
-            )}
+            {/* 저장소에서 사라진 사진은 주소만 남아 깨진 그림으로 나온다.
+                주소가 있어도 실제로 받지 못하면 마스코트로 대신한다 */}
+            <Photo
+              src={imageUrl}
+              fallback={MASCOTS.default}
+              className={`size-full object-cover ${isClosed ? 'blur-sm' : ''}`}
+              fallbackClassName="h-28"
+            />
             {isClosed && (
               <span className="absolute inset-0 flex items-center justify-center bg-black/40 text-head-03 font-bold text-white">
                 {statusLabel}

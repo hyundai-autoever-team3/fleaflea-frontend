@@ -1,5 +1,6 @@
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { Photo } from '../../../shared/ui/photo'
 
 interface PreviewSlotProps {
   label: string
@@ -18,15 +19,12 @@ export function PreviewSlot({ label, title, imageUrl }: PreviewSlotProps) {
           style={{ clipPath: pixelBox(3) }}
           className="flex aspect-square items-center justify-center overflow-hidden bg-bg"
         >
-          {imageUrl ? (
-            <img src={imageUrl} alt="" className="size-full object-cover" />
-          ) : (
-            <img
-              src={title ? MASCOTS.default : MASCOTS.basket}
-              alt=""
-              className="h-1/2 object-contain opacity-60 [image-rendering:pixelated]"
-            />
-          )}
+          <Photo
+            src={imageUrl ?? null}
+            fallback={title ? MASCOTS.default : MASCOTS.basket}
+            className="size-full object-cover"
+            fallbackClassName="h-1/2 opacity-60"
+          />
         </div>
       </div>
       <p className="mt-1.5 truncate text-center text-body-04 font-bold text-text-strong">{title ?? '아직 안 골랐어요'}</p>
