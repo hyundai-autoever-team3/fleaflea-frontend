@@ -19,6 +19,7 @@ import {
   useSendFriendRequest,
   type FriendRequestAction,
 } from '../../../features/friend-manage'
+import { useMyProfile } from '../../../entities/user'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { Avatar } from '../../../shared/ui/avatar'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -30,6 +31,7 @@ const ACTION_BUTTON = 'flex h-9 items-center px-3 text-xs font-bold transition-c
 
 // 검색 결과에서 관계 상태를 한 줄로 알려줌. NONE은 아직 아무 관계가 없어 표시하지 않음
 const SEARCH_CAPTION: Record<RelationshipStatus, string> = {
+  SELF: '나예요',
   NONE: '',
   REQUESTED: '요청을 보냈어요',
   REQUEST_RECEIVED: '나에게 친구 요청을 보냈어요',
@@ -71,6 +73,7 @@ function SectionTitle({ label, count }: { label: string; count?: number }) {
 }
 
 export function FriendsPage() {
+  const meQuery = useMyProfile()
   const friendsQuery = useMyFriends()
   const receivedQuery = useFriendRequests('RECEIVED')
   const sentQuery = useFriendRequests('SENT')
@@ -95,7 +98,9 @@ export function FriendsPage() {
     const friend = friends.find((entry) => entry.memberId === person.memberId)
     const receivedRequest = received.find((entry) => entry.memberId === person.memberId)
     const sentRequest = sent.find((entry) => entry.memberId === person.memberId)
-    const relationshipStatus: RelationshipStatus | null = !relationshipsReady ? null
+    // 내 닉네임으로 검색하면 나도 결과에 나온다. 나에게는 요청을 보낼 수 없어(400) 먼저 가른다
+    const relationshipStatus: RelationshipStatus | null = person.memberId === meQuery.data?.memberId ? 'SELF'
+      : !relationshipsReady ? null
       : friend ? 'FRIEND'
       : receivedRequest ? 'REQUEST_RECEIVED'
       : sentRequest ? 'REQUESTED'
