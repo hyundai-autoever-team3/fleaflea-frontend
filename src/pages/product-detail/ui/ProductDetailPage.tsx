@@ -14,7 +14,7 @@ import { useMyProfile } from '../../../entities/user'
 import { getDeleteProductErrorMessage, useDeleteProduct } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
+import { isSettledTradeStatus, useBackTarget, useIncomingTradeStatus, type BackTarget } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
@@ -55,7 +55,10 @@ export function ProductDetailPage() {
   const imageUrl = productsQuery.data?.find((item) => item.itemId === itemId)?.imageUrl ?? null
 
   const isOwner = product !== undefined && product.seller.id === meQuery.data?.memberId
-  const isClosed = product !== undefined && product.status !== 'AVAILABLE'
+  // 거래 목록에서 들어왔다면 그 줄의 상태도 함께 온다. 상품 상태가 아직 안 바뀌었어도
+  // 이미 끝난 거래를 거쳐 왔다면 새로 요청할 자리가 아니다
+  const cameFromSettledTrade = isSettledTradeStatus(useIncomingTradeStatus())
+  const isClosed = (product !== undefined && product.status !== 'AVAILABLE') || cameFromSettledTrade
 
   // 상품 상세 응답에는 내가 이미 요청했는지가 없다. 목록 API(GET /item-trade-requests)는
   // 마이페이지용이라 여기서는 쓰지 않고, 중복 요청은 서버의 409 응답으로 알린다

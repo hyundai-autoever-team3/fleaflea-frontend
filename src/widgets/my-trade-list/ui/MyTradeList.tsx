@@ -468,7 +468,7 @@ export function MyTradeList() {
 
                             <Link
                               to={targetLink(request)}
-                              state={{ from: { to: '/my-page', label: '마이페이지' } }}
+                              state={{ from: { to: '/my-page', label: '마이페이지' }, tradeStatus: status }}
                               viewTransition
                               title={targetItemTitle}
                               className={`mt-1 block truncate text-body-03 font-bold text-text-strong after:absolute after:inset-0 after:content-[''] ${FOCUS_STYLE}`}

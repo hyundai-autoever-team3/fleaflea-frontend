@@ -7,7 +7,7 @@ import { useMyProfile } from '../../../entities/user'
 import { BegRequestModal, TradeRequestModal } from '../../../features/collection-trade'
 import type { CollectionTradeType } from '../../../features/collection-trade'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
+import { isSettledTradeStatus, useBackTarget, useIncomingTradeStatus, type BackTarget } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { Header } from '../../../widgets/header'
@@ -54,8 +54,10 @@ export function CollectionItemDetailPage() {
   const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const isMine = detail !== undefined && detail.ownerId === meQuery.data?.memberId
-  // 이미 거래가 걸린 물건에는 새 요청을 보낼 수 없다. 물건은 그대로 보여주되 고르기만 막는다
-  const inTrade = detail?.status === 'IN_PROGRESS'
+  // 이미 거래가 걸린 물건에는 새 요청을 보낼 수 없다. 물건은 그대로 보여주되 고르기만 막는다.
+  // 거래 목록에서 들어온 경우엔 그 줄의 상태도 함께 본다
+  const cameFromSettledTrade = isSettledTradeStatus(useIncomingTradeStatus())
+  const inTrade = detail?.status === 'IN_PROGRESS' || cameFromSettledTrade
 
   return (
     <div>
