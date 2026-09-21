@@ -10,10 +10,11 @@ import { defineConfig } from 'vite'
 // '/api'가 두 번 붙었고 앞의 하나를 rewrite로 떼어냈는데, 그러면 브라우저가 보는 경로가
 // '/api/api/v1/...'이 된다. 서버는 맞지만 쿠키가 어긋난다 — 리프레시 토큰 쿠키의
 // Path가 '/api/v1/auth'라, 브라우저 경로와 맞지 않으면 재발급 요청에 실리지 않는다.
-// 개발에서는 VITE_API_BASE_URL을 비워 두고 코드의 '/api/v1/...'을 그대로 쓴다
+// VITE_API_BASE_URL을 비워 두고 코드의 '/api/v1/...'을 그대로 쓴다.
+// 개발에서는 아래 프록시가, 배포에서는 vercel.json의 rewrite가 백엔드로 넘긴다
 const apiProxy = {
   '/api': {
-    target: 'https://fleaflea.duckdns.org',
+    target: 'https://api.fleaflea.app',
     changeOrigin: true,
   },
 }
@@ -25,8 +26,7 @@ export default defineConfig({
     port: 5175,
     strictPort: true,
     // 개발 중에는 프록시를 거쳐 호출해 CORS·혼합 콘텐츠를 신경 쓰지 않아도 되게 함.
-    // 배포 환경에는 프록시가 없으므로 VITE_API_BASE_URL에 전체 주소를 넣어야 하고,
-    // 그때는 백엔드 CORS에 배포 도메인이 등록돼 있어야 함
+    // 배포에서도 같은 경로를 쓰며 vercel.json의 rewrite가 백엔드로 넘긴다
     proxy: apiProxy,
   },
   preview: {
