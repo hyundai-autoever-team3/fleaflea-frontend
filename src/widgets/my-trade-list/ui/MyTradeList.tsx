@@ -211,9 +211,9 @@ function statusLabel(request: MyTradeRequest) {
   return STATUS_LABEL[request.status]
 }
 
-function ItemPhoto({ imageUrl, label, status }: { imageUrl: string | null; label: string; status: TradeRequestStatus }) {
-  const inactive = status === 'ACCEPTED' || status === 'COMPLETED'
-
+// 사진은 덮지 않는다. 어떤 상태인지는 오른쪽 배지와 아래 한 줄이 이미 말해 주고,
+// 목록에서 물건을 알아보려면 사진이 그대로 보여야 한다
+function ItemPhoto({ imageUrl }: { imageUrl: string | null }) {
   return (
     <span
       style={{ clipPath: pixelBox(3) }}
@@ -224,11 +224,6 @@ function ItemPhoto({ imageUrl, label, status }: { imageUrl: string | null; label
         className="relative grid size-full place-items-center overflow-hidden bg-primary-subtle"
       >
         <Photo src={imageUrl} fallback={MASCOTS.default} className="size-full object-cover" fallbackClassName="h-2/3" />
-        {inactive && (
-          <span className="absolute inset-0 grid place-items-center bg-text-strong/55 text-xs font-bold text-white">
-            {label}
-          </span>
-        )}
       </span>
     </span>
   )
@@ -513,7 +508,7 @@ export function MyTradeList() {
                         className="relative min-h-28 px-2 py-4 transition-colors hover:bg-primary-subtle/40 sm:min-h-32"
                       >
                         <div className="flex items-start gap-3 sm:gap-4">
-                          <ItemPhoto imageUrl={imageUrl} label={statusLabel(request)} status={status} />
+                          <ItemPhoto imageUrl={imageUrl} />
                           <div className="min-w-0 flex-1">
                             {/* 출처·종류는 부가 정보라 글자만, 지금 해야 할 일(상태)만 배지로 세운다 */}
                             <div className="flex items-center justify-between gap-2">
