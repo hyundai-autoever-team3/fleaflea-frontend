@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    { "source": "/api/:path*", "destination": "https://fleaflea.duckdns.org/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
