@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
+import { notificationKeys } from '../../../entities/notification'
 import type { ProductSummary, TradeType } from '../../../entities/product'
 import { productKeys } from '../../../entities/product'
+import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
 export interface CreateProductPayload {
@@ -81,7 +83,14 @@ export function useDeleteProduct(itemId: number, marketId: number) {
     mutationFn: () => deleteProduct(itemId),
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: productKeys.detail(itemId), exact: true })
-      await refreshMarketProducts(queryClient, marketId)
+      // 상품을 지우면 그 상품에 오간 거래 요청과 알림도 서버에서 함께 사라진다.
+      // 내 거래 목록과 알림을 그대로 두면 없어진 상품의 줄이 남는다
+      await Promise.all([
+        refreshMarketProducts(queryClient, marketId),
+        queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined),
+        queryClient.invalidateQueries({ queryKey: ['trade-requests'] }).catch(() => undefined),
+        queryClient.invalidateQueries({ queryKey: notificationKeys.all }).catch(() => undefined),
+      ])
     },
   })
 }
@@ -104,9 +113,11 @@ export function getUpdateProductErrorMessage(error: unknown) {
   }
 }
 
+// 지난 요청이 남아 있어도 이제는 지울 수 있고, 막히는 건 상품의 상태뿐이다.
+// 진행 중과 완료는 막히는 이유가 달라 코드로 갈라 안내한다
 export function getDeleteProductErrorMessage(error: unknown) {
-  const status = isAxiosError(error) ? error.response?.status : undefined
-  switch (status) {
+  const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
+  switch (response?.status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
     case 403:
@@ -114,7 +125,9 @@ export function getDeleteProductErrorMessage(error: unknown) {
     case 404:
       return '상품을 찾을 수 없어요.'
     case 409:
-      return '거래가 진행 중인 상품은 삭제할 수 없어요.'
+      return response?.data?.code === 'ITEM_ALREADY_COMPLETED'
+        ? '거래가 끝난 상품은 거래 내역으로 남아 삭제할 수 없어요.'
+        : '거래가 진행 중인 상품은 삭제할 수 없어요.'
     default:
       return '상품을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.'
   }

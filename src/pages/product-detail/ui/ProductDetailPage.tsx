@@ -139,14 +139,18 @@ export function ProductDetailPage() {
                       >
                         정보 수정
                       </Link>
-                      <button
-                        type="button"
-                        onClick={() => setIsDeleteOpen(true)}
-                        style={{ clipPath: pixelBox(2) }}
-                        className="flex h-7 items-center bg-primary-subtle px-2.5 text-[11px] font-bold text-text-muted transition-colors duration-200 hover:bg-red-100 hover:text-red-600"
-                      >
-                        삭제
-                      </button>
+                      {/* 거래 중이거나 끝난 상품은 서버가 삭제를 막는다. 눌러도 실패할 버튼 대신
+                          바로 왼쪽의 상태 표시가 이유를 말해 준다 */}
+                      {product.status === 'AVAILABLE' && (
+                        <button
+                          type="button"
+                          onClick={() => setIsDeleteOpen(true)}
+                          style={{ clipPath: pixelBox(2) }}
+                          className="flex h-7 items-center bg-primary-subtle px-2.5 text-[11px] font-bold text-text-muted transition-colors duration-200 hover:bg-red-100 hover:text-red-600"
+                        >
+                          삭제
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
