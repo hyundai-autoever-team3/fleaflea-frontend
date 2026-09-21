@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { collectionKeys, type CollectionItemDetail } from '../../../entities/collection-item'
+import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
 export interface CollectionItemPayload {
@@ -60,7 +61,14 @@ export function useDeleteCollectionItem(collectionItemId: number) {
     mutationFn: () => deleteCollectionItem(collectionItemId),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: collectionKeys.detail(collectionItemId), exact: true })
-      void queryClient.invalidateQueries({ queryKey: collectionKeys.all }).catch(() => undefined)
+      // 물건을 지우면 아직 오가던 요청도 서버에서 함께 사라진다.
+      // 내가 받은 요청은 물론, 그 물건을 내주겠다고 내놓은 교환 요청까지 지워지므로
+      // 내 거래 목록을 그대로 두면 없어진 요청의 줄이 남는다
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: collectionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ['trade-requests'] }),
+      ]).catch(() => undefined)
     },
   })
 }
