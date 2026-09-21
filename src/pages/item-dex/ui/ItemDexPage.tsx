@@ -371,16 +371,22 @@ export function ItemDexPage() {
                 닫기
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setDeleteError('')
-                setIsDeleteOpen(true)
-              }}
-              className="mt-4 w-full text-body-04 font-bold text-text-muted underline transition-colors duration-200 hover:text-red-600"
-            >
-              도감에서 삭제
-            </button>
+            {detail.status === 'IN_PROGRESS' ? (
+              <p className="mt-4 text-center text-body-04 text-text-muted">
+                거래 중인 물건은 삭제할 수 없어요.
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteError('')
+                  setIsDeleteOpen(true)
+                }}
+                className="mt-4 w-full text-body-04 font-bold text-text-muted underline transition-colors duration-200 hover:text-red-600"
+              >
+                도감에서 삭제
+              </button>
+            )}
           </div>
         )}
       </Modal>
