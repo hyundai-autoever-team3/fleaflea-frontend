@@ -81,7 +81,7 @@ export function LoadingScreen({
             aria-valuemax={100}
             aria-valuenow={Math.round(Math.min(progress, holdMs ? 100 : CEILING))}
             aria-label={message}
-            className="h-2.5 flex-1 overflow-hidden rounded-full bg-glass-faint"
+            className="h-2.5 flex-1 overflow-hidden rounded-full bg-primary-subtle"
           >
             <div
               // 정해진 시간에 맞춰 그릴 때는 프레임마다 값을 바꾸므로 전환을 걸지 않는다.
