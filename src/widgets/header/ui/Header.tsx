@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 
+import { BrandMark } from '../../../shared/ui/brand'
 import { NotificationCenter } from './NotificationCenter'
 import { ProfileMenu } from './ProfileMenu'
 
@@ -24,10 +25,7 @@ export function Header() {
           aria-label="FleaFlea 홈, 마켓으로 이동"
           className={`flex min-h-11 w-fit items-center gap-2 transition-opacity hover:opacity-80 ${focusStyle}`}
         >
-          <div className="size-8 shrink-0 overflow-hidden rounded-full">
-            <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover [image-rendering:pixelated]" />
-          </div>
-          <span className="font-jua text-head-03 text-text-strong">FleaFlea</span>
+          <BrandMark />
         </Link>
 
         <nav

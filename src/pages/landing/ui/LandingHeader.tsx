@@ -1,5 +1,6 @@
-import { SparklesIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router'
+
+import { BrandMark } from '../../../shared/ui/brand'
 
 
 export interface LandingNavItem {
@@ -19,11 +20,7 @@ export function LandingHeader({
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-bg/90 px-6 py-4 backdrop-blur">
       <div className="flex shrink-0 items-center gap-2">
-        <div className="size-8 overflow-hidden rounded-full">
-          <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover" />
-        </div>
-        <span className="font-jua text-body-02 text-text-strong">FLEE</span>
-        <SparklesIcon className="size-4 text-primary" />
+        <BrandMark />
       </div>
 
       <div className="flex min-w-0 items-center gap-4 sm:gap-6">

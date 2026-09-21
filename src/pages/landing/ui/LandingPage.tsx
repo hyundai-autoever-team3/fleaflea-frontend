@@ -43,12 +43,12 @@ function BrowserMockup() {
             <span className="size-2.5 rounded-full bg-[#28c840]" />
           </span>
           <span className="mx-auto flex items-center gap-1 text-body-04 text-text-muted">
-            <LockClosedIcon className="size-3" /> FLEE · 우리들의 플리마켓
+            <LockClosedIcon className="size-3" /> FleaFlea · 우리들의 플리마켓
           </span>
         </div>
         <div className="p-6">
           <div className="flex items-center justify-between">
-            <span className="font-jua text-body-03 text-text-strong">FLEE</span>
+            <span className="font-jua text-body-03 text-text-strong">FleaFlea</span>
             <span className="rounded-full bg-bg-subtle px-3 py-1 text-body-04 text-text-muted">
               어떤 보물을 찾고 있나요?
             </span>
