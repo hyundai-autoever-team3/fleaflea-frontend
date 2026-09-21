@@ -14,16 +14,18 @@ import { pixelBox } from '../../../shared/lib/pixel'
 import { Modal } from '../../../shared/ui/modal'
 import { PixelShops } from './PixelShops'
 
+// 먼저 보이는 것이 기본. 내가 만든 마켓도 참여 중인 마켓이므로
+// 첫 탭에 전부 담고, 둘째 탭에서 내가 연 것만 추린다
 const TABS = [
-  { key: 'hosted', label: '내가 만든 마켓' },
   { key: 'joined', label: '참여 중인 마켓' },
+  { key: 'hosted', label: '내가 만든 마켓' },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
 
 const TAB_EMPTY: Record<TabKey, { title: string; description: string }> = {
   hosted: { title: '아직 연 마켓이 없어요', description: '위에서 친구들과 함께할 첫 플리마켓을 만들어보세요!' },
-  joined: { title: '아직 참여한 마켓이 없어요', description: '친구에게 받은 초대 링크로 마켓에 참여해보세요!' },
+  joined: { title: '아직 참여한 마켓이 없어요', description: '마켓을 직접 열거나, 친구에게 받은 초대 링크로 참여해보세요!' },
 }
 
 function EmptyState({ image, title, description }: { image: string; title: string; description: string }) {
@@ -43,7 +45,7 @@ export function MarketPage() {
   const marketsQuery = useMyMarkets()
   const meQuery = useMyProfile()
 
-  const [tab, setTab] = useState<TabKey>('hosted')
+  const [tab, setTab] = useState<TabKey>('joined')
   const [keyword, setKeyword] = useState('')
   // 한글 조합 중(예: '맠')에는 필터를 바꾸지 않아 카드가 깜빡이지 않도록, 조합이 끝난 글자만 검색에 반영
   const [appliedKeyword, setAppliedKeyword] = useState('')
@@ -65,14 +67,14 @@ export function MarketPage() {
   const isLoading = marketsQuery.isPending || meQuery.isPending
   const isError = marketsQuery.isError || meQuery.isError
 
-  // 개설자도 참여자로 등록되므로, 한 목록을 호스트 여부로 나눔
+  // 개설자도 참여자로 등록되므로 목록 하나에 다 들어 있다.
+  // '참여 중인 마켓'은 내가 연 것까지 전부, '내가 만든 마켓'만 호스트로 추린다
   const myMemberId = meQuery.data?.memberId
   const allMarkets = marketsQuery.data ?? []
   const hostedMarkets = allMarkets.filter((market) => market.hostId === myMemberId)
-  const joinedMarkets = allMarkets.filter((market) => market.hostId !== myMemberId)
 
   const hasAnyMarket = allMarkets.length > 0
-  const tabMarkets = isHostTab ? hostedMarkets : joinedMarkets
+  const tabMarkets = isHostTab ? hostedMarkets : allMarkets
   const query = appliedKeyword.trim().toLowerCase()
   const markets = tabMarkets.filter(
     (market) =>
