@@ -131,14 +131,17 @@ export function ProductDetailPage() {
                   </span>
                   {isOwner && (
                     <div className="flex shrink-0 gap-2">
-                      <Link
-                        to={`/items/${product.itemId}/edit`}
-                        viewTransition
-                        style={{ clipPath: pixelBox(2) }}
-                        className="flex h-7 items-center bg-primary px-2.5 text-[11px] font-bold text-white transition-colors duration-200 hover:bg-primary/90"
-                      >
-                        정보 수정
-                      </Link>
+                      {/* 거래가 끝난 상품은 서버가 수정도 막는다(거래 중은 아직 고칠 수 있다) */}
+                      {product.status !== 'COMPLETED' && (
+                        <Link
+                          to={`/items/${product.itemId}/edit`}
+                          viewTransition
+                          style={{ clipPath: pixelBox(2) }}
+                          className="flex h-7 items-center bg-primary px-2.5 text-[11px] font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                        >
+                          정보 수정
+                        </Link>
+                      )}
                       {/* 거래 중이거나 끝난 상품은 서버가 삭제를 막는다. 눌러도 실패할 버튼 대신
                           바로 왼쪽의 상태 표시가 이유를 말해 준다 */}
                       {product.status === 'AVAILABLE' && (
