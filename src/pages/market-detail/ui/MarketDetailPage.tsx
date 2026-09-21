@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios'
 
 import { MarketCover, useMarket, useMarketInvitation, useMarketMembers } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
-import { ProductCard, useMarketProductsPage } from '../../../entities/product'
+import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import { getSendFriendRequestErrorMessage, useSendFriendRequest } from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
@@ -31,6 +31,7 @@ function formatDate(isoDate: string) {
 // 옆에 놓인 커버(288px) 높이에 맞춘 줄 수. 이보다 적게 접으면 커버 옆에 빈 공간만 생김.
 // Tailwind는 소스의 문자열을 그대로 훑어 클래스를 만들므로 `line-clamp-${n}`처럼 조립하면 안 됨
 const DESCRIPTION_CLAMP_CLASS = 'line-clamp-8'
+const PRODUCTS_PER_PAGE = 12
 
 function readProductPage(value: string | null) {
   return value !== null && /^\d+$/.test(value) ? Number(value) : 0
@@ -88,7 +89,7 @@ export function MarketDetailPage() {
 
   const marketQuery = useMarket(marketId)
   const membersQuery = useMarketMembers(marketId)
-  const productsQuery = useMarketProductsPage(marketId, productPage)
+  const productsQuery = useMarketProducts(marketId)
   const meQuery = useMyProfile()
 
   const market = marketQuery.data
@@ -96,8 +97,12 @@ export function MarketDetailPage() {
   const invitationQuery = useMarketInvitation(marketId, isHost)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
 
-  const products = productsQuery.data?.content ?? []
-  const productPageCount = productsQuery.data?.totalPages ?? 0
+  const products = productsQuery.data ?? []
+  const productPageCount = Math.ceil(products.length / PRODUCTS_PER_PAGE)
+  const pageProducts = products.slice(
+    productPage * PRODUCTS_PER_PAGE,
+    (productPage + 1) * PRODUCTS_PER_PAGE,
+  )
   const productListParams = new URLSearchParams(searchParams)
   if (productPage === 0) productListParams.delete('productPage')
   else productListParams.set('productPage', String(productPage))
@@ -106,14 +111,14 @@ export function MarketDetailPage() {
 
   useEffect(() => {
     if (!productsQuery.data) return
-    const lastPage = Math.max(0, productsQuery.data.totalPages - 1)
+    const lastPage = Math.max(0, productPageCount - 1)
     if (productPage <= lastPage) return
 
     const params = new URLSearchParams(searchParams)
     if (lastPage === 0) params.delete('productPage')
     else params.set('productPage', String(lastPage))
     setSearchParams(params, { replace: true })
-  }, [productPage, productsQuery.data, searchParams, setSearchParams])
+  }, [productPage, productPageCount, productsQuery.data, searchParams, setSearchParams])
 
   function selectProductPage(page: number) {
     const params = new URLSearchParams(searchParams)
@@ -245,7 +250,7 @@ export function MarketDetailPage() {
             {/* 상품 */}
             <section className="mt-14">
               <h2 className="text-head-03 font-bold text-text-strong">
-                상품 {productsQuery.data && <span className="text-primary">{productsQuery.data.totalElements}</span>}
+                상품 {productsQuery.data && <span className="text-primary">{products.length}</span>}
               </h2>
               {productsQuery.isPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">상품을 불러오는 중이에요...</p>
@@ -273,7 +278,7 @@ export function MarketDetailPage() {
               ) : (
                 <>
                   <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-                    {products.map((product) => (
+                    {pageProducts.map((product) => (
                       <li key={product.itemId}>
                         <ProductCard
                           product={product}

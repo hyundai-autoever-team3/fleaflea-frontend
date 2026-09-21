@@ -8,10 +8,8 @@ export {
   TRADE_TYPE_LABEL,
 } from './model/trade'
 export {
-  MARKET_PRODUCT_PAGE_SIZE,
   productKeys,
   useMarketProducts,
-  useMarketProductsPage,
   useProduct,
 } from './api/product-api'
 export { ProductCard } from './ui/ProductCard'
