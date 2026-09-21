@@ -43,8 +43,7 @@ export function useTradeAction() {
         queryClient.invalidateQueries({ queryKey: ['trade-requests'] }),
       ]
       // 상품은 수락·완료 후 목록과 상세의 거래 상태를 다시 받는다.
-      // 도감 물건은 거래가 끝나면 주인이 바뀌어 내 도감에서 빠진다.
-      // 받아둔 목록은 1분간 그대로 쓰이므로, 여기서 비워주지 않으면 낡은 채로 남는다
+      // 도감 거래도 관련 목록과 상세를 함께 갱신한다.
       if (kind === 'ITEM') {
         refreshing.push(queryClient.invalidateQueries({ queryKey: productKeys.all }))
       } else {
@@ -55,11 +54,13 @@ export function useTradeAction() {
       // 목록을 다시 받는 데 실패해도 거래 자체는 성공이므로 실패로 바꾸지 않는다
       await Promise.all(refreshing.map((task) => task.catch(() => undefined)))
     },
-    // 상대가 먼저 처리했거나 이미 끝난 거래를 누른 것이다. 내 화면이 낡았다는 뜻이므로
-    // 목록을 다시 받아 맞춘다. 그러지 않으면 누를 수 없는 버튼이 계속 남아 같은 실패가 반복된다
+    // 권한·존재 여부·상태가 바뀌었을 수 있으므로 목록을 다시 확인한다.
+    // 구걸의 완료 상태 불일치는 다른 거래의 409와 달리 400으로 온다.
     onError: async (error) => {
-      const status = isAxiosError(error) ? error.response?.status : undefined
-      if (status !== 403 && status !== 404 && status !== 409) return
+      if (!isAxiosError<{ code?: string }>(error)) return
+      const status = error.response?.status
+      const isBegStatusMismatch = status === 400 && error.response?.data?.code === 'BEG_REQUEST_NOT_ACCEPTED'
+      if (status !== 403 && status !== 404 && status !== 409 && !isBegStatusMismatch) return
       await queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
     },
   })
@@ -73,7 +74,26 @@ const ACTION_LABEL: Record<TradeAction, string> = {
 }
 
 export function getTradeActionErrorMessage(error: unknown, action: TradeAction) {
-  const status = isAxiosError(error) ? error.response?.status : undefined
+  const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
+  // 같은 HTTP 상태여도 수락 전·완료 후·중복 확인 등 원인이 다르다.
+  // Swagger 등록 여부와 별개로 서버가 반환하는 code를 기준으로 안내한다.
+  switch (response?.data?.code) {
+    case 'COLLECTION_TRADE_INVALID_STATUS':
+    case 'TRADE_REQUEST_INVALID_STATUS':
+      return `현재 거래 상태에서는 ${ACTION_LABEL[action]}할 수 없어요. 거래 목록을 확인해 주세요.`
+    case 'TRADE_REQUEST_NOT_ACCEPTED':
+    case 'BEG_REQUEST_NOT_ACCEPTED':
+      return '수락된 거래만 완료할 수 있어요. 현재 거래 상태를 확인해 주세요.'
+    case 'TRADE_REQUEST_NOT_PENDING':
+    case 'BEG_REQUEST_NOT_PENDING':
+      return `수락 대기 중인 요청만 ${ACTION_LABEL[action]}할 수 있어요. 현재 거래 상태를 확인해 주세요.`
+    case 'COLLECTION_TRADE_ALREADY_CONFIRMED':
+    case 'TRADE_REQUEST_ALREADY_CONFIRMED':
+    case 'BEG_REQUEST_ALREADY_COMPLETED':
+      return '이미 완료 처리된 거래예요. 거래 목록을 확인해 주세요.'
+  }
+
+  const status = response?.status
   switch (status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
@@ -82,7 +102,7 @@ export function getTradeActionErrorMessage(error: unknown, action: TradeAction) 
     case 404:
       return '거래 요청을 찾을 수 없어요.'
     case 409:
-      return `이미 처리된 거래라 ${ACTION_LABEL[action]}할 수 없어요. 목록을 새로 받아왔어요.`
+      return `현재 거래 상태에서는 ${ACTION_LABEL[action]}할 수 없어요. 거래 목록을 확인해 주세요.`
     default:
       return `거래를 ${ACTION_LABEL[action]}하지 못했어요. 잠시 후 다시 시도해 주세요.`
   }
