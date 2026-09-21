@@ -15,10 +15,26 @@ interface LoadingScreenProps {
   // 머무는 시간을 아는 경우에만 준다. 그때는 막대가 그 시간에 맞춰 차오른다.
   // 모르면 남은 거리를 조금씩 좁히며 90%에서 기다린다
   holdMs?: number
+  // 이만큼 안에 끝나면 아예 보여주지 않는다. 새로고침처럼 금방 끝나는 기다림에
+  // 판이 번쩍였다 사라지면 오히려 더 거슬린다
+  delayMs?: number
 }
 
-export function LoadingScreen({ message, hint, fullScreen = true, holdMs }: LoadingScreenProps) {
+export function LoadingScreen({
+  message,
+  hint,
+  fullScreen = true,
+  holdMs,
+  delayMs = holdMs ? 0 : 400,
+}: LoadingScreenProps) {
   const [progress, setProgress] = useState(8)
+  const [visible, setVisible] = useState(delayMs === 0)
+
+  useEffect(() => {
+    if (delayMs === 0) return
+    const timer = setTimeout(() => setVisible(true), delayMs)
+    return () => clearTimeout(timer)
+  }, [delayMs])
 
   useEffect(() => {
     if (holdMs) {
@@ -36,6 +52,8 @@ export function LoadingScreen({ message, hint, fullScreen = true, holdMs }: Load
     }, TICK_MS)
     return () => clearInterval(timer)
   }, [holdMs])
+
+  if (!visible) return null
 
   return (
     <div className={fullScreen ? 'flex min-h-dvh items-center justify-center bg-bg p-6' : 'flex justify-center py-16'}>
