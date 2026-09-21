@@ -3,6 +3,7 @@ import { isAxiosError } from 'axios'
 
 import { userKeys } from '../../../entities/user'
 import { api } from '../../../shared/api/axios'
+import { getImageErrorMessage } from '../../../shared/lib/image'
 
 export interface ProfileUpdatePayload {
   nickname: string
@@ -54,8 +55,12 @@ export function useWithdrawMe() {
 }
 
 export function getProfileUpdateErrorMessage(error: unknown) {
-  const status = isAxiosError(error) ? error.response?.status : undefined
-  switch (status) {
+  const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
+  // 사진이 문제일 때 '입력을 확인하세요'라고만 하면 무엇을 고칠지 알 수 없다
+  const imageMessage = getImageErrorMessage(response?.data?.code)
+  if (imageMessage) return imageMessage
+
+  switch (response?.status) {
     case 400:
       return '입력한 내용을 다시 확인해 주세요.'
     case 401:
