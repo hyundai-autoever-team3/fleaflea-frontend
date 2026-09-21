@@ -7,11 +7,48 @@ import { MarketPage } from '../../pages/market'
 import { RequireAuth, RequireGuest } from './guards'
 import { RouteFallback } from './RouteFallback'
 
+// 배포가 바뀌면 조각 파일 이름의 해시도 함께 바뀐다. 탭을 열어둔 채 배포가 넘어가면
+// 그 탭은 사라진 이름을 부르게 되어 화면 이동이 통째로 실패한다.
+// 한 번만 새로고침해 새 index.html을 받으면 풀리므로, 그렇게 되살린다.
+// 새로고침하고도 실패하면 진짜 문제이므로 되풀이하지 않는다
+const RELOAD_FLAG = 'chunk-reloaded'
+
+function readFlag() {
+  try {
+    return sessionStorage.getItem(RELOAD_FLAG)
+  } catch {
+    return null
+  }
+}
+
+function writeFlag(value: string | null) {
+  try {
+    if (value === null) sessionStorage.removeItem(RELOAD_FLAG)
+    else sessionStorage.setItem(RELOAD_FLAG, value)
+  } catch {
+    // 저장소를 막아둔 브라우저에서는 되살리기를 포기한다
+  }
+}
+
+async function loadChunk<T>(load: () => Promise<T>): Promise<T> {
+  try {
+    const module = await load()
+    writeFlag(null)
+    return module
+  } catch (error) {
+    if (!readFlag()) {
+      writeFlag('1')
+      window.location.reload()
+    }
+    throw error
+  }
+}
+
 // 첫 진입 화면(랜딩·로그인·가입·마켓)만 함께 받고, 나머지는 그 화면으로 갈 때 받는다.
 // 전부 정적으로 두면 랜딩만 보려는 사람도 도감·마이페이지 코드를 모두 내려받게 된다
 function lazyAuthed(load: () => Promise<{ default?: unknown } & Record<string, unknown>>, name: string) {
   return async () => {
-    const module = await load()
+    const module = await loadChunk(load)
     const Page = module[name] as () => ReactNode
     return {
       element: (
@@ -57,7 +94,7 @@ export const router = createBrowserRouter([
   {
     path: '/invite/:code',
     lazy: async () => {
-      const { MarketJoinPage } = await import('../../pages/market-join')
+      const { MarketJoinPage } = await loadChunk(() => import('../../pages/market-join'))
       return { element: <MarketJoinPage /> }
     },
   },
