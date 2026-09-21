@@ -35,17 +35,28 @@ export function MarketJoinPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, inviteCode, shouldAutoJoin])
 
+  // 참여 자체는 금방 끝나 안내 화면이 스쳐 지나간다. 무슨 일이 일어났는지 읽을 틈을
+  // 주려고 자동 참여일 때만 이만큼은 머무른다. 직접 누른 경우는 곧바로 넘어간다
+  const AUTO_JOIN_HOLD_MS = 8000
+
   function handleJoin() {
     if (!inviteCode) return
     setError('')
+    const startedAt = Date.now()
+    const goAfterHold = (to: string) => {
+      const waited = Date.now() - startedAt
+      const remaining = shouldAutoJoin ? Math.max(0, AUTO_JOIN_HOLD_MS - waited) : 0
+      window.setTimeout(() => navigate(to, { replace: true }), remaining)
+    }
+
     joinMutation.mutate(inviteCode, {
-      onSuccess: (market) => navigate(`/market/${market.marketId}`, { replace: true }),
+      onSuccess: (market) => goAfterHold(`/market/${market.marketId}`),
       onError: (joinError) => {
         const joined = isAlreadyJoinedError(joinError)
         // 로그인을 거쳐 돌아온 길이라면 묻지 않고 통과시킨다. 이미 들어가 있는
         // 마켓이라고 굳이 멈춰 세울 이유가 없다
         if (joined && shouldAutoJoin) {
-          navigate('/market', { replace: true })
+          goAfterHold('/market')
           return
         }
         setAlreadyJoined(joined)
@@ -57,7 +68,7 @@ export function MarketJoinPage() {
   // 로그인을 마치고 돌아온 길에서는 확인 카드를 띄우지 않는다.
   // 이미 초대 링크를 눌러 로그인까지 한 사람에게 다시 묻는 건 한 단계가 헛돈다
   if (shouldAutoJoin && accessToken && inviteCode && !error) {
-    return <LoadingScreen message="마켓에 참여하는 중이에요" hint="곧 마켓으로 들어갈게요." />
+    return <LoadingScreen message="마켓에 참여하는 중이에요" hint="곧 마켓으로 들어갈게요." holdMs={AUTO_JOIN_HOLD_MS} />
   }
 
   return (

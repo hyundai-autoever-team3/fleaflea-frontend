@@ -12,18 +12,30 @@ interface LoadingScreenProps {
   // 화면 전체를 덮을지, 이미 그려진 화면 안 자리에 놓을지.
   // 주소를 직접 열어 아무것도 없을 때는 덮고, 목록만 기다릴 때는 그 자리에 둔다
   fullScreen?: boolean
+  // 머무는 시간을 아는 경우에만 준다. 그때는 막대가 그 시간에 맞춰 차오른다.
+  // 모르면 남은 거리를 조금씩 좁히며 90%에서 기다린다
+  holdMs?: number
 }
 
-export function LoadingScreen({ message, hint, fullScreen = true }: LoadingScreenProps) {
+export function LoadingScreen({ message, hint, fullScreen = true, holdMs }: LoadingScreenProps) {
   const [progress, setProgress] = useState(8)
 
   useEffect(() => {
+    if (holdMs) {
+      // 끝나는 시점을 아니까 그 시간에 맞춰 고르게 채운다
+      const startedAt = Date.now()
+      const timer = setInterval(() => {
+        setProgress(Math.min(100, ((Date.now() - startedAt) / holdMs) * 100))
+      }, TICK_MS)
+      return () => clearInterval(timer)
+    }
+
     const timer = setInterval(() => {
       // 남은 거리의 일부만 좁힌다 — 처음엔 성큼, 뒤로 갈수록 조금씩
       setProgress((current) => current + Math.max(0.6, (CEILING - current) * 0.12))
     }, TICK_MS)
     return () => clearInterval(timer)
-  }, [])
+  }, [holdMs])
 
   return (
     <div className={fullScreen ? 'flex min-h-dvh items-center justify-center bg-bg p-6' : 'flex justify-center py-16'}>
@@ -44,17 +56,17 @@ export function LoadingScreen({ message, hint, fullScreen = true }: LoadingScree
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={Math.round(progress)}
+            aria-valuenow={Math.round(Math.min(progress, holdMs ? 100 : CEILING))}
             aria-label={message}
             className="h-2.5 flex-1 overflow-hidden rounded-full bg-glass-faint"
           >
             <div
               className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out motion-reduce:transition-none"
-              style={{ width: `${Math.min(progress, CEILING)}%` }}
+              style={{ width: `${holdMs ? Math.min(progress, 100) : Math.min(progress, CEILING)}%` }}
             />
           </div>
           <span className="w-9 shrink-0 text-right text-[11px] font-bold tabular-nums text-glass-ink/58">
-            {Math.round(Math.min(progress, CEILING))}%
+            {Math.round(holdMs ? Math.min(progress, 100) : Math.min(progress, CEILING))}%
           </span>
         </div>
       </div>
