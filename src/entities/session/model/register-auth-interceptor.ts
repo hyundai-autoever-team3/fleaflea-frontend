@@ -6,11 +6,16 @@ import { useSessionStore } from './store'
 const REISSUE_PATH = '/api/v1/auth/reissue'
 
 // 접근 토큰이 만료되면 서버는 401만 돌려준다. 되살리지 않으면 로그아웃할 때까지
-// 모든 요청이 401로 막혀, 화면은 멀쩡한데 누르는 것마다 실패하는 상태가 된다
-function reissue(refreshToken: string) {
+// 모든 요청이 401로 막혀, 화면은 멀쩡한데 누르는 것마다 실패하는 상태가 된다.
+// 리프레시 토큰은 HttpOnly 쿠키라 본문에 실을 것이 없다 — 브라우저가 붙여 보낸다
+function reissue() {
   // 기본 axios로 보낸다. api로 보내면 만료된 토큰이 다시 실리고,
   // 이 응답이 401일 때 아래 처리가 또 돌아 재귀에 빠진다
-  return axios.post<{ accessToken: string }>(`${api.defaults.baseURL ?? ''}${REISSUE_PATH}`, { refreshToken })
+  return axios.post<{ accessToken: string }>(
+    `${api.defaults.baseURL ?? ''}${REISSUE_PATH}`,
+    null,
+    { withCredentials: true },
+  )
 }
 
 // 토큰이 만료되면 여러 요청이 한꺼번에 401을 받는다.
@@ -19,9 +24,7 @@ let refreshing: Promise<string> | null = null
 
 function refreshAccessToken() {
   refreshing ??= (async () => {
-    const { refreshToken } = useSessionStore.getState()
-    if (!refreshToken) throw new Error('no refresh token')
-    const { data } = await reissue(refreshToken)
+    const { data } = await reissue()
     useSessionStore.getState().setAccessToken(data.accessToken)
     return data.accessToken
   })().finally(() => {
@@ -46,7 +49,8 @@ export function registerAuthInterceptor() {
       const request = error.config as (typeof error.config & { retriedAfterReissue?: boolean }) | undefined
       // 한 요청당 한 번만 다시 보낸다. 재발급 뒤에도 401이면 정말 권한이 없는 것이다
       if (error.response?.status !== 401 || !request || request.retriedAfterReissue) throw error
-      if (!useSessionStore.getState().refreshToken) throw error
+      // 로그인한 적이 없으면 되살릴 세션도 없다
+      if (!useSessionStore.getState().accessToken) throw error
 
       request.retriedAfterReissue = true
       try {
