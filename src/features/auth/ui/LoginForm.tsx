@@ -43,7 +43,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-subtle p-6">
+    <div className="flex min-h-screen items-center justify-center bg-primary-subtle p-6">
       <div className="grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10">
         {/* 왼쪽: 폼 */}
         <div className="flex h-full flex-col p-6 md:p-10">
