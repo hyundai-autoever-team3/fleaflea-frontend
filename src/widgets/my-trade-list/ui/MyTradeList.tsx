@@ -71,6 +71,23 @@ const ACTION_UI: Record<TradeAction, { label: string; toast: string; primary: bo
   complete: { label: '거래 완료', toast: '거래를 마쳤어요', primary: true },
 }
 
+// 대여는 물건이 돌아오는 거래다. 넘겨주고 끝나는 거래와 같은 말을 쓰면
+// 빌려준 사람은 물건을 잃은 것처럼, 빌린 사람은 산 것처럼 읽힌다
+function isRental({ tradeType }: MyTradeRequest) {
+  return tradeType === 'RENTAL'
+}
+
+// 완료 버튼은 빌린 사람만 누른다. 그 사람에게 이 동작은 '반납'이다
+const RENTAL_ACTION_UI: Partial<Record<TradeAction, { label: string; toast: string }>> = {
+  complete: { label: '반납 확인', toast: '반납을 확인했어요' },
+}
+
+function actionUi(request: MyTradeRequest, action: TradeAction) {
+  const base = ACTION_UI[action]
+  const override = isRental(request) ? RENTAL_ACTION_UI[action] : undefined
+  return { ...base, ...override }
+}
+
 // 마켓 상품과 도감 물건 거래가 한 목록에 섞여 오므로, 보고 싶은 쪽만 추릴 수 있게 한다
 type SourceKey = 'ALL' | 'ITEM' | 'DEX'
 
@@ -167,17 +184,30 @@ function matchesTab(request: MyTradeRequest, tab: TabKey) {
 }
 
 // 상대가 누구이고 지금 무슨 상황인지를 한 줄로. 상태마다 주어가 달라 문장을 따로 쓴다
-function describe({ status, isRequester, owner, requester }: MyTradeRequest) {
+function describe(request: MyTradeRequest) {
+  const { status, isRequester, owner, requester } = request
   // 통합 목록은 양쪽을 다 주므로, 내가 아닌 쪽이 상대다
   const who = (isRequester ? owner : requester).nickname
   if (status === 'PENDING') return isRequester ? `${who}님에게 요청했어요` : `${who}님이 요청했어요`
-  if (status === 'ACCEPTED') return `${who}님과 거래 중이에요`
-  if (status === 'COMPLETED') return `${who}님과 거래를 마쳤어요`
+  if (status === 'ACCEPTED') {
+    if (isRental(request)) return isRequester ? `${who}님에게 빌렸어요` : `${who}님에게 빌려줬어요`
+    return `${who}님과 거래 중이에요`
+  }
+  if (status === 'COMPLETED') {
+    if (isRental(request)) return isRequester ? `${who}님에게 빌렸다 돌려줬어요` : `${who}님이 돌려줬어요`
+    return `${who}님과 거래를 마쳤어요`
+  }
   if (status === 'REJECTED') return isRequester ? `${who}님이 거절했어요` : '거절한 요청이에요'
   return isRequester ? '요청을 취소했어요' : `${who}님이 취소했어요`
 }
 
-function ItemPhoto({ imageUrl, status }: { imageUrl: string | null; status: TradeRequestStatus }) {
+// 수락된 대여는 물건이 이미 나가 있는 상태라 '거래 중'보다 '대여 중'이 실제와 맞다
+function statusLabel(request: MyTradeRequest) {
+  if (request.status === 'ACCEPTED' && isRental(request)) return '대여 중'
+  return STATUS_LABEL[request.status]
+}
+
+function ItemPhoto({ imageUrl, label, status }: { imageUrl: string | null; label: string; status: TradeRequestStatus }) {
   const inactive = status === 'ACCEPTED' || status === 'COMPLETED'
 
   return (
@@ -192,7 +222,7 @@ function ItemPhoto({ imageUrl, status }: { imageUrl: string | null; status: Trad
         <Photo src={imageUrl} fallback={MASCOTS.default} className="size-full object-cover" fallbackClassName="h-2/3" />
         {inactive && (
           <span className="absolute inset-0 grid place-items-center bg-text-strong/55 text-xs font-bold text-white">
-            {STATUS_LABEL[status]}
+            {label}
           </span>
         )}
       </span>
@@ -290,7 +320,7 @@ export function MyTradeList() {
       await action.mutateAsync({ kind: request.requestType, requestId: request.requestId, action: actionType })
       // 처리한 줄을 자리에 붙잡아 둔다. 목록에서 바로 빼면 아래 줄들이 튀어 오른다
       setJustHandled((current) => current.includes(requestKey) ? current : [...current, requestKey])
-      useToastStore.getState().showToast(ACTION_UI[actionType].toast)
+      useToastStore.getState().showToast(actionUi(request, actionType).toast)
     } catch (actionError) {
       setError(getTradeActionErrorMessage(actionError, actionType))
     } finally {
@@ -479,7 +509,7 @@ export function MyTradeList() {
                         className="relative min-h-28 px-2 py-4 transition-colors hover:bg-primary-subtle/40 sm:min-h-32"
                       >
                         <div className="flex items-start gap-3 sm:gap-4">
-                          <ItemPhoto imageUrl={imageUrl} status={status} />
+                          <ItemPhoto imageUrl={imageUrl} label={statusLabel(request)} status={status} />
                           <div className="min-w-0 flex-1">
                             {/* 출처·종류는 부가 정보라 글자만, 지금 해야 할 일(상태)만 배지로 세운다 */}
                             <div className="flex items-center justify-between gap-2">
@@ -494,7 +524,7 @@ export function MyTradeList() {
                                     needsMyAction ? NEEDS_ME_TONE : STATUS_TONE[status]
                                   }`}
                                 >
-                                  {needsMyAction ? '응답 필요' : STATUS_LABEL[status]}
+                                  {needsMyAction ? '응답 필요' : statusLabel(request)}
                                 </span>
                               )}
                             </div>
@@ -522,15 +552,17 @@ export function MyTradeList() {
                                     disabled={busy}
                                     onClick={() => void run(request, actionType)}
                                     style={{ clipPath: pixelBox(2) }}
-                                    className={ACTION_UI[actionType].primary ? ROW_PRIMARY : ROW_SECONDARY}
+                                    className={actionUi(request, actionType).primary ? ROW_PRIMARY : ROW_SECONDARY}
                                   >
-                                    {busy && pendingAction === actionType ? '처리 중' : ACTION_UI[actionType].label}
+                                    {busy && pendingAction === actionType ? '처리 중' : actionUi(request, actionType).label}
                                   </button>
                                 ))}
                               </div>
                             </div>
                             {status === 'ACCEPTED' && actions.length === 0 && (
-                              <p className="mt-1.5 text-xs text-text-muted">상대방의 거래 완료를 기다리고 있어요.</p>
+                              <p className="mt-1.5 text-xs text-text-muted">
+                                {isRental(request) ? '상대방의 반납 확인을 기다리고 있어요.' : '상대방의 거래 완료를 기다리고 있어요.'}
+                              </p>
                             )}
                           </div>
                         </div>
