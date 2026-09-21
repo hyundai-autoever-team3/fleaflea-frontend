@@ -34,6 +34,9 @@ export function DateRangeCalendar({
   // 1일이 무슨 요일인지에 맞춰 앞을 비워 둔다
   const leading = first.getDay()
 
+  // 지난 달에는 고를 수 있는 날이 하나도 없어, 넘어가 봐야 빈 판만 본다
+  const atFirstMonth = `${cursor.year}-${String(cursor.month + 1).padStart(2, '0')}` <= minDate.slice(0, 7)
+
   function moveMonth(step: number) {
     setCursor((current) => {
       const moved = new Date(current.year, current.month + step, 1)
@@ -63,9 +66,10 @@ export function DateRangeCalendar({
           <button
             type="button"
             onClick={() => moveMonth(-1)}
+            disabled={atFirstMonth}
             aria-label="이전 달"
             style={{ clipPath: pixelBox(2) }}
-            className={`grid size-9 place-items-center bg-primary-subtle text-text-strong transition-colors hover:bg-primary-tint ${FOCUS_RING}`}
+            className={`grid size-9 place-items-center bg-primary-subtle text-text-strong transition-colors hover:bg-primary-tint disabled:pointer-events-none disabled:text-text-muted/40 ${FOCUS_RING}`}
           >
             ‹
           </button>
@@ -119,16 +123,20 @@ export function DateRangeCalendar({
                   role="gridcell"
                   disabled={disabled}
                   aria-pressed={edge || inRange}
-                  aria-label={`${cursor.month + 1}월 ${Number(day.slice(-2))}일`}
+                  aria-label={`${cursor.month + 1}월 ${Number(day.slice(-2))}일${disabled ? ', 지난 날짜' : ''}`}
                   onClick={() => pick(day)}
                   className={`group grid h-10 place-items-center text-body-04 disabled:pointer-events-none disabled:text-text-muted/40 ${rangeTrack} ${FOCUS_RING}`}
                 >
+                  {/* 색은 이 안쪽 칸이 들고 있다. 바깥 버튼에만 흐린 색을 걸면
+                      여기서 다시 제 색으로 덮어써 지난 날이 멀쩡해 보인다 */}
                   <span className={`relative z-10 grid size-9 place-items-center rounded-full transition-colors ${
-                    edge
-                      ? 'bg-primary font-bold text-white'
-                      : inRange
-                        ? 'text-text-strong'
-                        : 'text-text group-hover:bg-primary-subtle'
+                    disabled
+                      ? 'text-text-muted/40'
+                      : edge
+                        ? 'bg-primary font-bold text-white'
+                        : inRange
+                          ? 'text-text-strong'
+                          : 'text-text group-hover:bg-primary-subtle'
                   }`}>
                     {Number(day.slice(-2))}
                   </span>
