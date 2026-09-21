@@ -51,7 +51,9 @@ export function MarketJoinPage() {
     }
 
     joinMutation.mutate(inviteCode, {
-      onSuccess: (market) => goAfterHold(`/market/${market.marketId}`),
+      // 막 들어간 마켓이 목록에 더해진 모습을 먼저 보여준다.
+      // 상세로 곧장 들어가면 무엇이 달라졌는지 알기 어렵다
+      onSuccess: () => goAfterHold('/market'),
       onError: (joinError) => {
         const joined = isAlreadyJoinedError(joinError)
         // 로그인을 거쳐 돌아온 길이라면 묻지 않고 통과시킨다. 이미 들어가 있는
