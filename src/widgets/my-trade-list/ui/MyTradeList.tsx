@@ -58,8 +58,10 @@ function requestKeyOf({ requestType, requestId }: MyTradeRequest) {
   return `${requestType}:${requestId}`
 }
 
-function targetLink({ requestType, targetItemId }: MyTradeRequest) {
-  return requestType === 'ITEM' ? `/items/${targetItemId}` : `/collection-items/${targetItemId}`
+// 물건 상세가 아니라 거래 요청 상세로 보낸다. 물건 쪽은 지워졌거나 마켓을 나갔으면
+// 404·403이 나고, 대여 기간이나 요청할 때 쓴 말처럼 요청에만 있는 값도 보이지 않는다
+function targetLink({ requestType, requestId }: MyTradeRequest) {
+  return `/trade-requests/${requestType}/${requestId}`
 }
 
 const ACTION_UI: Record<TradeAction, { label: string; toast: string; primary: boolean }> = {
@@ -499,7 +501,7 @@ export function MyTradeList() {
 
                             <Link
                               to={targetLink(request)}
-                              state={{ from: { to: returnToMyPage, label: '마이페이지' }, tradeStatus: status }}
+                              state={{ from: { to: returnToMyPage, label: '마이페이지' } }}
                               viewTransition
                               title={targetItemTitle}
                               className={`mt-1 block truncate text-body-03 font-bold text-text-strong after:absolute after:inset-0 after:content-[''] ${FOCUS_STYLE}`}

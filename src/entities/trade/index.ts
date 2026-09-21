@@ -6,3 +6,5 @@ export type {
   TradeRequestParty,
 } from './api/my-trade-request-api'
 export { myTradeRequestKeys, useMyTradeRequests } from './api/my-trade-request-api'
+export type { TradeRequestDetail, TradeRequestOfferItem } from './api/trade-request-detail-api'
+export { getTradeRequestDetailErrorMessage, useTradeRequestDetail } from './api/trade-request-detail-api'

@@ -36,6 +36,8 @@ export interface MyTradeRequest extends TradeRequestListItem {
 
 export const myTradeRequestKeys = {
   all: ['my-trade-requests'] as const,
+  detail: (requestType: TradeRequestKind, requestId: number) =>
+    [...myTradeRequestKeys.all, 'detail', requestType, requestId] as const,
 }
 
 export function getTradeRequests(direction: 'received' | 'sent', signal?: AbortSignal) {

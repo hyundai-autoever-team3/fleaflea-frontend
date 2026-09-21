@@ -131,6 +131,12 @@ export const router = createBrowserRouter([
     path: '/members/:memberId/item-dex',
     lazy: lazyAuthed(() => import('../../pages/member-item-dex'), 'MemberItemDexPage'),
   },
+  // 지난 거래는 물건 상세가 아니라 요청 당시의 모습을 본다.
+  // 물건이 지워지거나 마켓을 나간 뒤에도 당사자면 열 수 있다
+  {
+    path: '/trade-requests/:requestType/:requestId',
+    lazy: lazyAuthed(() => import('../../pages/trade-request-detail'), 'TradeRequestDetailPage'),
+  },
   { path: '/friends', lazy: lazyAuthed(() => import('../../pages/friends'), 'FriendsPage') },
   { path: '/my-page', lazy: lazyAuthed(() => import('../../pages/my-page'), 'MyPage') },
     ],
