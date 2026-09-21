@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import type { TradeType } from '../../../entities/product'
+import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 import type { PageResponse } from '../../../shared/api/page-response'
 
@@ -97,9 +98,10 @@ export function useCreateTradeRequest(itemId: number) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: TradeRequestPayload) => createTradeRequest(itemId, payload).then((response) => response.data),
-    onSuccess: () => {
-      // 보낸 뒤 버튼이 '요청함'으로 바뀌도록 목록을 다시 받는다
-      void queryClient.invalidateQueries({ queryKey: tradeRequestKeys.all }).catch(() => undefined)
+    // 보낸 요청은 마이페이지 거래 목록에 바로 보여야 한다. 받아둔 목록을 1분간
+    // 그대로 쓰므로, 여기서 비워주지 않으면 방금 보낸 요청이 한동안 나타나지 않는다
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
     },
   })
 }
