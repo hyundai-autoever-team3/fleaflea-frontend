@@ -407,11 +407,11 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           aria-busy={notificationsQuery.isPending}
           className="glass-panel fixed inset-x-4 top-[6.75rem] z-50 flex max-h-[calc(100dvh-7.75rem)] flex-col overflow-hidden rounded-2xl md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96"
         >
-          <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3.5">
+          <div className="flex min-h-[4.5rem] shrink-0 items-center justify-between gap-3 px-4 py-3.5">
             {confirmingClear ? (
               <>
                 <div className="min-w-0">
-                  <p className="text-body-04 font-bold text-glass-ink/92">알림을 모두 지울까요?</p>
+                  <p className="text-body-03 font-bold text-glass-ink/92">알림을 모두 지울까요?</p>
                   <p className="mt-0.5 text-xs text-glass-ink/58">지운 알림은 되돌릴 수 없어요.</p>
                 </div>
                 {/* 판 안의 다른 동작과 같은 글자 링크로 둔다. 채운 버튼을 하나만
