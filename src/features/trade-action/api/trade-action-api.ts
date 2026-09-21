@@ -20,15 +20,12 @@ export function actOnTradeRequest(kind: TradeRequestKind, requestId: number, act
 }
 
 // 누가 무엇을 누를 수 있는지는 백엔드 검증과 정확히 맞춰야 한다.
-// 특히 '완료'의 주체가 종류마다 다르다 —
-//   상품: 요청자(validateRequester) / 도감: 주인(requireOwner) / 구걸: 신청자
+// 완료는 상품·도감·구걸 모두 요청자만 할 수 있다.
 // 누를 수 없는 버튼을 그리면 403만 돌아오므로 여기서 걸러낸다
-export function availableActions({ requestType, status, isRequester }: MyTradeRequest): TradeAction[] {
+export function availableActions({ status, isRequester }: MyTradeRequest): TradeAction[] {
   if (status === 'PENDING') return isRequester ? ['cancel'] : ['accept', 'reject']
   if (status !== 'ACCEPTED') return []
-
-  const completedByOwner = requestType === 'COLLECTION'
-  return completedByOwner === !isRequester ? ['complete'] : []
+  return isRequester ? ['complete'] : []
 }
 
 export function useTradeAction() {
