@@ -25,9 +25,17 @@ export function getStatusTagLabel(status: ProductStatus, tradeType: TradeType) {
   return '거래 완료'
 }
 
+// 요청을 보내는 쪽에서 본 이름. 파는 사람이 '판매'하는 물건을 사려는 것이므로
+// 버튼에는 '구매'라고 적어야 누르는 사람의 행동과 맞는다
+export const REQUEST_ACTION_LABEL: Record<TradeType, string> = {
+  SALE: '구매',
+  GIVEAWAY: '나눔',
+  RENTAL: '대여',
+}
+
 // 거래 방식에 따라 버튼 문구를 바꿈
 export function getRequestActionLabel(tradeType: TradeType) {
-  return `${TRADE_TYPE_LABEL[tradeType]} 요청하기`
+  return `${REQUEST_ACTION_LABEL[tradeType]} 요청하기`
 }
 
 export function formatProductPrice({ tradeType, price }: Pick<ProductSummary, 'tradeType' | 'price'>) {

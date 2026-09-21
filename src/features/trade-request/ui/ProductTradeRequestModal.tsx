@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 
-import { TRADE_TYPE_LABEL, type TradeType } from '../../../entities/product'
+import { REQUEST_ACTION_LABEL, type TradeType } from '../../../entities/product'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { Modal } from '../../../shared/ui/modal'
@@ -40,7 +40,8 @@ export function ProductTradeRequestModal({
 
   // 대여만 기간을 받는다. 판매·나눔은 날짜 개념이 없음
   const needsDates = tradeType === 'RENTAL'
-  const label = TRADE_TYPE_LABEL[tradeType]
+  // 보내는 사람 입장의 이름을 쓴다 — 파는 물건이라도 누르는 쪽은 '구매'다
+  const label = REQUEST_ACTION_LABEL[tradeType]
 
   function close() {
     setMessage('')
