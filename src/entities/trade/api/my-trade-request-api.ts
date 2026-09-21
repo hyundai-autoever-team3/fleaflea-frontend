@@ -67,5 +67,8 @@ export function useMyTradeRequests() {
     queryKey: myTradeRequestKeys.all,
     queryFn: ({ signal }) => getMyTradeRequests(signal),
     retry: retryUnlessClientError,
+    // 상대방이나 다른 탭에서 처리할 수 있으므로, 재방문·탭 복귀 시 최신 상태를 확인한다.
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   })
 }
