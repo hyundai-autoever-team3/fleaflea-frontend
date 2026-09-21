@@ -9,3 +9,4 @@ export {
   useReadAllNotifications,
   useReadNotification,
 } from './api/notification-api'
+export { NotificationRealtimeSync } from './ui/NotificationRealtimeSync'

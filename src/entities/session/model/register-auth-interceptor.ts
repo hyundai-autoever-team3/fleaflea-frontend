@@ -22,7 +22,7 @@ function reissue() {
 // 재발급은 한 번만 보내고 나머지는 그 결과를 함께 기다린다
 let refreshing: Promise<string> | null = null
 
-function refreshAccessToken() {
+export function refreshAccessToken() {
   refreshing ??= (async () => {
     const { data } = await reissue()
     useSessionStore.getState().setAccessToken(data.accessToken)

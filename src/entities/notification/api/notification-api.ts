@@ -53,7 +53,5 @@ export function useUnreadNotificationCount() {
     queryFn: async () => (await getUnreadNotificationCount()).data,
     retry: retryUnlessClientError,
     staleTime: 30_000,
-    // 실시간 연결 명세가 없으므로, 헤더 배지는 가벼운 주기 조회로 갱신한다.
-    refetchInterval: 60_000,
   })
 }
