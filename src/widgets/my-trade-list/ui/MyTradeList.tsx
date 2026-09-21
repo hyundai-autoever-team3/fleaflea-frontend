@@ -226,8 +226,10 @@ export function MyTradeList() {
   function selectTab(nextTab: TabKey) {
     setTab(nextTab)
     setPage(0)
-    // 탭을 옮기면 붙잡아 두던 줄도 제자리를 찾아간다
+    // 탭을 옮기면 붙잡아 두던 줄도 제자리를 찾아간다.
+    // 앞선 실패 문구도 그 탭의 이야기라 같이 치운다
     setJustHandled([])
+    setError('')
     tabRefs.current[nextTab]?.focus()
   }
 
@@ -309,6 +311,7 @@ export function MyTradeList() {
                                 setSource(key)
                                 setPage(0)
                                 setJustHandled([])
+                                setError('')
                                 setSourceOpen(false)
                               }}
                               className={`flex min-h-10 w-full items-center justify-between px-3 text-left text-body-04 transition-colors hover:bg-primary-subtle ${
