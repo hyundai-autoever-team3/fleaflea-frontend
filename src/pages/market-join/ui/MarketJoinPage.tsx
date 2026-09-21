@@ -75,7 +75,7 @@ export function MarketJoinPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-bg-subtle p-6">
+    <div className="flex min-h-dvh items-center justify-center bg-primary-subtle p-6">
       <div className="w-full max-w-md drop-shadow-[0_10px_20px_rgba(0,0,0,0.12)]">
         <div style={{ clipPath: pixelBox(6) }} className="bg-bg px-8 py-10 text-center">
           <img src="/mascot/flea10.png" alt="" className="mx-auto h-24 object-contain [image-rendering:pixelated]" />
