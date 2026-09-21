@@ -104,8 +104,7 @@ export function getUpdateCollectionErrorMessage(error: unknown) {
 }
 
 export function getDeleteCollectionErrorMessage(error: unknown) {
-  const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
-  const status = response?.status
+  const status = isAxiosError(error) ? error.response?.status : undefined
   switch (status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
@@ -114,9 +113,7 @@ export function getDeleteCollectionErrorMessage(error: unknown) {
     case 404:
       return '이미 삭제되었거나 찾을 수 없는 물건이에요.'
     case 409:
-      return response?.data?.code === 'DATA_INTEGRITY_VIOLATION'
-        ? '거래 중이거나 상품·거래 내역에 연결된 물건은 삭제할 수 없어요. 마이페이지의 내 거래에서 상태를 확인해 주세요.'
-        : '거래 중인 물건은 삭제할 수 없어요. 마이페이지의 내 거래에서 상태를 확인해 주세요.'
+      return '거래가 걸려 있는 물건은 삭제할 수 없어요. 마이페이지의 내 거래에서 상태를 확인해 주세요.'
     default:
       return '물건을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.'
   }
