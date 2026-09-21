@@ -72,7 +72,7 @@ export function LoginForm() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  placeholder=" flee@example.com"
+                  placeholder="flee@example.com"
                   aria-invalid={Boolean(fieldErrors.email)}
                   className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
                 />
@@ -96,7 +96,7 @@ export function LoginForm() {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   maxLength={FIELD_LIMITS.password.max}
-                  placeholder=" 비밀번호를 입력해 주세요"
+                  placeholder="비밀번호를 입력해 주세요"
                   aria-invalid={Boolean(fieldErrors.password)}
                   className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
                 />
