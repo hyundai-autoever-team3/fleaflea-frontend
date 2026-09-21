@@ -116,7 +116,9 @@ export function TradeRequestDetailPage() {
             </p>
 
             <div className="mt-8 grid gap-10 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-              <PolaroidPhoto imageUrl={detail.targetItemImageUrl} statusLabel={statusLabel(detail)} />
+              {/* 이 화면은 그 거래의 기록을 들여다보는 자리라 사진을 가리지 않는다.
+                  마켓 목록에서 흐리게 덮는 건 "지금 요청할 수 없다"는 신호인데 여기엔 요청할 버튼이 없다 */}
+              <PolaroidPhoto imageUrl={detail.targetItemImageUrl} />
 
               <div className="flex flex-col py-2 md:py-4">
                 {/* 상태는 왼쪽 사진 위에 이미 크게 얹혀 있다. 바로 옆에 또 두면
@@ -152,6 +154,7 @@ export function TradeRequestDetailPage() {
 
                 {/* 요청에만 있고 물건에는 없는 값들 — 대여 기간과 요청할 때 쓴 말 */}
                 <dl className="mt-6 divide-y divide-primary-subtle border-y border-primary-subtle">
+                  <InfoRow label="상태" value={statusLabel(detail)} />
                   <InfoRow label="대여 기간" value={rentalPeriod} />
                   <InfoRow label="요청한 날" value={formatDate(detail.createdAt)} />
                   <InfoRow label="완료한 날" value={detail.completedAt ? formatDate(detail.completedAt) : null} />
