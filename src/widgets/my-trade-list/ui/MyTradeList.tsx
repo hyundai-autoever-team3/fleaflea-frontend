@@ -201,9 +201,13 @@ function describe(request: MyTradeRequest) {
   return isRequester ? '요청을 취소했어요' : `${who}님이 취소했어요`
 }
 
-// 수락된 대여는 물건이 이미 나가 있는 상태라 '거래 중'보다 '대여 중'이 실제와 맞다
+// 대여는 물건이 나갔다 돌아오는 거래라 진행도 끝맺음도 제 이름으로 부른다.
+// 거절·취소는 대여든 아니든 같은 일이라 그대로 둔다
 function statusLabel(request: MyTradeRequest) {
-  if (request.status === 'ACCEPTED' && isRental(request)) return '대여 중'
+  if (isRental(request)) {
+    if (request.status === 'ACCEPTED') return '대여 중'
+    if (request.status === 'COMPLETED') return '대여 완료'
+  }
   return STATUS_LABEL[request.status]
 }
 

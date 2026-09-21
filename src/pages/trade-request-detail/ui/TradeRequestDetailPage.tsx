@@ -31,6 +31,15 @@ const STATUS_LABEL: Record<TradeRequestDetail['status'], string> = {
   COMPLETED: '거래 완료',
 }
 
+// 대여는 넘겨주고 끝나는 거래가 아니라 빌려줬다 돌려받는 거래라 말이 달라야 한다
+function statusLabel({ status, tradeType }: TradeRequestDetail) {
+  if (tradeType === 'RENTAL') {
+    if (status === 'ACCEPTED') return '대여 중'
+    if (status === 'COMPLETED') return '대여 완료'
+  }
+  return STATUS_LABEL[status]
+}
+
 // 상품 거래는 SALE·GIVEAWAY·RENTAL, 도감 거래는 RENTAL·EXCHANGE로 값이 겹친다.
 // 구걸에는 방식이 없어 종류 이름이 그 자리를 대신한다
 const TRADE_TYPE_LABEL: Record<string, string> = {
@@ -107,7 +116,7 @@ export function TradeRequestDetailPage() {
             </p>
 
             <div className="mt-8 grid gap-10 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-              <PolaroidPhoto imageUrl={detail.targetItemImageUrl} statusLabel={STATUS_LABEL[detail.status]} />
+              <PolaroidPhoto imageUrl={detail.targetItemImageUrl} statusLabel={statusLabel(detail)} />
 
               <div className="flex flex-col py-2 md:py-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -121,7 +130,7 @@ export function TradeRequestDetailPage() {
                     style={{ clipPath: pixelBox(2) }}
                     className="bg-primary-subtle px-2 py-1 text-xs font-bold text-text-muted"
                   >
-                    {STATUS_LABEL[detail.status]}
+                    {statusLabel(detail)}
                   </span>
                 </div>
 
