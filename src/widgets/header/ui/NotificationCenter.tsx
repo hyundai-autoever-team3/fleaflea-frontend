@@ -414,12 +414,14 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
                   <p className="text-body-04 font-bold text-glass-ink/92">알림을 모두 지울까요?</p>
                   <p className="mt-0.5 text-xs text-glass-ink/58">지운 알림은 되돌릴 수 없어요.</p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                {/* 판 안의 다른 동작과 같은 글자 링크로 둔다. 채운 버튼을 하나만
+                    세우면 유리면 위에서 혼자 튄다. 지우기는 굵기와 색으로 가른다 */}
+                <div className="flex shrink-0 items-center gap-3">
                   <button
                     type="button"
                     onClick={clearAll}
                     disabled={deleteAllMutation.isPending}
-                    className={`min-h-9 rounded-lg bg-status-danger px-3 text-[11px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`whitespace-nowrap text-[11px] font-bold text-status-danger underline underline-offset-2 transition-colors hover:text-glass-ink/92 disabled:no-underline disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     {deleteAllMutation.isPending ? '지우는 중...' : '지우기'}
                   </button>
@@ -427,7 +429,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
                     type="button"
                     onClick={() => setConfirmingClear(false)}
                     disabled={deleteAllMutation.isPending}
-                    className={`min-h-9 whitespace-nowrap text-[11px] text-glass-ink/58 transition-colors hover:text-glass-ink/92 ${FOCUS_RING}`}
+                    className={`whitespace-nowrap text-[11px] text-glass-ink/58 underline-offset-2 transition-colors hover:text-glass-ink/92 hover:underline disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     취소
                   </button>
