@@ -17,9 +17,10 @@ const ATTEMPTS: [edge: number, quality: number][] = [
   [500, 0.5],
 ]
 
-// 서버는 JPEG와 PNG만 받는다(ImageIO로 형식을 읽어 그 둘만 통과시킨다).
-// 그 밖의 형식은 그대로 올리면 400으로 막히므로 반드시 JPEG로 바꿔 보낸다
-const SERVER_SUPPORTED = new Set(['image/jpeg', 'image/png'])
+// 서버가 받는 형식. WebP가 더해져(imageio-webp로 실제 해독까지 한다)
+// 요즘 사진을 그대로 올릴 수 있는 경우가 늘었다.
+// 여기 없는 형식(HEIC·GIF 등)은 그대로 올리면 400이므로 반드시 JPEG로 바꿔 보낸다
+const SERVER_SUPPORTED = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 export function isServerSupportedImage(file: File) {
   return SERVER_SUPPORTED.has(file.type)
@@ -60,7 +61,7 @@ export async function shrinkImage(file: File, maxEdge = MAX_EDGE): Promise<File>
 
     if (!blob) return file
     // 원본이 서버가 받는 형식이고 용량도 예산에 들어오면 더 작은 쪽을 그대로 쓴다.
-    // WebP·HEIC·GIF처럼 서버가 못 받는 형식은 커지더라도 변환본을 보내야 한다
+    // HEIC·GIF처럼 서버가 못 받는 형식은 커지더라도 변환본을 보내야 한다
     if (isServerSupportedImage(file) && file.size <= MAX_UPLOAD_BYTES && blob.size >= file.size) return file
 
     const name = file.name.replace(/\.[^.]+$/, '') + '.jpg'
@@ -78,7 +79,7 @@ export function getImageErrorMessage(code: string | undefined) {
   switch (code) {
     case 'INVALID_IMAGE':
     case 'INVALID_PROFILE_IMAGE_REQUEST':
-      return '이 사진은 올릴 수 없어요. JPG나 PNG로 저장해서 다시 올려 주세요.'
+      return '이 사진은 올릴 수 없어요. JPG, PNG, WebP로 저장해서 다시 올려 주세요.'
     case 'IMAGE_TOO_LARGE':
       return '사진 용량이 너무 커요. 더 작은 사진으로 올려 주세요.'
     default:
