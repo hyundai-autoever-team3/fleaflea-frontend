@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { collectionKeys } from '../../../entities/collection-item'
+import { productKeys } from '../../../entities/product'
 import { myTradeRequestKeys, type MyTradeRequest, type TradeRequestKind } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
@@ -41,10 +42,12 @@ export function useTradeAction() {
         queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }),
         queryClient.invalidateQueries({ queryKey: ['trade-requests'] }),
       ]
+      // 상품은 수락·완료 후 목록과 상세의 거래 상태를 다시 받는다.
       // 도감 물건은 거래가 끝나면 주인이 바뀌어 내 도감에서 빠진다.
-      // 받아둔 목록은 1분간 그대로 쓰이므로(query-client의 staleTime),
-      // 여기서 비워주지 않으면 넘긴 물건이 한동안 도감에 남아 보인다
-      if (kind !== 'ITEM') {
+      // 받아둔 목록은 1분간 그대로 쓰이므로, 여기서 비워주지 않으면 낡은 채로 남는다
+      if (kind === 'ITEM') {
+        refreshing.push(queryClient.invalidateQueries({ queryKey: productKeys.all }))
+      } else {
         refreshing.push(queryClient.invalidateQueries({ queryKey: collectionKeys.all }))
       }
       // 새 목록이 도착할 때까지 기다렸다 끝낸다. 기다리지 않으면 버튼이 '처리 중'에서
