@@ -7,8 +7,9 @@ import { useMyProfile } from '../../../entities/user'
 import { BegRequestModal, TradeRequestModal } from '../../../features/collection-trade'
 import type { CollectionTradeType } from '../../../features/collection-trade'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { isSettledTradeStatus, useBackTarget, useIncomingTradeStatus, type BackTarget } from '../../../shared/lib/back-target'
+import { isSettledTradeStatus, useIncomingTradeStatus } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { BackLink } from '../../../shared/ui/back-link'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { Header } from '../../../widgets/header'
 
@@ -31,15 +32,6 @@ function getDetailErrorMessage(error: unknown) {
 }
 
 // 돌아갈 곳은 들어온 경로에 따라 달라진다 (도감 목록 / 마이페이지 거래 목록)
-function BackLink({ fallback }: { fallback: BackTarget }) {
-  const back = useBackTarget(fallback)
-  return (
-    <Link to={back.to} viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
-      ← {back.label}
-    </Link>
-  )
-}
-
 export function CollectionItemDetailPage() {
   const { collectionItemId: idParam } = useParams()
   const collectionItemId = Number(idParam)

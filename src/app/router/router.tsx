@@ -5,6 +5,7 @@ import { LoginPage, SignupPage } from '../../pages/auth'
 import { LandingPage } from '../../pages/landing'
 import { MarketPage } from '../../pages/market'
 import { RequireAuth, RequireGuest } from './guards'
+import { RootLayout } from './RootLayout'
 import { RouteFallback } from './RouteFallback'
 
 // 배포가 바뀌면 조각 파일 이름의 해시도 함께 바뀐다. 탭을 열어둔 채 배포가 넘어가면
@@ -62,7 +63,8 @@ function lazyAuthed(load: () => Promise<{ default?: unknown } & Record<string, u
 
 export const router = createBrowserRouter([
   {
-    // 경로 없는 감싸는 라우트 — 아래 화면들이 전부 이 대기 화면을 함께 쓴다
+    // 경로 없는 감싸는 라우트 — 아래 화면들이 전부 이 대기 화면과 스크롤 기록을 함께 쓴다
+    element: <RootLayout />,
     HydrateFallback: RouteFallback,
     children: [
   {

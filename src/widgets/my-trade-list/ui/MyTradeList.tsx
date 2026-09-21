@@ -237,7 +237,7 @@ export function MyTradeList() {
   function updateListLocation(next: Partial<{ tab: TabKey; source: SourceKey; page: number }>) {
     const params = new URLSearchParams(searchParams)
     writeTradeListParams(params, next.tab ?? tab, next.source ?? source, next.page ?? page)
-    setSearchParams(params, { replace: true })
+    setSearchParams(params, { replace: true, preventScrollReset: true })
   }
 
   // 바깥을 누르거나 Esc를 누르면 필터 목록을 닫는다

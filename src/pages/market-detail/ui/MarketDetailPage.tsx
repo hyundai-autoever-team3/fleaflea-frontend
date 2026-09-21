@@ -133,14 +133,14 @@ export function MarketDetailPage() {
     const params = new URLSearchParams(searchParams)
     if (lastPage === 0) params.delete('productPage')
     else params.set('productPage', String(lastPage))
-    setSearchParams(params, { replace: true })
+    setSearchParams(params, { replace: true, preventScrollReset: true })
   }, [productPage, productPageCount, productsQuery.data, searchParams, setSearchParams])
 
   function selectProductPage(page: number) {
     const params = new URLSearchParams(searchParams)
     if (page === 0) params.delete('productPage')
     else params.set('productPage', String(page))
-    setSearchParams(params, { replace: true })
+    setSearchParams(params, { replace: true, preventScrollReset: true })
   }
 
   // 닉네임 검색 API가 없어 memberId를 알 수 있는 곳이 참여자 목록뿐이라, 친구 추가를 여기서 함

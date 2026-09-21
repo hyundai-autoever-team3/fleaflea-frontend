@@ -14,9 +14,10 @@ import { useMyProfile } from '../../../entities/user'
 import { getDeleteProductErrorMessage, useDeleteProduct } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { isSettledTradeStatus, useBackTarget, useIncomingTradeStatus, type BackTarget } from '../../../shared/lib/back-target'
+import { isSettledTradeStatus, useIncomingTradeStatus } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
+import { BackLink } from '../../../shared/ui/back-link'
 import { Modal } from '../../../shared/ui/modal'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -27,16 +28,6 @@ function getDetailErrorMessage(error: unknown) {
   if (status === 403) return '이 상품이 등록된 마켓에 참여해야 볼 수 있어요.'
   if (status === 404) return '상품을 찾을 수 없어요.'
   return '상품 정보를 불러오지 못했어요.'
-}
-
-// 돌아갈 곳은 들어온 경로에 따라 달라진다 (마켓 / 마이페이지 거래 목록)
-function BackLink({ fallback }: { fallback: BackTarget }) {
-  const back = useBackTarget(fallback)
-  return (
-    <Link to={back.to} viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
-      ← {back.label}
-    </Link>
-  )
 }
 
 export function ProductDetailPage() {
