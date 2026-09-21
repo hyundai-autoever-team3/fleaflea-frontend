@@ -292,11 +292,12 @@ export function MyTradeList() {
                   </button>
 
                   {sourceOpen && (
-                    // 잠깐 떴다 사라지는 조작용 판이라 둥근 모서리를 쓴다 (프로필 메뉴와 같은 예외)
+                    // 잠깐 떴다 사라지는 조작용 판이라 둥근 모서리를 쓰고,
+                    // 헤더의 알림·프로필 판과 같은 유리면으로 맞춘다
                     <ul
                       role="listbox"
                       aria-label="거래 출처"
-                      className="absolute right-0 top-full z-10 mt-1 w-36 overflow-hidden rounded-xl border border-border/60 bg-bg py-1 shadow-lg"
+                      className="glass-panel absolute right-0 top-full z-10 mt-1 w-36 overflow-hidden rounded-2xl py-1"
                     >
                       {SOURCES.map(({ key, label }) => {
                         const selected = source === key
@@ -314,12 +315,12 @@ export function MyTradeList() {
                                 setError('')
                                 setSourceOpen(false)
                               }}
-                              className={`flex min-h-10 w-full items-center justify-between px-3 text-left text-body-04 transition-colors hover:bg-primary-subtle ${
-                                selected ? 'font-bold text-text-strong' : 'text-text-muted'
+                              className={`flex min-h-10 w-full items-center justify-between px-3 text-left text-body-04 transition-colors hover:bg-glass-strong ${
+                                selected ? 'font-bold text-glass-ink/92' : 'text-glass-ink/58'
                               } ${FOCUS_STYLE}`}
                             >
                               {label}
-                              <span className="text-xs text-text-muted">{count}</span>
+                              <span className="text-xs text-glass-ink/58">{count}</span>
                             </button>
                           </li>
                         )
