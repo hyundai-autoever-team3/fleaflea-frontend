@@ -23,6 +23,10 @@ export function deleteNotification(notificationId: number) {
   return api.delete<void>(`/api/v1/notifications/${notificationId}`)
 }
 
+export function deleteAllNotifications() {
+  return api.delete<void>('/api/v1/notifications')
+}
+
 // 받아둔 모든 장에서 알림 한 건을 찾아 바꾼다. 어느 장에 있었는지는 알 수 없다
 function updateCachedNotification(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -117,6 +121,22 @@ export function useDeleteNotification() {
       // 지운 줄이 빠지면 뒤쪽 알림이 한 칸씩 당겨 올라오므로 목록을 다시 받는다.
       // 읽지 않은 알림을 지웠다면 배지 숫자도 하나 줄어든다
       if (wasUnread(queryClient, notificationId)) decreaseUnreadCount(queryClient)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: notificationKeys.lists() }),
+        queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }),
+      ].map((task) => task.catch(() => undefined)))
+    },
+  })
+}
+
+export function useDeleteAllNotifications() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: deleteAllNotifications,
+    onSuccess: async () => {
+      // 하나도 남지 않으므로 배지도 0으로 맞춘다
+      queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), { unreadCount: 0 })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: notificationKeys.lists() }),
         queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }),

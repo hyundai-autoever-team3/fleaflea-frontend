@@ -25,6 +25,7 @@ import {
 } from '../../../entities/notification'
 import {
   getNotificationActionErrorMessage,
+  useDeleteAllNotifications,
   useDeleteNotification,
   useReadAllNotifications,
   useReadNotification,
@@ -246,6 +247,10 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
   const readNotificationMutation = useReadNotification()
   const readAllMutation = useReadAllNotifications()
   const deleteMutation = useDeleteNotification()
+  const deleteAllMutation = useDeleteAllNotifications()
+  // 되돌릴 수 없는 동작이라 한 번 더 묻는다. 판 안에 모달을 겹치면 무거워
+  // 제목 줄을 확인 문구로 바꿔 그 자리에서 답하게 한다
+  const [confirmingClear, setConfirmingClear] = useState(false)
 
   const {
     data: notificationPages,
@@ -311,6 +316,8 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
     const nextOpen = !open
     onOpenChange(nextOpen)
     if (nextOpen) void unreadCountQuery.refetch()
+    // 닫았다 열면 확인 상태는 없던 일로 한다
+    setConfirmingClear(false)
   }
 
   function showMutationError(error: unknown) {
@@ -342,6 +349,17 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
     if (!notification.isRead) markAsRead(notification)
     onOpenChange(false)
     void navigate(DESTINATION[notification.referenceType], { viewTransition: true })
+  }
+
+  function clearAll() {
+    if (deleteAllMutation.isPending) return
+    deleteAllMutation.mutate(undefined, {
+      onSuccess: () => {
+        setConfirmingClear(false)
+        triggerRef.current?.focus()
+      },
+      onError: showMutationError,
+    })
   }
 
   function readAll() {
@@ -389,22 +407,62 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           aria-busy={notificationsQuery.isPending}
           className="glass-panel fixed inset-x-4 top-[6.75rem] z-50 flex max-h-[calc(100dvh-7.75rem)] flex-col overflow-hidden rounded-2xl md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96"
         >
-          <div className="flex shrink-0 items-center justify-between gap-4 px-4 py-3.5">
-            <div className="min-w-0">
-              <h2 id={titleId} className="text-body-03 font-bold text-glass-ink/92">알림</h2>
-              <p className="mt-0.5 text-xs text-glass-ink/58">
-                {unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '새 소식을 확인해 보세요'}
-              </p>
-            </div>
-            {hasUnread && (
-              <button
-                type="button"
-                onClick={readAll}
-                disabled={readAllMutation.isPending}
-                className={`shrink-0 whitespace-nowrap text-[11px] text-glass-ink/58 underline-offset-2 transition-colors hover:text-glass-ink/92 hover:underline disabled:no-underline disabled:opacity-50 ${FOCUS_RING}`}
-              >
-                {readAllMutation.isPending ? '처리 중...' : '모두 읽음'}
-              </button>
+          <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3.5">
+            {confirmingClear ? (
+              <>
+                <div className="min-w-0">
+                  <p className="text-body-04 font-bold text-glass-ink/92">알림을 모두 지울까요?</p>
+                  <p className="mt-0.5 text-xs text-glass-ink/58">지운 알림은 되돌릴 수 없어요.</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    disabled={deleteAllMutation.isPending}
+                    className={`min-h-9 rounded-lg bg-status-danger px-3 text-[11px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
+                  >
+                    {deleteAllMutation.isPending ? '지우는 중...' : '지우기'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingClear(false)}
+                    disabled={deleteAllMutation.isPending}
+                    className={`min-h-9 whitespace-nowrap text-[11px] text-glass-ink/58 transition-colors hover:text-glass-ink/92 ${FOCUS_RING}`}
+                  >
+                    취소
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="min-w-0">
+                  <h2 id={titleId} className="text-body-03 font-bold text-glass-ink/92">알림</h2>
+                  <p className="mt-0.5 text-xs text-glass-ink/58">
+                    {unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '새 소식을 확인해 보세요'}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  {hasUnread && (
+                    <button
+                      type="button"
+                      onClick={readAll}
+                      disabled={readAllMutation.isPending}
+                      className={`whitespace-nowrap text-[11px] text-glass-ink/58 underline-offset-2 transition-colors hover:text-glass-ink/92 hover:underline disabled:no-underline disabled:opacity-50 ${FOCUS_RING}`}
+                    >
+                      {readAllMutation.isPending ? '처리 중...' : '모두 읽음'}
+                    </button>
+                  )}
+                  {notifications.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingClear(true)}
+                      className={`whitespace-nowrap text-[11px] text-glass-ink/58 underline-offset-2 transition-colors hover:text-status-danger hover:underline ${FOCUS_RING}`}
+                    >
+                      전체 삭제
+                    </button>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
