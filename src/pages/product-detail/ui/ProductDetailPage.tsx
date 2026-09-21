@@ -10,6 +10,7 @@ import {
   useMarketProducts,
   useProduct,
 } from '../../../entities/product'
+import type { ProductDetail } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import { getDeleteProductErrorMessage, useDeleteProduct } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
@@ -27,6 +28,17 @@ function getDetailErrorMessage(error: unknown) {
   if (status === 403) return '이 상품이 등록된 마켓에 참여해야 볼 수 있어요.'
   if (status === 404) return '상품을 찾을 수 없어요.'
   return '상품 정보를 불러오지 못했어요.'
+}
+
+// 요청을 못 보내는 이유는 상태마다 다르다. 하나로 묶어 '끝났다'고만 하면
+// 대여는 돌아올 물건인데 영영 끝난 것처럼 읽힌다
+function closedNotice({ status, tradeType }: ProductDetail) {
+  if (status === 'IN_PROGRESS') {
+    return tradeType === 'RENTAL'
+      ? { button: '지금 대여 중이에요', hint: '다른 분이 빌려 갔어요. 반납되면 다시 빌릴 수 있어요.' }
+      : { button: '지금 예약 중이에요', hint: '거래가 진행 중이에요. 취소되면 다시 요청할 수 있어요.' }
+  }
+  return { button: '거래가 끝난 상품이에요', hint: '이미 거래를 마친 상품이에요.' }
 }
 
 export function ProductDetailPage() {
@@ -180,19 +192,21 @@ export function ProductDetailPage() {
                 </div>
 
                 <div className="mt-8">
+                  {/* 왜 요청할 수 없는지는 주인에게도 알려준다 — 주인 화면에는 버튼이 없어
+                      사진 위 표시만으로는 지금 어떤 상태인지 읽히지 않는다 */}
+                  {isClosed && (
+                    <p className="mb-3 text-body-04 text-text-muted">{closedNotice(product).hint}</p>
+                  )}
                   {!isOwner && (
-                    <>
-                      {/* 거래가 끝난 상품에는 요청을 보낼 수 없다 */}
-                      <button
-                        type="button"
-                        disabled={isClosed}
-                        onClick={() => setIsRequestOpen(true)}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="h-11 w-full max-w-[260px] bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
-                      >
-                        {isClosed ? '거래가 끝난 상품이에요' : getRequestActionLabel(product.tradeType)}
-                      </button>
-                    </>
+                    <button
+                      type="button"
+                      disabled={isClosed}
+                      onClick={() => setIsRequestOpen(true)}
+                      style={{ clipPath: pixelBox(4) }}
+                      className="h-11 w-full max-w-[260px] bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                    >
+                      {isClosed ? closedNotice(product).button : getRequestActionLabel(product.tradeType)}
+                    </button>
                   )}
                 </div>
               </div>
