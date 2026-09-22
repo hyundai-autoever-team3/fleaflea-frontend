@@ -361,11 +361,11 @@ export function MarketDetailPage() {
                 <ul
                   id="market-members"
                   ref={membersListRef}
-                  className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4"
+                  className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
                 >
                   {visibleMembers.map((member) => {
                     const isMe = member.relationshipStatus === 'SELF'
-                    const chipClass = 'flex h-12 w-full min-w-0 items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
+                    const chipClass = 'flex h-11 w-full min-w-0 items-center gap-1.5 bg-primary-subtle pl-1.5 pr-2.5'
                     const content = (
                       <>
                         <Avatar profileImageUrl={member.profileImageUrl} size="sm" className="bg-white" />
