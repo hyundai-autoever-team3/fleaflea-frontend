@@ -218,7 +218,7 @@ export function CollectionForm({
               rows={4}
               placeholder="이 물건에 담긴 이야기나 특징을 적어 주세요."
               style={pixelInputStyle}
-              className={`resize-y py-3 disabled:opacity-60 ${pixelInputClass}`}
+              className={`py-3 disabled:opacity-60 ${pixelInputClass}`}
             />
           </PixelField>
         </div>

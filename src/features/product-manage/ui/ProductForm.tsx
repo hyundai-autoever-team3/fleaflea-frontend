@@ -317,7 +317,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
             placeholder="상품 상태나 거래 방법을 적어 주세요."
             aria-invalid={Boolean(fieldErrors.description)}
             style={pixelInputStyle}
-            className={`resize-none py-3 ${pixelInputClass}`}
+            className={`py-3 ${pixelInputClass}`}
           />
         </PixelField>
         {fieldErrors.description && <p className="mt-2 text-body-04 text-red-600">{fieldErrors.description}</p>}

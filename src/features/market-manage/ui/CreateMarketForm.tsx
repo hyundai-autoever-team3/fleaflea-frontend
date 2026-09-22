@@ -123,7 +123,7 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             rows={4}
             placeholder="서로의 물건에 새로운 주인을 찾아줘요."
             style={pixelInputStyle}
-            className={`resize-none py-3 ${pixelInputClass}`}
+            className={`py-3 ${pixelInputClass}`}
           />
         </PixelField>
       </div>

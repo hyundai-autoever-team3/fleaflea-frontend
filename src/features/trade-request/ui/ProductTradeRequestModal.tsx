@@ -132,7 +132,7 @@ export function ProductTradeRequestModal({
             rows={4}
             placeholder="언제 어디서 만나면 좋을지 적어 주세요."
             style={pixelInputStyle}
-            className={`resize-y py-3 ${pixelInputClass}`}
+            className={`py-3 ${pixelInputClass}`}
           />
         </PixelField>
       </div>
