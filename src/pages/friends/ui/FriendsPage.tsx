@@ -1,4 +1,3 @@
-import { HandRaisedIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
@@ -21,7 +20,6 @@ import {
   type FriendRequestAction,
 } from '../../../features/friend-manage'
 import { useMyProfile } from '../../../entities/user'
-import { getPokeErrorMessage, usePokeMember } from '../../../features/poke-member'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { Avatar } from '../../../shared/ui/avatar'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -116,7 +114,6 @@ export function FriendsPage() {
 
   // 목록 새로고침은 각 mutation 안에서 한다. 여기서는 어느 줄이 처리 중인지와
   // 실패 문구만 다루면 된다
-  const pokeMutation = usePokeMember()
   const sendRequestMutation = useSendFriendRequest()
   const respondMutation = useRespondToFriendRequest()
   const deleteFriendshipMutation = useDeleteFriendship()
@@ -125,15 +122,6 @@ export function FriendsPage() {
     : respondMutation.isPending ? respondMutation.variables.memberId
     : deleteFriendshipMutation.isPending ? deleteTarget?.memberId ?? null
     : null
-
-  // 알림 하나를 보내고 끝나는 가벼운 인사라, 목록을 다시 받을 것도 화면을 옮길 것도 없다
-  function handlePoke(friend: Pick<Friendship, 'memberId' | 'nickname'>) {
-    setError('')
-    pokeMutation.mutate(friend.memberId, {
-      onSuccess: () => useToastStore.getState().showToast(`${friend.nickname}님을 콕 찔렀어요`),
-      onError: (pokeError) => setError(getPokeErrorMessage(pokeError)),
-    })
-  }
 
   // 수락·거절·취소는 처리 흐름이 같아 한 곳에서 실행하고, 문구만 동작에 맞춰 바꿈
   function runRequestAction(memberId: number, action: FriendRequestAction, successMessage: string) {
@@ -352,18 +340,6 @@ export function FriendsPage() {
                 <ul className="mt-4 flex flex-col gap-3">
                   {friends.map((friend) => (
                     <FriendRow key={friend.memberId} friend={friend} caption="친구">
-                      {/* 알림에서 받기만 하던 콕 찌르기를 여기서도 보낼 수 있게.
-                          마켓 참여자 모달과 같은 그림·같은 말을 쓴다 */}
-                      <button
-                        type="button"
-                        disabled={pokeMutation.isPending}
-                        onClick={() => handlePoke(friend)}
-                        style={{ clipPath: pixelBox(2) }}
-                        className={`${ACTION_BUTTON} gap-1 bg-primary-subtle text-primary hover:bg-primary-tint disabled:opacity-50`}
-                      >
-                        <HandRaisedIcon aria-hidden="true" className="size-3.5" />
-                        콕 찌르기
-                      </button>
                       {/* 목록 응답에 소유자 이름이 없어, 제목에 쓸 닉네임을 같이 넘김 */}
                       <Link
                         to={`/members/${friend.memberId}/item-dex`}

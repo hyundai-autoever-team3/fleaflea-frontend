@@ -1,4 +1,3 @@
-import { HandRaisedIcon } from '@heroicons/react/24/outline'
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { isAxiosError } from 'axios'
@@ -9,12 +8,10 @@ import type { RelationshipStatus } from '../../../entities/friend'
 import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import { InviteLinkModal } from '../../../features/market-invite'
-import { getPokeErrorMessage, usePokeMember } from '../../../features/poke-member'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
-import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 
 function getDetailErrorMessage(error: unknown) {
@@ -170,25 +167,8 @@ export function MarketDetailPage() {
     setSearchParams(params, { replace: true, preventScrollReset: true })
   }
 
-  // 닉네임 검색 API가 없어 memberId를 알 수 있는 곳이 참여자 목록뿐이라, 친구 추가를 여기서 함
+  // 참여자를 누르면 그 사람의 프로필과 도감으로 가는 길을 보여준다
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
-  const [friendError, setFriendError] = useState('')
-  const pokeMutation = usePokeMember()
-
-  function openMember(member: MarketMember) {
-    setSelectedMember(member)
-    setFriendError('')
-  }
-
-  // 콕 찌르기는 알림 하나를 보내고 끝나는 가벼운 인사다.
-  // 목록에 쌓이는 것이 없으니 모달을 닫지 않고 그 자리에서 알려만 준다
-  function handlePoke(member: MarketMember) {
-    setFriendError('')
-    pokeMutation.mutate(member.memberId, {
-      onSuccess: () => useToastStore.getState().showToast(`${member.nickname}님을 콕 찔렀어요`),
-      onError: (error) => setFriendError(getPokeErrorMessage(error)),
-    })
-  }
 
   const newProductPath = `/market/${marketId}/items/new`
 
@@ -409,7 +389,7 @@ export function MarketDetailPage() {
                         ) : (
                           <button
                             type="button"
-                            onClick={() => openMember(member)}
+                            onClick={() => setSelectedMember(member)}
                             style={{ clipPath: pixelBox() }}
                             className={`${chipClass} transition-colors duration-200 hover:bg-primary-tint`}
                           >
@@ -444,22 +424,8 @@ export function MarketDetailPage() {
                       {FRIEND_RELATIONSHIP_CAPTION[selectedMember.relationshipStatus]}
                     </p>
                   )}
-                  {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  {/* 닫기는 모달 자체의 X가 맡는다. 여기 남는 동작은 콕 찌르기 하나뿐이라
-                      혼자 줄을 차지하고, 친구 맺기는 친구 화면에서 한다 */}
-                  <button
-                    type="button"
-                    disabled={pokeMutation.isPending}
-                    onClick={() => handlePoke(selectedMember)}
-                    style={{ clipPath: pixelBox(4) }}
-                    className="mt-8 flex w-full items-center justify-center gap-1.5 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
-                  >
-                    <HandRaisedIcon aria-hidden="true" className="size-4" />
-                    {pokeMutation.isPending ? '찌르는 중...' : '콕 찔러보기'}
-                  </button>
-
-                  {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
+                  {/* 도감 보기가 이 모달에서 할 수 있는 유일한 일이다 */}
                   {selectedMember.relationshipStatus !== 'SELF' && (
                     <Link
                       to={`/members/${selectedMember.memberId}/item-dex`}
