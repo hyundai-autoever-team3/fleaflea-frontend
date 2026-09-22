@@ -90,18 +90,34 @@ dialog[open] {
 }
 
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
   transition:
     background 0.25s ease,
+    backdrop-filter 0.25s ease,
+    -webkit-backdrop-filter 0.25s ease,
     overlay 0.25s ease allow-discrete,
     display 0.25s ease allow-discrete;
 }
+/* 검정 대신 남색 쪽 막 + 옅은 블러. 뒤 화면이 비치되 읽히지는 않을 만큼만 */
 dialog[open]::backdrop {
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--color-scrim);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 @starting-style {
   dialog[open]::backdrop {
-    background: rgba(0, 0, 0, 0);
+    background: transparent;
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+/* 투명 효과를 줄여 달라고 설정했다면 블러 없이 막만 남긴다 */
+@media (prefers-reduced-transparency: reduce) {
+  dialog[open]::backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 
