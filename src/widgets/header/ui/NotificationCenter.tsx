@@ -7,7 +7,7 @@ import {
   CheckBadgeIcon,
   CheckCircleIcon,
   CheckIcon,
-  HandRaisedIcon,
+  CursorArrowRippleIcon,
   TrashIcon,
   UserGroupIcon,
   UserPlusIcon,
@@ -75,7 +75,7 @@ function NotificationIcon({ type }: { type: NotificationType }) {
     case 'FRIEND_ACCEPTED':
       return <UserGroupIcon aria-hidden="true" className={className} />
     case 'POKE_RECEIVED':
-      return <HandRaisedIcon aria-hidden="true" className={className} />
+      return <CursorArrowRippleIcon aria-hidden="true" className={className} />
   }
 }
 

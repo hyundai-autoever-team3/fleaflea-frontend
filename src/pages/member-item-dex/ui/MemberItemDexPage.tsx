@@ -1,4 +1,4 @@
-import { HandRaisedIcon } from '@heroicons/react/24/outline'
+import { CursorArrowRippleIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { isAxiosError } from 'axios'
@@ -85,9 +85,9 @@ export function MemberItemDexPage() {
             disabled={pokeMutation.isPending}
             onClick={handlePoke}
             style={{ clipPath: pixelBox(2) }}
-            className="flex h-8 items-center gap-1.5 bg-primary-subtle px-3 text-xs font-bold text-primary transition-colors duration-200 hover:bg-primary-tint disabled:opacity-50"
+            className="flex h-8 items-center gap-1.5 bg-status-warning-subtle px-3 text-xs font-bold text-status-warning transition-colors duration-200 hover:brightness-95 disabled:opacity-50"
           >
-            <HandRaisedIcon aria-hidden="true" className="size-3.5" />
+            <CursorArrowRippleIcon aria-hidden="true" className="size-3.5" />
             {pokeMutation.isPending ? '찌르는 중...' : '콕 찌르기'}
           </button>
         </div>
