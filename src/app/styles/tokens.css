@@ -60,8 +60,12 @@
   --green-100: #e7f4eb;
   --green-700: #356a4b;
   --red-100: #fbe9ed;
-  --red-500: #e0334b; /* 안 읽은 알림 배지, 콕 찌르기 타일 — 멀리서도 눈에 걸리는 선명한 빨강 */
-  --red-600: #c62a42; /* 콕 찌르기 글씨 — 거절의 흐린 장미빛(700)과 섞이지 않게 한 단 선명하게 */
+  --red-500: #e0334b; /* 안 읽은 알림 배지 — 멀리서도 '새것'으로 읽히는 선명한 빨강 */
+
+  /* 콕 찌르기 — 붉은 계열이되 주황 쪽으로 기울여, 거절의 장미빛(red-400)과 겹쳐 보이지 않게 한다 */
+  --coral-100: #fdeeea;
+  --coral-400: #dd8672;
+  --coral-700: #9e4a38;
   --red-700: #99394e;
   --amber-100: #fff1da;
   --amber-700: #7d5524;
@@ -153,8 +157,8 @@
   --color-status-accent: var(--pink-700);
   --color-status-accent-subtle: var(--pink-100);
   /* 콕 찌르기 — 거래도 친구 맺기도 아닌 가벼운 인사라 다른 여섯 색과 겹치지 않게 둔다 */
-  --color-status-nudge: var(--red-600);
-  --color-status-nudge-subtle: var(--red-100);
+  --color-status-nudge: var(--coral-700);
+  --color-status-nudge-subtle: var(--coral-100);
 
   /* 종류 타일 바탕 — 흰 아이콘을 얹는 자리 */
   --color-status-brand-tile: var(--purple-400);
@@ -163,7 +167,7 @@
   --color-status-success-tile: var(--green-400);
   --color-status-warning-tile: var(--amber-400);
   --color-status-accent-tile: var(--pink-400);
-  --color-status-nudge-tile: var(--red-500);
+  --color-status-nudge-tile: var(--coral-400);
   --color-status-muted-tile: var(--gray-500);
 
   /* Text */
