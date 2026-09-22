@@ -7,11 +7,18 @@ import type { MarketMember } from '../../../entities/market'
 import type { RelationshipStatus } from '../../../entities/friend'
 import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
+import {
+  getFriendRequestActionErrorMessage,
+  getSendFriendRequestErrorMessage,
+  useRespondToFriendRequest,
+  useSendFriendRequest,
+} from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
+import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 
 function getDetailErrorMessage(error: unknown) {
@@ -167,8 +174,41 @@ export function MarketDetailPage() {
     setSearchParams(params, { replace: true, preventScrollReset: true })
   }
 
-  // 참여자를 누르면 그 사람의 프로필과 도감으로 가는 길을 보여준다
+  // 참여자를 누르면 프로필과 함께, 그 사람에게 할 수 있는 일을 보여준다
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
+  const [friendError, setFriendError] = useState('')
+  const sendFriendRequestMutation = useSendFriendRequest()
+  const respondFriendRequestMutation = useRespondToFriendRequest()
+  const isFriendActionRunning = sendFriendRequestMutation.isPending || respondFriendRequestMutation.isPending
+
+  function openMember(member: MarketMember) {
+    setSelectedMember(member)
+    setFriendError('')
+  }
+
+  function handleSendFriendRequest(memberId: number) {
+    setFriendError('')
+    // 목록 새로고침은 useSendFriendRequest 안에서 한다
+    sendFriendRequestMutation.mutate(memberId, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구 요청을 보냈어요')
+        setSelectedMember(null)
+      },
+      onError: (error) => setFriendError(getSendFriendRequestErrorMessage(error)),
+    })
+  }
+
+  // 상대가 먼저 보낸 요청은 여기서 바로 받아 줄 수 있다
+  function handleAcceptFriendRequest(memberId: number) {
+    setFriendError('')
+    respondFriendRequestMutation.mutate({ action: 'accept', memberId }, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구가 되었어요')
+        setSelectedMember(null)
+      },
+      onError: (error) => setFriendError(getFriendRequestActionErrorMessage(error, '수락')),
+    })
+  }
 
   const newProductPath = `/market/${marketId}/items/new`
 
@@ -389,7 +429,7 @@ export function MarketDetailPage() {
                         ) : (
                           <button
                             type="button"
-                            onClick={() => setSelectedMember(member)}
+                            onClick={() => openMember(member)}
                             style={{ clipPath: pixelBox() }}
                             className={`${chipClass} transition-colors duration-200 hover:bg-primary-tint`}
                           >
@@ -424,8 +464,33 @@ export function MarketDetailPage() {
                       {FRIEND_RELATIONSHIP_CAPTION[selectedMember.relationshipStatus]}
                     </p>
                   )}
+                  {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  {/* 도감 보기가 이 모달에서 할 수 있는 유일한 일이다 */}
+                  {/* 이미 친구거나 요청이 오간 사이에 다시 보내면 409라서, 관계에 맞는 버튼만 둔다 */}
+                  {selectedMember.relationshipStatus === 'NONE' && (
+                    <button
+                      type="button"
+                      disabled={isFriendActionRunning}
+                      onClick={() => handleSendFriendRequest(selectedMember.memberId)}
+                      style={{ clipPath: pixelBox(4) }}
+                      className="mt-8 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                    >
+                      {isFriendActionRunning ? '보내는 중...' : '친구 추가'}
+                    </button>
+                  )}
+                  {selectedMember.relationshipStatus === 'REQUEST_RECEIVED' && (
+                    <button
+                      type="button"
+                      disabled={isFriendActionRunning}
+                      onClick={() => handleAcceptFriendRequest(selectedMember.memberId)}
+                      style={{ clipPath: pixelBox(4) }}
+                      className="mt-8 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                    >
+                      {isFriendActionRunning ? '받는 중...' : '친구 수락'}
+                    </button>
+                  )}
+
+                  {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둔다 */}
                   {selectedMember.relationshipStatus !== 'SELF' && (
                     <Link
                       to={`/members/${selectedMember.memberId}/item-dex`}
