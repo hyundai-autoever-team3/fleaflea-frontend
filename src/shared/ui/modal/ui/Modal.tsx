@@ -80,6 +80,8 @@ export function Modal({ open, onRequestClose, labelledBy, size = 'md', showClose
       // 내용이 길면 스크롤은 되지만 스크롤바는 숨김. 열릴 때 창 자체에 생기는 포커스 테두리도 제거
       className={`glass-window m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
     >
+      {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
+      <div tabIndex={-1} autoFocus className="outline-none" aria-hidden="true" />
       {showClose && (
         <button
           type="button"

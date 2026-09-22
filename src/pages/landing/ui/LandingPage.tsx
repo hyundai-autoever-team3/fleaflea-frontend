@@ -396,6 +396,9 @@ export function LandingPage() {
           setInvitedCode('')
         }}
       >
+        {/* 창을 열자마자 X에 초점이 잡혀 검은 테두리가 그려지던 것을 여기로 받아낸다 */}
+        {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
+        <div tabIndex={-1} autoFocus className="outline-none" aria-hidden="true" />
         <button
           type="button"
           onClick={() => dialogRef.current?.close()}
