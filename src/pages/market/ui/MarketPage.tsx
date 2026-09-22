@@ -120,14 +120,14 @@ export function MarketPage() {
 
       <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {/* 히어로 — 마스코트 + 말풍선 + 시작 버튼 */}
-        <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-8 lg:min-h-80 lg:p-10">
-          <h1 className="mt-6 max-w-[60%] text-head-01 font-bold text-text-strong lg:mt-8 lg:text-4xl">
+        <div className="relative overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-6 sm:min-h-72 sm:p-8 lg:min-h-80 lg:p-10">
+          <h1 className="mt-2 max-w-full text-head-01 font-bold text-text-strong sm:mt-6 sm:max-w-[60%] lg:mt-8 lg:text-4xl">
             친구들과 여는
             <br />
             우리들만의 비밀 마켓
           </h1>
 
-          <div className="relative z-10 mt-6 flex flex-wrap gap-3">
+          <div className="relative z-10 mt-5 flex w-[calc(100%-5rem)] flex-wrap gap-2 sm:mt-6 sm:w-auto sm:gap-3">
             <button
               type="button"
               onClick={() => setModal('create')}
@@ -152,15 +152,15 @@ export function MarketPage() {
             </button>
           </div>
 
-          <div className="absolute right-6 top-24 max-w-56 rounded-2xl bg-bg px-4 py-3 text-body-04 text-text-muted shadow-md lg:right-8 lg:top-28">
+          <div className="absolute right-6 top-24 hidden max-w-56 rounded-2xl bg-bg px-4 py-3 text-body-04 text-text-muted shadow-md sm:block lg:right-8 lg:top-28">
             친구들과 함께 마켓을 열어보세요!
             <span className="absolute -bottom-1.5 left-8 size-3 rotate-45 bg-bg shadow-md" />
           </div>
-          <div className="absolute bottom-6 right-10 h-3 w-20 rounded-full bg-black/15 blur-md lg:right-14 lg:w-24" />
+          <div className="absolute bottom-4 right-6 hidden h-3 w-20 rounded-full bg-black/15 blur-md sm:block lg:right-14 lg:w-24" />
           <img
             src="/mascot/flea.png"
             alt=""
-            className="absolute bottom-4 right-6 size-28 object-contain [image-rendering:pixelated] lg:right-10 lg:size-32"
+            className="absolute -bottom-1 right-2 size-20 object-contain [image-rendering:pixelated] sm:bottom-4 sm:right-6 sm:size-28 lg:right-10 lg:size-32"
           />
         </div>
 
