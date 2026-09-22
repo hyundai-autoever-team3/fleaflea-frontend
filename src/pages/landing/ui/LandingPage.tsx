@@ -376,7 +376,7 @@ export function LandingPage() {
       {/* 푸터 — 스냅 대상 아님 (design.md: 랜딩 페이지 전용) */}
       <footer className="flex flex-col items-center justify-between gap-2 bg-primary-subtle px-6 py-6 text-body-04 text-text-muted md:flex-row">
         {/* 같은 말을 한국어와 영어로 두 번 하지 않는다. 이름도 FleaFlea 하나로 쓴다 */}
-        <span className="flex items-center gap-2">
+        <span className="flex items-baseline gap-2">
           <span className="font-jua text-body-03 font-bold text-primary">FleaFlea</span>
           <span>좋은 건 함께!</span>
         </span>
