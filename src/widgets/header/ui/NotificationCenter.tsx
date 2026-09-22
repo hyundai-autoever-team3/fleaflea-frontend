@@ -3,9 +3,9 @@ import {
   ArrowPathIcon,
   ArrowUturnLeftIcon,
   ArrowsRightLeftIcon,
+  BellAlertIcon,
   BellIcon,
   CheckBadgeIcon,
-  FingerPrintIcon,
   CheckCircleIcon,
   CheckIcon,
   TrashIcon,
@@ -75,7 +75,7 @@ function NotificationIcon({ type }: { type: NotificationType }) {
     case 'FRIEND_ACCEPTED':
       return <UserGroupIcon aria-hidden="true" className={className} />
     case 'POKE_RECEIVED':
-      return <FingerPrintIcon aria-hidden="true" className={className} />
+      return <BellAlertIcon aria-hidden="true" className={className} />
   }
 }
 
