@@ -5,7 +5,12 @@ import { isAxiosError } from 'axios'
 
 import { CollectionSlot, EmptySlot, useOwnerCollectionItems } from '../../../entities/collection-item'
 import { useMyFriends } from '../../../entities/friend'
-import { getPokeErrorMessage, usePokeMember } from '../../../features/poke-member'
+import {
+  DAILY_POKE_LIMIT,
+  getPokeErrorMessage,
+  isPokeLimitExceeded,
+  usePokeMember,
+} from '../../../features/poke-member'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -47,13 +52,24 @@ export function MemberItemDexPage() {
   // 남의 도감을 구경하다 말을 걸고 싶어지는 자리라 여기에 둔다.
   // 알림 하나를 보내고 끝나므로 다시 받을 목록도, 옮길 화면도 없다
   const [pokeError, setPokeError] = useState('')
+  // 남은 횟수를 알려주는 API가 없어 보낸 만큼 세어 둔다.
+  // 새로고침하면 셈이 풀리지만, 그때는 서버가 429로 막아 주므로 다시 잠긴다
+  const [pokeCount, setPokeCount] = useState(0)
+  const [isPokeLimited, setIsPokeLimited] = useState(false)
   const pokeMutation = usePokeMember()
+  const pokeLocked = isPokeLimited || pokeCount >= DAILY_POKE_LIMIT
 
   function handlePoke() {
     setPokeError('')
     pokeMutation.mutate(memberId, {
-      onSuccess: () => useToastStore.getState().showToast(nickname ? `${nickname}님을 콕 찔렀어요` : '콕 찔렀어요'),
-      onError: (error) => setPokeError(getPokeErrorMessage(error)),
+      onSuccess: () => {
+        setPokeCount((count) => count + 1)
+        useToastStore.getState().showToast(nickname ? `${nickname}님을 콕 찔렀어요` : '콕 찔렀어요')
+      },
+      onError: (error) => {
+        if (isPokeLimitExceeded(error)) setIsPokeLimited(true)
+        setPokeError(getPokeErrorMessage(error))
+      },
     })
   }
 
@@ -82,13 +98,14 @@ export function MemberItemDexPage() {
           </p>
           <button
             type="button"
-            disabled={pokeMutation.isPending}
+            disabled={pokeMutation.isPending || pokeLocked}
             onClick={handlePoke}
+            title={pokeLocked ? `하루에 ${DAILY_POKE_LIMIT}번까지만 찌를 수 있어요` : undefined}
             style={{ clipPath: pixelBox(2) }}
-            className="flex h-8 items-center gap-1.5 bg-status-nudge-subtle px-3 text-xs font-bold text-status-nudge transition-colors duration-200 hover:brightness-95 disabled:opacity-50"
+            className="flex h-8 items-center gap-1.5 bg-status-nudge-subtle px-3 text-xs font-bold text-status-nudge transition-colors duration-200 hover:brightness-95 disabled:opacity-50 disabled:hover:brightness-100"
           >
             <BellAlertIcon aria-hidden="true" className="size-3.5" />
-            {pokeMutation.isPending ? '찌르는 중...' : '콕 찌르기'}
+            {pokeMutation.isPending ? '찌르는 중...' : pokeLocked ? '오늘은 다 찔렀어요' : '콕 찌르기'}
           </button>
         </div>
         {pokeError && <p className="mt-2 text-body-04 text-red-600">{pokeError}</p>}
