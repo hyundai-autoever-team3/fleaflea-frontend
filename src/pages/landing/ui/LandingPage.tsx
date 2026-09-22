@@ -464,7 +464,7 @@ export function LandingPage() {
               autoCapitalize="none"
               spellCheck={false}
               aria-invalid={Boolean(inviteError)}
-              className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03"
+              className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03 outline-none transition-colors focus:border-primary-tint focus:bg-white focus:ring-2 focus:ring-primary-subtle"
             />
             {inviteError && <p className="mt-2 text-body-04 text-red-600">{inviteError}</p>}
             <button
