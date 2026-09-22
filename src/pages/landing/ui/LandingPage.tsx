@@ -92,6 +92,8 @@ function BrowserMockup() {
   )
 }
 
+const FEATURE_SECTION_CLASS = 'mx-auto flex min-h-dvh w-full max-w-6xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 lg:gap-16'
+
 const navItems = [
   { id: 'intro', label: '서비스 소개' },
   { id: 'how-to-use', label: '이용 방법' },
@@ -217,9 +219,9 @@ export function LandingPage() {
       <section
         id="how-to-use"
         ref={step01RevealRef}
-        className="mx-auto flex min-h-dvh w-full max-w-5xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 md:flex-row md:gap-16"
+        className={`${FEATURE_SECTION_CLASS} lg:flex-row`}
       >
-        <div data-reveal-item className="text-left">
+        <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
             className={`inline-flex items-center gap-2 px-3 py-1 text-body-04 font-bold tracking-widest text-text-muted ${glassPill}`}
@@ -240,7 +242,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        <div data-reveal-item className="w-full flex-1">
+        <div data-reveal-item className="w-full min-w-0 flex-1">
           <InviteMockup />
         </div>
       </section>
@@ -248,9 +250,9 @@ export function LandingPage() {
       {/* 이용 방법 — 02. 판매/나눔/대여/교환 */}
       <section
         ref={step02RevealRef}
-        className="mx-auto flex min-h-dvh w-full max-w-5xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 md:flex-row-reverse md:gap-16"
+        className={`${FEATURE_SECTION_CLASS} lg:flex-row-reverse`}
       >
-        <div data-reveal-item className="text-left">
+        <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
             className={`inline-flex items-center gap-2 px-3 py-1 text-body-04 font-bold tracking-widest text-text-muted ${glassPill}`}
@@ -272,7 +274,7 @@ export function LandingPage() {
           </span>
         </div>
 
-        <div data-reveal-item className="w-full flex-1">
+        <div data-reveal-item className="w-full min-w-0 flex-1">
           <TradeWaysMockup />
         </div>
       </section>
@@ -280,9 +282,9 @@ export function LandingPage() {
       {/* 03. 내 물건 도감 */}
       <section
         ref={step03RevealRef}
-        className="mx-auto flex min-h-dvh w-full max-w-5xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 md:flex-row md:gap-16"
+        className={`${FEATURE_SECTION_CLASS} lg:flex-row`}
       >
-        <div data-reveal-item className="text-left">
+        <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
             className={`inline-flex items-center gap-2 px-3 py-1 text-body-04 font-bold tracking-widest text-text-muted ${glassPill}`}
@@ -303,8 +305,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 오른쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="w-full flex-1">
+        <div data-reveal-item className="w-full min-w-0 flex-1">
           <CollectionMockup />
         </div>
       </section>
@@ -312,9 +313,9 @@ export function LandingPage() {
       {/* 04. 친구 추가 */}
       <section
         ref={step04RevealRef}
-        className="mx-auto flex min-h-dvh w-full max-w-5xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 md:flex-row-reverse md:gap-16"
+        className={`${FEATURE_SECTION_CLASS} lg:flex-row-reverse`}
       >
-        <div data-reveal-item className="text-left">
+        <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
             className={`inline-flex items-center gap-2 px-3 py-1 text-body-04 font-bold tracking-widest text-text-muted ${glassPill}`}
@@ -337,8 +338,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 왼쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="w-full flex-1">
+        <div data-reveal-item className="w-full min-w-0 flex-1">
           <FriendsMockup />
         </div>
       </section>
@@ -346,9 +346,9 @@ export function LandingPage() {
       {/* 05. 거래 진행 상태 */}
       <section
         ref={step05RevealRef}
-        className="mx-auto flex min-h-dvh w-full max-w-5xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 md:flex-row md:gap-16"
+        className={`${FEATURE_SECTION_CLASS} lg:flex-row`}
       >
-        <div data-reveal-item className="text-left">
+        <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
             className={`inline-flex items-center gap-2 px-3 py-1 text-body-04 font-bold tracking-widest text-text-muted ${glassPill}`}
@@ -367,8 +367,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 오른쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="w-full flex-1">
+        <div data-reveal-item className="w-full min-w-0 flex-1">
           <TradeFlowMockup />
         </div>
       </section>
