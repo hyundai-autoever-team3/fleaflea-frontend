@@ -19,12 +19,12 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
             <Awning color="var(--color-primary-tint)" stripeColor="#f2f3f6" />
 
             {/* 가판대 본체: 쇼윈도 | 소개 | 입장 */}
-            <div className="flex items-center gap-5 bg-bg px-6 pb-8 pt-12" style={{ clipPath: pixelCorners('bottom') }}>
-                <MarketCover coverImageUrl={market.coverImageUrl} marketId={market.marketId} className="w-36 shrink-0" />
+            <div className="flex flex-wrap items-center gap-4 bg-bg px-5 pb-6 pt-10 sm:flex-nowrap sm:gap-5 sm:px-6 sm:pb-8 sm:pt-12" style={{ clipPath: pixelCorners('bottom') }}>
+                <MarketCover coverImageUrl={market.coverImageUrl} marketId={market.marketId} className="w-24 shrink-0 sm:w-36" />
 
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                        <h3 className="truncate text-xl font-bold text-text-strong">{market.title}</h3>
+                        <h3 className="min-w-0 truncate text-lg font-bold text-text-strong sm:text-xl">{market.title}</h3>
                         {isHost && (
                             <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white">HOST</span>
                         )}
@@ -45,7 +45,12 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
                     )}
                 </div>
 
-                <Link to={`/market/${market.marketId}`} viewTransition className="shrink-0 bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white" style={{ clipPath: pixelBox() }}>
+                <Link
+                    to={`/market/${market.marketId}`}
+                    viewTransition
+                    className="flex w-full shrink-0 justify-center bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white sm:w-auto"
+                    style={{ clipPath: pixelBox() }}
+                >
                     입장하기
                 </Link>
             </div>
