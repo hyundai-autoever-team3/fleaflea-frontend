@@ -54,7 +54,7 @@ const TYPE_STYLE: Record<NotificationType, NotificationTypeStyle> = {
   TRADE_COMPLETED: { label: '완료', textClass: 'text-status-success', tileClass: 'bg-status-success-tile' },
   FRIEND_REQUESTED: { label: '친구 요청', textClass: 'text-status-accent', tileClass: 'bg-status-accent-tile' },
   FRIEND_ACCEPTED: { label: '친구 수락', textClass: 'text-status-info', tileClass: 'bg-status-info-tile' },
-  POKE_RECEIVED: { label: '콕 찌르기', textClass: 'text-status-warning', tileClass: 'bg-status-warning-tile' },
+  POKE_RECEIVED: { label: '콕 찌르기', textClass: 'text-status-accent', tileClass: 'bg-status-accent-tile' },
 }
 
 function NotificationIcon({ type }: { type: NotificationType }) {

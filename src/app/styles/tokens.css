@@ -64,6 +64,7 @@
   --red-700: #99394e;
   --amber-100: #fff1da;
   --amber-700: #7d5524;
+  --pink-100: #fdeaf4;
   --pink-700: #97417a;
 
   /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
@@ -149,6 +150,7 @@
   --color-status-warning-subtle: var(--amber-100);
   /* 콕 찌르기처럼 좋고 나쁨이 아닌 알림 — 성공·경고로 읽히지 않게 따로 둔다 */
   --color-status-accent: var(--pink-700);
+  --color-status-accent-subtle: var(--pink-100);
 
   /* 종류 타일 바탕 — 흰 아이콘을 얹는 자리 */
   --color-status-brand-tile: var(--purple-400);

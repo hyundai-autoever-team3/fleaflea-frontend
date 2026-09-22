@@ -85,7 +85,7 @@ export function MemberItemDexPage() {
             disabled={pokeMutation.isPending}
             onClick={handlePoke}
             style={{ clipPath: pixelBox(2) }}
-            className="flex h-8 items-center gap-1.5 bg-status-warning-subtle px-3 text-xs font-bold text-status-warning transition-colors duration-200 hover:brightness-95 disabled:opacity-50"
+            className="flex h-8 items-center gap-1.5 bg-status-accent-subtle px-3 text-xs font-bold text-status-accent transition-colors duration-200 hover:brightness-95 disabled:opacity-50"
           >
             <CursorArrowRippleIcon aria-hidden="true" className="size-3.5" />
             {pokeMutation.isPending ? '찌르는 중...' : '콕 찌르기'}
