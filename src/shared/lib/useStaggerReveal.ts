@@ -22,14 +22,13 @@ export function useStaggerReveal<T extends HTMLElement>() {
       return
     }
 
+    // 띠를 벗어나면 표시를 걷어, 다시 들어올 때 순서대로 다시 등장하게 한다
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting) return
         items.forEach((item, index) => {
           item.style.setProperty('--reveal-delay', `${index * STAGGER_STEP_MS}ms`)
-          item.classList.add('is-visible')
+          item.classList.toggle('is-visible', entry.isIntersecting)
         })
-        observer.unobserve(el)
       },
       // 화면 위아래 20%를 잘라낸 가운데 띠에 닿을 때 재생한다.
       // 요소 넓이의 20%가 보이면(threshold) 바로 켜지게 두었더니, 스냅 스크롤이
