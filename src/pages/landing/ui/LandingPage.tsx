@@ -146,11 +146,7 @@ export function LandingPage() {
 
   return (
     <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-scroll">
-      <LandingHeader
-        navItems={navItems}
-        activeId={activeId}
-        onJoin={() => dialogRef.current?.showModal()}
-      />
+      <LandingHeader navItems={navItems} activeId={activeId} />
 
       {/* 히어로 — 점 그리드 텍스처 + 은은한 그라데이션 (design.md 6장 예외: 화면당 배경 1곳까지) */}
       <section className="relative flex min-h-dvh snap-start flex-col items-center justify-center overflow-hidden bg-bg px-6 text-center">
@@ -370,7 +366,7 @@ export function LandingPage() {
       </section>
 
       {/* 푸터 — 스냅 대상 아님 (design.md: 랜딩 페이지 전용) */}
-      <footer className="flex flex-col items-center justify-between gap-2 border-t border-border bg-primary-subtle px-6 py-6 text-body-04 text-text-muted md:flex-row">
+      <footer className="flex flex-col items-center justify-between gap-2 bg-primary-subtle px-6 py-6 text-body-04 text-text-muted md:flex-row">
         {/* 같은 말을 한국어와 영어로 두 번 하지 않는다. 이름도 FleaFlea 하나로 쓴다 */}
         <span className="flex items-center gap-2">
           <span className="font-jua text-body-03 font-bold text-primary">FleaFlea</span>
