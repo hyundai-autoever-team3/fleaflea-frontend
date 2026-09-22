@@ -149,7 +149,7 @@ export function LandingPage() {
       <LandingHeader navItems={navItems} activeId={activeId} />
 
       {/* 히어로 — 점 그리드 텍스처 + 은은한 그라데이션 (design.md 6장 예외: 화면당 배경 1곳까지) */}
-      <section className="relative flex min-h-dvh snap-start flex-col items-center justify-center overflow-hidden bg-bg px-6 text-center">
+      <section id="top" className="relative flex min-h-dvh snap-start flex-col items-center justify-center overflow-hidden bg-bg px-6 text-center">
         <div
           className="absolute inset-0"
           style={{

@@ -19,9 +19,13 @@ export function LandingHeader({
 }) {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-bg/90 px-6 py-4 backdrop-blur">
-      <div className="flex shrink-0 items-center gap-2">
+      <a
+        href="#top"
+        aria-label="맨 위로"
+        className={`flex shrink-0 items-center gap-2 transition-opacity hover:opacity-80 ${FOCUS_RING}`}
+      >
         <BrandMark />
-      </div>
+      </a>
 
       <div className="flex min-w-0 items-center gap-3 sm:gap-6">
         <nav aria-label="랜딩 목차" className="hidden gap-6 sm:flex">
