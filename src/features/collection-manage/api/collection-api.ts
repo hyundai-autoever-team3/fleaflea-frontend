@@ -112,8 +112,8 @@ export function getUpdateCollectionErrorMessage(error: unknown) {
 }
 
 export function getDeleteCollectionErrorMessage(error: unknown) {
-  const status = isAxiosError(error) ? error.response?.status : undefined
-  switch (status) {
+  const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
+  switch (response?.status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
     case 403:
@@ -121,7 +121,10 @@ export function getDeleteCollectionErrorMessage(error: unknown) {
     case 404:
       return '이미 삭제되었거나 찾을 수 없는 물건이에요.'
     case 409:
-      return '거래가 걸려 있는 물건은 삭제할 수 없어요. 마이페이지의 내 거래에서 상태를 확인해 주세요.'
+      // 끝난 거래는 더 이상 막지 않는다. 아직 오가는 중인 요청만 삭제를 막는다
+      return response?.data?.code === 'COLLECTION_ITEM_TRADE_IN_PROGRESS'
+        ? '아직 오가는 거래 요청이 있어요. 마이페이지에서 요청을 처리한 뒤 삭제해 주세요.'
+        : '거래가 걸려 있는 물건은 삭제할 수 없어요. 마이페이지의 내 거래에서 상태를 확인해 주세요.'
     default:
       return '물건을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.'
   }
