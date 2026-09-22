@@ -145,7 +145,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-scroll">
+    <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <LandingHeader navItems={navItems} activeId={activeId} />
 
       {/* 히어로 — 점 그리드 텍스처 + 은은한 그라데이션 (design.md 6장 예외: 화면당 배경 1곳까지) */}
