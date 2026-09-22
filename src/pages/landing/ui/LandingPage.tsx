@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FormEvent, MouseEvent } from 'react'
+import type { FormEvent, MouseEvent, PointerEvent } from 'react'
 import { Link } from 'react-router'
 import {
   CheckCircleIcon,
@@ -384,7 +384,7 @@ export function LandingPage() {
         ref={dialogRef}
         className={`m-auto w-[min(440px,calc(100vw-36px))] p-8 text-center rounded-2xl shadow-lg`}
         // <dialog>는 바깥을 눌러도 저절로 닫히지 않는다. 공용 모달과 같은 판정을 쓴다
-        onMouseDown={(event: MouseEvent<HTMLDialogElement>) => {
+        onPointerDown={(event: PointerEvent<HTMLDialogElement>) => {
           pressedOutsideRef.current = event.target === event.currentTarget && isOutsideDialog(event)
         }}
         onClick={(event: MouseEvent<HTMLDialogElement>) => {
