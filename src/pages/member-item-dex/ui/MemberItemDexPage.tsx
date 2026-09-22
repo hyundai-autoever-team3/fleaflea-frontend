@@ -91,7 +91,7 @@ export function MemberItemDexPage() {
           {nickname ? `${nickname}님의 물건 도감` : '물건 도감'}
         </h1>
         {/* 서버가 공개 물건만 내려주므로, 비어 보이는 이유를 미리 알려둔다 */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <p className="text-body-04 text-text-muted">
             공개한 물건만 볼 수 있어요
             {!itemsQuery.isPending && !itemsQuery.isError && ` · ${items.length}개`}
@@ -102,7 +102,7 @@ export function MemberItemDexPage() {
             onClick={handlePoke}
             title={pokeLocked ? `하루에 ${DAILY_POKE_LIMIT}번까지만 찌를 수 있어요` : undefined}
             style={{ clipPath: pixelBox(2) }}
-            className="flex h-8 items-center gap-1.5 bg-status-nudge-subtle px-3 text-xs font-bold text-status-nudge transition-colors duration-200 hover:brightness-95 disabled:opacity-50 disabled:hover:brightness-100"
+            className="flex h-8 items-center gap-1.5 bg-primary-subtle px-3 text-xs font-bold text-primary transition-colors duration-200 hover:bg-primary-tint disabled:opacity-50 disabled:hover:bg-primary-subtle"
           >
             <BellAlertIcon aria-hidden="true" className="size-3.5" />
             {pokeMutation.isPending ? '찌르는 중...' : pokeLocked ? '오늘은 다 찔렀어요' : '콕 찌르기'}
