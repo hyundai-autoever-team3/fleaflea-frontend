@@ -51,13 +51,14 @@ export function MarketJoinPage() {
     }
 
     joinMutation.mutate(inviteCode, {
-      // 막 들어간 마켓이 목록에 더해진 모습을 먼저 보여준다.
-      // 상세로 곧장 들어가면 무엇이 달라졌는지 알기 어렵다
-      onSuccess: () => goAfterHold('/market'),
+      // 초대 링크를 누른 사람은 그 마켓을 보러 온 것이다. 목록에 내려놓지 않고
+      // 방금 들어간 마켓 안으로 바로 데려간다
+      onSuccess: (market) => goAfterHold(`/market/${market.marketId}`),
       onError: (joinError) => {
         const joined = isAlreadyJoinedError(joinError)
         // 로그인을 거쳐 돌아온 길이라면 묻지 않고 통과시킨다. 이미 들어가 있는
-        // 마켓이라고 굳이 멈춰 세울 이유가 없다
+        // 마켓이라고 굳이 멈춰 세울 이유가 없다.
+        // 다만 이 응답에는 마켓 번호가 없어 어디로 갈지 알 수 없으므로 목록으로 보낸다
         if (joined && shouldAutoJoin) {
           goAfterHold('/market')
           return
