@@ -112,6 +112,9 @@ export function MarketDetailPage() {
   const isHost = market !== undefined && market.hostId === meQuery.data?.memberId
   const invitationQuery = useMarketInvitation(marketId, isHost)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const membersListRef = useRef<HTMLUListElement>(null)
+  const [areMembersExpanded, setAreMembersExpanded] = useState(false)
+  const [memberColumnCount, setMemberColumnCount] = useState(2)
 
   const products = productsQuery.data ?? []
   const productPageCount = Math.ceil(products.length / PRODUCTS_PER_PAGE)
@@ -124,6 +127,9 @@ export function MarketDetailPage() {
   else productListParams.set('productPage', String(productPage))
   const productListQuery = productListParams.toString()
   const productListPath = productListQuery ? `/market/${marketId}?${productListQuery}` : `/market/${marketId}`
+  const members = membersQuery.data ?? []
+  const hasMoreMembers = members.length > memberColumnCount
+  const visibleMembers = areMembersExpanded ? members : members.slice(0, memberColumnCount)
 
   useEffect(() => {
     if (!productsQuery.data) return
@@ -135,6 +141,31 @@ export function MarketDetailPage() {
     else params.set('productPage', String(lastPage))
     setSearchParams(params, { replace: true, preventScrollReset: true })
   }, [productPage, productPageCount, productsQuery.data, searchParams, setSearchParams])
+
+  useLayoutEffect(() => {
+    const list = membersListRef.current
+    if (!list) return
+
+    const measure = () => {
+      const columns = window.getComputedStyle(list).gridTemplateColumns
+        .split(' ')
+        .filter(Boolean).length
+      setMemberColumnCount(Math.max(1, columns))
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(list)
+    return () => observer.disconnect()
+  }, [membersQuery.data])
+
+  useEffect(() => {
+    setAreMembersExpanded(false)
+  }, [marketId])
+
+  useEffect(() => {
+    if (!hasMoreMembers) setAreMembersExpanded(false)
+  }, [hasMoreMembers])
 
   function selectProductPage(page: number) {
     const params = new URLSearchParams(searchParams)
@@ -347,33 +378,50 @@ export function MarketDetailPage() {
 
             {/* 참여자 */}
             <section className="mt-14">
-              <h2 className="text-head-03 font-bold text-text-strong">
-                참여자 <span className="text-primary">{market.memberCount}</span>
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-head-03 font-bold text-text-strong">
+                  참여자 <span className="text-primary">{market.memberCount}</span>
+                </h2>
+                {hasMoreMembers && (
+                  <button
+                    type="button"
+                    onClick={() => setAreMembersExpanded((value) => !value)}
+                    aria-expanded={areMembersExpanded}
+                    aria-controls="market-members"
+                    className="shrink-0 text-body-04 font-bold text-gray-400 transition-colors hover:text-gray-500"
+                  >
+                    {areMembersExpanded ? '접기' : '더보기'}
+                  </button>
+                )}
+              </div>
               {membersQuery.isPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">참여자를 불러오는 중이에요...</p>
               ) : membersQuery.isError ? (
                 <p className="mt-4 text-body-04 text-text-muted">참여자 목록을 불러오지 못했어요.</p>
               ) : (
-                <ul className="mt-4 flex flex-wrap gap-3">
-                  {membersQuery.data.map((member) => {
+                <ul
+                  id="market-members"
+                  ref={membersListRef}
+                  className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4"
+                >
+                  {visibleMembers.map((member) => {
                     const isMe = member.relationshipStatus === 'SELF'
-                    const chipClass = 'flex items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
+                    const chipClass = 'flex h-12 w-full min-w-0 items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
                     const content = (
                       <>
                         <Avatar profileImageUrl={member.profileImageUrl} size="sm" className="bg-white" />
-                        <span className="text-body-04 font-semibold text-text-strong">
+                        <span className="min-w-0 truncate text-body-04 font-semibold text-text-strong">
                           {member.nickname}
                           {isMe && ' (나)'}
                         </span>
                         {member.host && (
-                          <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">HOST</span>
+                          <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">HOST</span>
                         )}
                       </>
                     )
 
                     return (
-                      <li key={member.memberId}>
+                      <li key={member.memberId} className="min-w-0">
                         {/* 내 프로필은 모달을 열어도 할 수 있는 게 없어 누를 수 없게 둠 */}
                         {isMe ? (
                           <div style={{ clipPath: pixelBox() }} className={chipClass}>
