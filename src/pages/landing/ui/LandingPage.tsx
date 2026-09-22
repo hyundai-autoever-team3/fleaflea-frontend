@@ -161,6 +161,9 @@ export function LandingPage() {
             backgroundImage:
               'radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px), radial-gradient(ellipse at 25% 15%, var(--color-primary-subtle) 0%, transparent 55%)',
             backgroundSize: '24px 24px, 100% 100%',
+            // 아래쪽에서 무늬를 서서히 지워, 다음 화면으로 넘어가는 자리에 선이 남지 않게 한다
+            WebkitMaskImage: 'linear-gradient(180deg, #000 45%, transparent 100%)',
+            maskImage: 'linear-gradient(180deg, #000 45%, transparent 100%)',
           }}
         />
         <div ref={heroRevealRef} data-reveal className="relative flex flex-col items-center gap-4">
@@ -199,7 +202,7 @@ export function LandingPage() {
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(170deg, var(--color-bg) 0%, var(--color-blue-subtle) 28%, var(--color-primary-subtle) 100%)',
+              'linear-gradient(175deg, var(--color-bg) 0%, var(--color-blue-subtle) 55%, var(--color-primary-subtle) 100%)',
           }}
         />
         <div data-reveal-item className="relative">
