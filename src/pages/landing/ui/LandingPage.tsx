@@ -197,7 +197,10 @@ export function LandingPage() {
       >
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(160deg, var(--color-blue-subtle), var(--color-primary-subtle))' }}
+          style={{
+            background:
+              'linear-gradient(170deg, var(--color-bg) 0%, var(--color-blue-subtle) 28%, var(--color-primary-subtle) 100%)',
+          }}
         />
         <div data-reveal-item className="relative">
           <h2 className="text-head-02 font-bold text-text-strong">당신의 두 번째 발견! 즐거운 플리마켓</h2>
