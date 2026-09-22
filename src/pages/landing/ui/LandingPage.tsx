@@ -254,12 +254,12 @@ export function LandingPage() {
             <span className="text-primary">빌리고, 바꾸고</span>
           </h2>
           <p className="mt-4 text-body-03 text-text-muted">
-            판매뿐 아니라 나눔, 대여, 교환까지 —
+            마켓에 올린 물건은 팔거나 나누거나 빌려주고,
             <br />
-            상황에 맞는 방식으로 자유롭게 거래하세요.
+            도감 속 물건은 빌려주거나 서로 바꿔요.
           </p>
           <span className="mt-4 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-body-04 text-text-muted">
-            <HeartIcon className="size-4" /> 급할 땐 조르기 기능도 있어요
+            <HeartIcon className="size-4" /> 정말 갖고 싶을 땐 구걸도 할 수 있어요
           </span>
         </div>
 
@@ -321,11 +321,13 @@ export function LandingPage() {
             <span className="text-primary">더 편하게 거래하세요</span>
           </h2>
           <p className="mt-4 text-body-03 text-text-muted">
-            닉네임 검색으로 친구를 추가하고,
+            닉네임으로 친구를 찾아 요청을 보내고,
             <br />
-            서로 맞팔하면 친구가 돼요.
+            상대가 수락하면 친구가 돼요.
             <br />
-            친구의 거래 소식은 알림으로 바로 확인할 수 있어요.
+            친구끼리는 서로의 도감을 둘러보고
+            <br />
+            콕 찔러 안부도 전할 수 있어요.
           </p>
         </div>
 
