@@ -8,12 +8,6 @@ import type { MarketMember } from '../../../entities/market'
 import type { RelationshipStatus } from '../../../entities/friend'
 import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import {
-  getFriendRequestActionErrorMessage,
-  getSendFriendRequestErrorMessage,
-  useRespondToFriendRequest,
-  useSendFriendRequest,
-} from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
 import { getPokeErrorMessage, usePokeMember } from '../../../features/poke-member'
 import { MASCOTS } from '../../../shared/config/mascots'
@@ -179,27 +173,11 @@ export function MarketDetailPage() {
   // 닉네임 검색 API가 없어 memberId를 알 수 있는 곳이 참여자 목록뿐이라, 친구 추가를 여기서 함
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
   const [friendError, setFriendError] = useState('')
-  const sendFriendRequestMutation = useSendFriendRequest()
-  const respondFriendRequestMutation = useRespondToFriendRequest()
   const pokeMutation = usePokeMember()
-  const isRequesting = sendFriendRequestMutation.isPending || respondFriendRequestMutation.isPending
 
   function openMember(member: MarketMember) {
     setSelectedMember(member)
     setFriendError('')
-  }
-
-  function handleSendFriendRequest(memberId: number) {
-    setFriendError('')
-    // 이미 친구이거나 보낸 요청이면 서버가 409를 주므로 목록을 미리 고쳐 두지 않는다.
-    // 목록 새로고침은 useSendFriendRequest 안에서 한다
-    sendFriendRequestMutation.mutate(memberId, {
-      onSuccess: () => {
-        useToastStore.getState().showToast('친구 요청을 보냈어요')
-        setSelectedMember(null)
-      },
-      onError: (error) => setFriendError(getSendFriendRequestErrorMessage(error)),
-    })
   }
 
   // 콕 찌르기는 알림 하나를 보내고 끝나는 가벼운 인사다.
@@ -209,18 +187,6 @@ export function MarketDetailPage() {
     pokeMutation.mutate(member.memberId, {
       onSuccess: () => useToastStore.getState().showToast(`${member.nickname}님을 콕 찔렀어요`),
       onError: (error) => setFriendError(getPokeErrorMessage(error)),
-    })
-  }
-
-  // 상대가 먼저 보낸 요청은 여기서 바로 받아 줄 수 있다. 친구 화면까지 가지 않아도 되게
-  function handleAcceptFriendRequest(memberId: number) {
-    setFriendError('')
-    respondFriendRequestMutation.mutate({ action: 'accept', memberId }, {
-      onSuccess: () => {
-        useToastStore.getState().showToast('친구가 되었어요')
-        setSelectedMember(null)
-      },
-      onError: (error) => setFriendError(getFriendRequestActionErrorMessage(error, '수락')),
     })
   }
 
@@ -463,7 +429,6 @@ export function MarketDetailPage() {
               onRequestClose={() => setSelectedMember(null)}
               labelledBy="member-modal-title"
               size="sm"
-              showClose={false}
             >
               {selectedMember && (
                 <div className="py-6 text-center">
@@ -481,52 +446,17 @@ export function MarketDetailPage() {
                   )}
                   {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  {/* X를 없앤 대신 닫기를 둠. 주요 동작인 친구 관련 버튼을 왼쪽에 */}
-                  <div className="mt-8 flex gap-3">
-                    {/* 이미 친구거나 요청이 오간 사이에 다시 보내면 409라서, 관계에 맞는 버튼만 둔다 */}
-                    {selectedMember.relationshipStatus === 'NONE' && (
-                      <button
-                        type="button"
-                        disabled={isRequesting}
-                        onClick={() => handleSendFriendRequest(selectedMember.memberId)}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
-                      >
-                        {isRequesting ? '보내는 중...' : '친구 추가'}
-                      </button>
-                    )}
-                    {selectedMember.relationshipStatus === 'REQUEST_RECEIVED' && (
-                      <button
-                        type="button"
-                        disabled={isRequesting}
-                        onClick={() => handleAcceptFriendRequest(selectedMember.memberId)}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
-                      >
-                        {isRequesting ? '받는 중...' : '친구 수락'}
-                      </button>
-                    )}
-                    {/* 친구가 아니어도 보낼 수 있는 가벼운 인사. 친구 관련 버튼과 같은 줄에 서지만
-                        주요 동작은 그쪽이라 무게를 낮춘다 (좁은 모달이라 한 줄에 둘까지만 둔다) */}
-                    <button
-                      type="button"
-                      disabled={pokeMutation.isPending}
-                      onClick={() => handlePoke(selectedMember)}
-                      style={{ clipPath: pixelBox(4) }}
-                      className="flex flex-1 items-center justify-center gap-1.5 bg-primary-subtle py-3 text-body-04 font-bold text-primary transition-colors duration-200 hover:bg-primary-tint disabled:opacity-50"
-                    >
-                      <HandRaisedIcon aria-hidden="true" className="size-4" />
-                      {pokeMutation.isPending ? '찌르는 중...' : '콕 찔러보기'}
-                    </button>
-                  </div>
-
+                  {/* 닫기는 모달 자체의 X가 맡는다. 여기 남는 동작은 콕 찌르기 하나뿐이라
+                      혼자 줄을 차지하고, 친구 맺기는 친구 화면에서 한다 */}
                   <button
                     type="button"
-                    onClick={() => setSelectedMember(null)}
+                    disabled={pokeMutation.isPending}
+                    onClick={() => handlePoke(selectedMember)}
                     style={{ clipPath: pixelBox(4) }}
-                    className="mt-3 w-full bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                    className="mt-8 flex w-full items-center justify-center gap-1.5 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                   >
-                    닫기
+                    <HandRaisedIcon aria-hidden="true" className="size-4" />
+                    {pokeMutation.isPending ? '찌르는 중...' : '콕 찔러보기'}
                   </button>
 
                   {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
