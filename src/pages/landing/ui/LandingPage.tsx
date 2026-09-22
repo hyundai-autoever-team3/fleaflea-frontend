@@ -414,7 +414,7 @@ export function LandingPage() {
           </span>
         </div>
 
-        <div className="max-h-[calc(90dvh-44px)] overflow-y-auto px-7 pb-11 pt-7 text-left [overflow-wrap:anywhere] sm:px-10">
+        <div className="max-h-[calc(90dvh-44px)] overflow-y-auto px-7 pb-11 pt-7 sm:px-10">
         {invitedCode ? (
           <>
             <h2 className="text-center text-gray-800 text-head-03 font-bold">초대받은 마켓이에요</h2>
