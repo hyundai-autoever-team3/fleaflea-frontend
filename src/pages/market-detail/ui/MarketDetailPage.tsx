@@ -1,3 +1,4 @@
+import { HandRaisedIcon } from '@heroicons/react/24/outline'
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { isAxiosError } from 'axios'
@@ -14,6 +15,7 @@ import {
   useSendFriendRequest,
 } from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
+import { getPokeErrorMessage, usePokeMember } from '../../../features/poke-member'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
@@ -179,6 +181,7 @@ export function MarketDetailPage() {
   const [friendError, setFriendError] = useState('')
   const sendFriendRequestMutation = useSendFriendRequest()
   const respondFriendRequestMutation = useRespondToFriendRequest()
+  const pokeMutation = usePokeMember()
   const isRequesting = sendFriendRequestMutation.isPending || respondFriendRequestMutation.isPending
 
   function openMember(member: MarketMember) {
@@ -196,6 +199,16 @@ export function MarketDetailPage() {
         setSelectedMember(null)
       },
       onError: (error) => setFriendError(getSendFriendRequestErrorMessage(error)),
+    })
+  }
+
+  // 콕 찌르기는 알림 하나를 보내고 끝나는 가벼운 인사다.
+  // 목록에 쌓이는 것이 없으니 모달을 닫지 않고 그 자리에서 알려만 준다
+  function handlePoke(member: MarketMember) {
+    setFriendError('')
+    pokeMutation.mutate(member.memberId, {
+      onSuccess: () => useToastStore.getState().showToast(`${member.nickname}님을 콕 찔렀어요`),
+      onError: (error) => setFriendError(getPokeErrorMessage(error)),
     })
   }
 
@@ -493,15 +506,28 @@ export function MarketDetailPage() {
                         {isRequesting ? '받는 중...' : '친구 수락'}
                       </button>
                     )}
+                    {/* 친구가 아니어도 보낼 수 있는 가벼운 인사. 친구 관련 버튼과 같은 줄에 서지만
+                        주요 동작은 그쪽이라 무게를 낮춘다 (좁은 모달이라 한 줄에 둘까지만 둔다) */}
                     <button
                       type="button"
-                      onClick={() => setSelectedMember(null)}
+                      disabled={pokeMutation.isPending}
+                      onClick={() => handlePoke(selectedMember)}
                       style={{ clipPath: pixelBox(4) }}
-                      className="flex-1 bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                      className="flex flex-1 items-center justify-center gap-1.5 bg-primary-subtle py-3 text-body-04 font-bold text-primary transition-colors duration-200 hover:bg-primary-tint disabled:opacity-50"
                     >
-                      닫기
+                      <HandRaisedIcon aria-hidden="true" className="size-4" />
+                      {pokeMutation.isPending ? '찌르는 중...' : '콕 찔러보기'}
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember(null)}
+                    style={{ clipPath: pixelBox(4) }}
+                    className="mt-3 w-full bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                  >
+                    닫기
+                  </button>
 
                   {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
                   {selectedMember.relationshipStatus !== 'SELF' && (
