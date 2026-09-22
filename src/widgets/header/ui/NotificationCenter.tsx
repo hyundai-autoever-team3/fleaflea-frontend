@@ -174,7 +174,7 @@ function NotificationRow({
           type="button"
           onClick={() => onSelect(notification)}
           className={`mt-1 block w-full break-keep text-left text-xs leading-5 after:absolute after:inset-0 after:content-[''] ${
-            unread ? 'font-medium text-glass-ink/70' : 'font-normal text-glass-ink/45'
+            unread ? 'font-medium text-glass-ink/85' : 'font-normal text-glass-ink/62'
           } ${FOCUS_RING}`}
         >
           {notification.message}
