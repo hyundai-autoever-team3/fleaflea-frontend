@@ -23,8 +23,9 @@ const SIZE_CLASS = {
   compact: 'w-[min(480px,calc(100vw-36px))] p-6 sm:p-8',
 } as const
 
-// 클릭 좌표가 모달 창 사각형 밖이면 바깥(backdrop) 클릭
-function isOutsideDialog(event: MouseEvent<HTMLDialogElement>) {
+// 클릭 좌표가 모달 창 사각형 밖이면 바깥(backdrop) 클릭.
+// <dialog>를 직접 쓰는 랜딩 초대 모달도 같은 판정을 쓰도록 내보낸다
+export function isOutsideDialog(event: MouseEvent<HTMLDialogElement>) {
   const rect = event.currentTarget.getBoundingClientRect()
   return (
     event.clientX < rect.left ||

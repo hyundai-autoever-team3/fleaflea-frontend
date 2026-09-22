@@ -1,1 +1,1 @@
-export { Modal } from './ui/Modal'
+export { isOutsideDialog, Modal } from './ui/Modal'

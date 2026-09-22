@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, MouseEvent } from 'react'
 import { Link } from 'react-router'
 import {
   CheckCircleIcon,
@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 import { withRedirect } from '../../../shared/lib/redirect'
+import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
 import { LandingHeader } from './LandingHeader'
@@ -91,6 +92,8 @@ const navItems = [
 
 export function LandingPage() {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  // 입력칸에서 글자를 끌다 바깥에서 손을 떼도 닫히지 않도록, 누른 자리도 바깥이었는지 기억한다
+  const pressedOutsideRef = useRef(false)
   const [invite, setInvite] = useState('')
   const [inviteError, setInviteError] = useState('')
   // 코드를 확인하면 모달 안에서 다음 단계로 넘어간다. 여기서 화면을 옮겨 버리면
@@ -380,6 +383,17 @@ export function LandingPage() {
       <dialog
         ref={dialogRef}
         className={`m-auto w-[min(440px,calc(100vw-36px))] p-8 text-center rounded-2xl shadow-lg`}
+        // <dialog>는 바깥을 눌러도 저절로 닫히지 않는다. 공용 모달과 같은 판정을 쓴다
+        onMouseDown={(event: MouseEvent<HTMLDialogElement>) => {
+          pressedOutsideRef.current = event.target === event.currentTarget && isOutsideDialog(event)
+        }}
+        onClick={(event: MouseEvent<HTMLDialogElement>) => {
+          const pressedOutside = pressedOutsideRef.current
+          pressedOutsideRef.current = false
+          if (pressedOutside && event.target === event.currentTarget && isOutsideDialog(event)) {
+            dialogRef.current?.close()
+          }
+        }}
         onClose={() => {
           setInvite('')
           setInviteError('')
