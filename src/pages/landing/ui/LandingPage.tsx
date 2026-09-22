@@ -105,7 +105,6 @@ export function LandingPage() {
   const step03RevealRef = useStaggerReveal<HTMLElement>()
   const step04RevealRef = useStaggerReveal<HTMLElement>()
   const step05RevealRef = useStaggerReveal<HTMLElement>()
-  const ctaRevealRef = useScrollReveal<HTMLElement>()
 
   useEffect(() => {
     const sections = navItems
@@ -147,7 +146,11 @@ export function LandingPage() {
 
   return (
     <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-scroll">
-      <LandingHeader navItems={navItems} activeId={activeId} />
+      <LandingHeader
+        navItems={navItems}
+        activeId={activeId}
+        onJoin={() => dialogRef.current?.showModal()}
+      />
 
       {/* 히어로 — 점 그리드 텍스처 + 은은한 그라데이션 (design.md 6장 예외: 화면당 배경 1곳까지) */}
       <section className="relative flex min-h-dvh snap-start flex-col items-center justify-center overflow-hidden bg-bg px-6 text-center">
@@ -364,23 +367,6 @@ export function LandingPage() {
         <div data-reveal-item className="min-h-64 w-full flex-1 rounded-3xl bg-primary-subtle p-6 md:min-h-96">
           <span className="text-body-04 font-bold tracking-widest text-text-muted">A HAPPY NEW CHAPTER</span>
         </div>
-      </section>
-
-      {/* 최종 CTA */}
-      <section
-        ref={ctaRevealRef}
-        data-reveal
-        className="flex min-h-dvh snap-start flex-col items-center justify-center gap-6 bg-primary-tint px-6 text-center"
-      >
-        <h2 className="text-head-02 font-bold text-text-strong">지금 바로 첫 플리마켓을 시작해보세요</h2>
-        <button
-          type="button"
-          onClick={() => dialogRef.current?.showModal()}
-          data-hover-lift
-          className="flex items-center gap-2 rounded-lg bg-primary px-8 py-4 text-body-02 font-bold text-white"
-        >
-          초대 링크로 참여하기
-        </button>
       </section>
 
       {/* 푸터 — 스냅 대상 아님 (design.md: 랜딩 페이지 전용) */}

@@ -13,17 +13,19 @@ const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus
 export function LandingHeader({
   navItems,
   activeId,
+  onJoin,
 }: {
   navItems: LandingNavItem[]
   activeId: string | null
+  onJoin: () => void
 }) {
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-bg/90 px-6 py-4 backdrop-blur">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-bg/90 px-6 py-4 backdrop-blur">
       <div className="flex shrink-0 items-center gap-2">
         <BrandMark />
       </div>
 
-      <div className="flex min-w-0 items-center gap-4 sm:gap-6">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-6">
         <nav aria-label="랜딩 목차" className="hidden gap-6 sm:flex">
           {navItems.map((item) => (
             <a
@@ -48,6 +50,13 @@ export function LandingHeader({
         >
           로그인
         </Link>
+        <button
+          type="button"
+          onClick={onJoin}
+          className={`shrink-0 rounded-lg bg-primary-subtle px-3 py-2 text-body-03 font-bold text-primary transition-colors hover:bg-primary-tint ${FOCUS_RING}`}
+        >
+          참여하기
+        </button>
       </div>
     </header>
   )
