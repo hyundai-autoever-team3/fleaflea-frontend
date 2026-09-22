@@ -370,7 +370,7 @@ export function LandingPage() {
         {/* 같은 말을 한국어와 영어로 두 번 하지 않는다. 이름도 FleaFlea 하나로 쓴다 */}
         <span className="flex items-center gap-2">
           <span className="font-jua text-body-03 font-bold text-primary">FleaFlea</span>
-          <span>좋은 건, 함께.</span>
+          <span>좋은 건 함께!</span>
         </span>
         <span>© 2026 FleaFlea</span>
       </footer>
