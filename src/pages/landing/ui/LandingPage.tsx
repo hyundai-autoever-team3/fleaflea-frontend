@@ -7,6 +7,7 @@ import {
   LockClosedIcon,
   SparklesIcon,
   UserGroupIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 
 import { MASCOTS } from '../../../shared/config/mascots'
@@ -378,7 +379,6 @@ export function LandingPage() {
         ref={dialogRef}
         // macOS 창처럼 띄운다. 안쪽 여백은 본문 칸이 맡으므로 창 자체에는 주지 않는다
         className="glass-window m-auto w-[min(440px,calc(100vw-36px))] overflow-hidden rounded-2xl text-center outline-none"
-        aria-labelledby="invite-dialog-title"
         // <dialog>는 바깥을 눌러도 저절로 닫히지 않는다. 공용 모달과 같은 판정을 쓴다
         onPointerDown={(event: PointerEvent<HTMLDialogElement>) => {
           pressedOutsideRef.current = event.target === event.currentTarget && isOutsideDialog(event)
@@ -396,25 +396,16 @@ export function LandingPage() {
           setInvitedCode('')
         }}
       >
-        {/* 제목줄 — 왼쪽 신호등 중 빨간 것만 실제로 닫는 버튼이고 나머지 둘은 장식이다 */}
-        <div className="relative flex h-11 items-center gap-2 border-b border-glass-line px-3">
-          <button
-            type="button"
-            onClick={() => dialogRef.current?.close()}
-            aria-label="닫기"
-            className="size-3 rounded-full bg-traffic-red transition-transform hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-glass-ink"
-          />
-          <span aria-hidden className="size-3 rounded-full bg-traffic-yellow" />
-          <span aria-hidden className="size-3 rounded-full bg-traffic-green" />
-          <span
-            id="invite-dialog-title"
-            className="pointer-events-none absolute inset-x-0 text-[13px] font-bold text-glass-ink/58"
-          >
-            마켓 참여
-          </span>
-        </div>
+        <button
+          type="button"
+          onClick={() => dialogRef.current?.close()}
+          aria-label="닫기"
+          className="absolute right-2 top-2 flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-strong"
+        >
+          <XMarkIcon className="size-6" />
+        </button>
 
-        <div className="max-h-[calc(90dvh-44px)] overflow-y-auto px-7 pb-11 pt-7 sm:px-10">
+        <div className="max-h-[90dvh] overflow-y-auto px-7 pb-11 pt-7 sm:px-10">
         {invitedCode ? (
           <>
             <h2 className="text-center text-gray-800 text-head-03 font-bold">초대받은 마켓이에요</h2>
