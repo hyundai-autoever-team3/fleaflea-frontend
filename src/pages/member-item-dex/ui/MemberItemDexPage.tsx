@@ -1,11 +1,14 @@
+import { HandRaisedIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
 import { CollectionSlot, EmptySlot, useOwnerCollectionItems } from '../../../entities/collection-item'
 import { useMyFriends } from '../../../entities/friend'
+import { getPokeErrorMessage, usePokeMember } from '../../../features/poke-member'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 
 // 내 도감과 같은 판을 쓰므로 한 페이지에 보이는 칸 수도 맞춘다
@@ -41,6 +44,19 @@ export function MemberItemDexPage() {
   const nickname = stateNickname ?? friendNickname
 
   const [page, setPage] = useState(0)
+  // 남의 도감을 구경하다 말을 걸고 싶어지는 자리라 여기에 둔다.
+  // 알림 하나를 보내고 끝나므로 다시 받을 목록도, 옮길 화면도 없다
+  const [pokeError, setPokeError] = useState('')
+  const pokeMutation = usePokeMember()
+
+  function handlePoke() {
+    setPokeError('')
+    pokeMutation.mutate(memberId, {
+      onSuccess: () => useToastStore.getState().showToast(nickname ? `${nickname}님을 콕 찔렀어요` : '콕 찔렀어요'),
+      onError: (error) => setPokeError(getPokeErrorMessage(error)),
+    })
+  }
+
   const pageCount = Math.max(1, Math.ceil(items.length / SLOTS_PER_PAGE))
   if (page > pageCount - 1) setPage(pageCount - 1)
   const pageItems = items.slice(page * SLOTS_PER_PAGE, (page + 1) * SLOTS_PER_PAGE)
@@ -59,10 +75,23 @@ export function MemberItemDexPage() {
           {nickname ? `${nickname}님의 물건 도감` : '물건 도감'}
         </h1>
         {/* 서버가 공개 물건만 내려주므로, 비어 보이는 이유를 미리 알려둔다 */}
-        <p className="mt-1 text-body-04 text-text-muted">
-          공개한 물건만 볼 수 있어요
-          {!itemsQuery.isPending && !itemsQuery.isError && ` · ${items.length}개`}
-        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <p className="text-body-04 text-text-muted">
+            공개한 물건만 볼 수 있어요
+            {!itemsQuery.isPending && !itemsQuery.isError && ` · ${items.length}개`}
+          </p>
+          <button
+            type="button"
+            disabled={pokeMutation.isPending}
+            onClick={handlePoke}
+            style={{ clipPath: pixelBox(2) }}
+            className="flex h-8 items-center gap-1.5 bg-primary-subtle px-3 text-xs font-bold text-primary transition-colors duration-200 hover:bg-primary-tint disabled:opacity-50"
+          >
+            <HandRaisedIcon aria-hidden="true" className="size-3.5" />
+            {pokeMutation.isPending ? '찌르는 중...' : '콕 찌르기'}
+          </button>
+        </div>
+        {pokeError && <p className="mt-2 text-body-04 text-red-600">{pokeError}</p>}
 
         {!Number.isInteger(memberId) || memberId <= 0 ? (
           <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">잘못된 주소예요.</p>
