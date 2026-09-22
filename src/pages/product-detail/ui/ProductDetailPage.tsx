@@ -176,13 +176,13 @@ export function ProductDetailPage() {
                     shapeRendering="crispEdges"
                     fill="var(--color-primary-subtle)"
                     aria-hidden
-                    className="absolute -top-2 left-6 w-3"
+                    className="absolute -top-2 left-3 w-3"
                   >
                     <rect x="4" y="0" width="4" height="2" />
                     <rect x="2" y="2" width="8" height="2" />
                     <rect x="0" y="4" width="12" height="4" />
                   </svg>
-                  <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-3">
+                  <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-4">
                     <h3 className="text-body-03 font-bold text-text-strong">이 물건을 소개해요</h3>
                     <p className="mt-2 whitespace-pre-wrap text-body-04 leading-relaxed text-text-muted">
                       {product.description || '소개글이 없어요'}
@@ -202,7 +202,7 @@ export function ProductDetailPage() {
                       disabled={isClosed}
                       onClick={() => setIsRequestOpen(true)}
                       style={{ clipPath: pixelBox(4) }}
-                      className="h-11 w-full max-w-[260px] bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                      className="h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                     >
                       {isClosed ? closedNotice(product).button : getRequestActionLabel(product.tradeType)}
                     </button>
