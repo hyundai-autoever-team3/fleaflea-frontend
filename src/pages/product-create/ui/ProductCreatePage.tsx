@@ -42,7 +42,7 @@ export function ProductCreatePage() {
 
         {!isValidId || marketQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">참여 중인 마켓에서만 상품을 등록할 수 있어요.</p>
           </div>
         ) : (

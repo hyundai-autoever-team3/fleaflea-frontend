@@ -94,7 +94,7 @@ export function SignupForm() {
                 <div className="flex h-full flex-col p-6 md:p-10">
                     <div className="flex items-center gap-2">
                         <div className="size-8 overflow-hidden rounded-full">
-                            <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover"/>
+                            <img draggable={false} src="/mascot/flea.png" alt="" className="h-full w-full object-cover"/>
                         </div>
                         <span className="font-jua text-body-02 text-text-strong">FleaFlea</span>
                     </div>
@@ -226,7 +226,7 @@ export function SignupForm() {
                         }}
                     />
                     <StarField/>
-                    <img
+                    <img draggable={false}
                         src="/mascot/flea-bg.png"
                         alt=""
                         className="relative h-full w-full object-cover"

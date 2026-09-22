@@ -116,7 +116,7 @@ export function MemberItemDexPage() {
           <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
         ) : itemsQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">{getListErrorMessage(itemsQuery.error)}</p>
             <button
               type="button"
@@ -180,7 +180,7 @@ export function MemberItemDexPage() {
 
             {items.length === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-                <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                <img draggable={false} src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                 <p className="mt-3 text-body-03 font-bold text-text-strong">아직 공개한 물건이 없어요</p>
                 <p className="mt-1 text-body-04 text-text-muted">물건을 공개하면 여기에 보여요.</p>
               </div>

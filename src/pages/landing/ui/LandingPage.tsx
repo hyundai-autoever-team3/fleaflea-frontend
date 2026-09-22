@@ -59,7 +59,7 @@ function BrowserMockup() {
                 작은 취향을 나누고, 새로운 이야기를 시작해요.
               </p>
             </div>
-            <img src={MASCOTS.smile} alt="" loading="lazy" width={48} height={48} className="size-12 shrink-0 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.smile} alt="" loading="lazy" width={48} height={48} className="size-12 shrink-0 object-contain [image-rendering:pixelated]" />
           </div>
 
           {/* 알림을 화면 안의 흐름에 넣어 본문을 가리거나 바깥으로 넘치지 않게 한다. */}
@@ -422,7 +422,7 @@ export function LandingPage() {
               로그인하면 이 마켓으로 바로 들어가요.
             </p>
 
-            <img src="/mascot/flea10.png" alt="" className="mx-auto my-6 w-32 [image-rendering:pixelated]" />
+            <img draggable={false} src="/mascot/flea10.png" alt="" className="mx-auto my-6 w-32 [image-rendering:pixelated]" />
 
             <Link
               to={withRedirect('/login', `/invite/${invitedCode}?join=1`)}
@@ -463,7 +463,7 @@ export function LandingPage() {
             받은 초대 링크나 코드를 붙여 넣어 주세요.
           </p>
 
-          <img src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
+          <img draggable={false} src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
 
           <form onSubmit={joinMarket} noValidate className="text-left">
             <label htmlFor="flea-invite-input" className="text-gray-800 text-body-04 font-bold ">

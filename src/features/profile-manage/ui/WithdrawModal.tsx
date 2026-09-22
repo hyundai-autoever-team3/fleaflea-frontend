@@ -30,7 +30,7 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open onRequestClose={onClose} labelledBy={titleId} size="sm">
       <div className="py-6 text-center">
-        <img src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
+        <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
         <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">정말 탈퇴할까요?</h2>
         <p className="mt-2 text-body-04 text-text-muted">
           내 도감과 마켓, 주고받은 거래 기록이 사라져요. 되돌릴 수 없어요.

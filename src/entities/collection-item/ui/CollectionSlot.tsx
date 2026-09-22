@@ -76,10 +76,10 @@ export function CollectionSlot({ item, onClick }: CollectionSlotProps) {
       className="relative block aspect-square w-full overflow-hidden bg-primary-subtle transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transform-none motion-reduce:transition-none"
     >
       {imageUrl ? (
-        <img src={imageUrl} alt="" loading="lazy" onError={() => setFailedImageUrl(imageUrl)} className="size-full object-cover" />
+        <img draggable={false} src={imageUrl} alt="" loading="lazy" onError={() => setFailedImageUrl(imageUrl)} className="size-full object-cover" />
       ) : (
         <span className="flex size-full items-center justify-center">
-          <img src={MASCOTS.default} alt="" className="h-2/3 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.default} alt="" className="h-2/3 object-contain [image-rendering:pixelated]" />
         </span>
       )}
 

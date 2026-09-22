@@ -32,11 +32,11 @@ export function Photo({ src, fallback, alt = '', className = '', fallbackClassNa
   const usable = src && !hasFailedRecently(src) ? src : null
 
   if (!usable) {
-    return <img src={fallback} alt={alt} className={`object-contain [image-rendering:pixelated] ${fallbackClassName}`} />
+    return <img draggable={false} src={fallback} alt={alt} className={`object-contain [image-rendering:pixelated] ${fallbackClassName}`} />
   }
 
   return (
-    <img
+    <img draggable={false}
       src={usable}
       alt={alt}
       loading="lazy"

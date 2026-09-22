@@ -63,7 +63,7 @@ export function LoadingScreen({
   return (
     <div className={fullScreen ? 'flex min-h-dvh items-center justify-center bg-primary-subtle p-6' : 'flex justify-center py-16'}>
       <div className="glass-panel w-full max-w-sm rounded-2xl px-8 py-10 text-center">
-        <img
+        <img draggable={false}
           src="/mascot/flea10.png"
           alt=""
           className="mx-auto h-16 object-contain [image-rendering:pixelated]"

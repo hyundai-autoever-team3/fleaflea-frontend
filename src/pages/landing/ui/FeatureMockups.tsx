@@ -68,7 +68,7 @@ function Badge({ children }: { children: ReactNode }) {
 function MiniAvatar({ src }: { src: string }) {
   return (
     <span style={{ clipPath: pixelBox(2) }} className="grid size-8 shrink-0 place-items-center bg-primary-subtle">
-      <img src={src} alt="" loading="lazy" width={32} height={32} className="size-8 object-contain [image-rendering:pixelated]" />
+      <img draggable={false} src={src} alt="" loading="lazy" width={32} height={32} className="size-8 object-contain [image-rendering:pixelated]" />
     </span>
   )
 }
@@ -135,7 +135,7 @@ export function InviteMockup() {
           <p className="mt-2 text-body-03 font-bold text-text-strong">우리들의 작은 플리마켓</p>
           <p className="mt-1 text-xs text-text-muted">좋아하던 물건에 새로운 주인을 찾아요.</p>
         </div>
-        <img src={MASCOTS.smile} alt="" loading="lazy" width={64} height={64} className="size-16 shrink-0 object-contain [image-rendering:pixelated]" />
+        <img draggable={false} src={MASCOTS.smile} alt="" loading="lazy" width={64} height={64} className="size-16 shrink-0 object-contain [image-rendering:pixelated]" />
       </div>
       <div style={{ clipPath: pixelBox(4) }} className="space-y-3 bg-primary-subtle p-4">
         <p className="flex items-center gap-2 text-body-04 font-bold text-text-strong">

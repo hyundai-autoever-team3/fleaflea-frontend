@@ -51,14 +51,14 @@ export function ProductEditPage() {
 
         {!isValidId || productQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">상품을 찾을 수 없어요.</p>
           </div>
         ) : !product ? (
           <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
         ) : !isOwner ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">내가 올린 상품만 수정할 수 있어요.</p>
             <Link to={`/items/${itemId}`} className="mt-4 text-body-04 font-bold text-primary underline">
               상품 상세로 돌아가기

@@ -141,10 +141,10 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             className="group relative flex h-44 items-center justify-center overflow-hidden bg-[image:var(--gradient-dreamy)]"
           >
             {previewUrl ? (
-              <img src={previewUrl} alt="선택한 마켓 커버 미리보기" className="size-full object-cover" />
+              <img draggable={false} src={previewUrl} alt="선택한 마켓 커버 미리보기" className="size-full object-cover" />
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <img src={MASCOTS.beret} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                <img draggable={false} src={MASCOTS.beret} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                 <span className="text-body-04 font-semibold text-text-muted">눌러서 커버 이미지 선택</span>
               </div>
             )}

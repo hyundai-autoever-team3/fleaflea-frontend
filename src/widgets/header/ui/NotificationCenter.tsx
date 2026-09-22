@@ -476,7 +476,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
             <NotificationSkeleton />
           ) : notificationsQuery.isError && !notificationsQuery.data ? (
             <div role="alert" className="flex flex-col items-center px-6 py-10 text-center">
-              <img src={MASCOTS.surprised} alt="" className="size-12 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.surprised} alt="" className="size-12 object-contain [image-rendering:pixelated]" />
               <p className="mt-3 text-body-04 font-bold text-glass-ink/92">알림을 불러오지 못했어요</p>
               <button
                 type="button"
@@ -489,7 +489,7 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center px-6 py-9 text-center">
-              <img src={MASCOTS.basket} alt="" className="size-14 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.basket} alt="" className="size-14 object-contain [image-rendering:pixelated]" />
               <p className="mt-3 break-keep text-body-04 font-bold text-glass-ink/92">아직 도착한 알림이 없어요</p>
               <p className="mt-1 max-w-56 text-balance text-xs text-glass-ink/58">거래와 친구 소식이 생기면 여기에 알려드릴게요.</p>
             </div>

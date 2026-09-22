@@ -149,14 +149,14 @@ export function CollectionForm({
               >
                 {shownImageUrl ? (
                   <>
-                    <img src={shownImageUrl} alt="물건 사진 미리보기" className="size-full object-cover" />
+                    <img draggable={false} src={shownImageUrl} alt="물건 사진 미리보기" className="size-full object-cover" />
                     <span className="absolute inset-x-0 bottom-0 bg-black/50 py-2 text-body-04 font-semibold text-white">
                       사진 바꾸기
                     </span>
                   </>
                 ) : (
                   <span className="flex flex-col items-center gap-2">
-                    <img src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+                    <img draggable={false} src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
                     <span className="text-body-04 font-semibold text-text-muted">눌러서 사진 선택</span>
                   </span>
                 )}

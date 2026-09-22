@@ -434,7 +434,7 @@ export function MyTradeList() {
 
         {error && (
           <div role="alert" style={{ clipPath: pixelBox(3) }} className="mt-4 flex items-start gap-2 bg-primary-subtle p-3 text-body-04 text-text-strong">
-            <img src={MASCOTS.surprised} alt="" className="mt-0.5 h-5 shrink-0 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="mt-0.5 h-5 shrink-0 object-contain [image-rendering:pixelated]" />
             <p>{error}</p>
           </div>
         )}
@@ -461,7 +461,7 @@ export function MyTradeList() {
             </div>
           ) : requestsQuery.isError ? (
             <div className="flex flex-col items-center px-4 py-12 text-center sm:py-16">
-              <img src={MASCOTS.surprised} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.surprised} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
               <p role="alert" className="mt-4 text-body-03 font-bold text-text-strong">거래 내역을 불러오지 못했어요</p>
               <p className="mt-2 text-body-04 text-text-muted">잠시 후 다시 불러와 주세요.</p>
               <button
@@ -478,7 +478,7 @@ export function MyTradeList() {
             <>
               {visible.length === 0 ? (
                 <div className="flex min-h-72 flex-col items-center justify-center px-3 py-10 text-center sm:min-h-80 sm:py-12">
-                  <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                  <img draggable={false} src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                   <p className="mt-5 text-balance text-body-03 font-bold text-text-strong">{EMPTY_STATE[tab].title}</p>
                   <p className="mt-2 whitespace-pre-line text-body-04 leading-relaxed text-text-muted">{EMPTY_STATE[tab].description}</p>
                   {tab === 'ongoing' && counts.received > 0 ? (

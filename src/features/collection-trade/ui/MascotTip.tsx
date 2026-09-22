@@ -16,7 +16,7 @@ interface MascotTipProps {
 export function MascotTip({ mascot, children, className = '' }: MascotTipProps) {
   return (
     <div className={`flex items-start gap-2 ${className}`}>
-      <img src={mascot} alt="" className="h-9 shrink-0 object-contain [image-rendering:pixelated]" />
+      <img draggable={false} src={mascot} alt="" className="h-9 shrink-0 object-contain [image-rendering:pixelated]" />
       <div className="relative min-w-0 flex-1">
         <svg
           viewBox={`0 0 ${TAIL[0].length} ${TAIL.length}`}

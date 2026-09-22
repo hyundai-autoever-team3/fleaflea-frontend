@@ -91,7 +91,7 @@ export function ProductDetailPage() {
       <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {!isValidId || productQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(productQuery.error) : '상품을 찾을 수 없어요.'}
             </p>
@@ -218,7 +218,7 @@ export function ProductDetailPage() {
       {/* 삭제 확인 */}
       <Modal open={isDeleteOpen} onRequestClose={() => setIsDeleteOpen(false)} labelledBy="delete-product-title">
         <div className="py-8 text-center">
-          <img src={MASCOTS.surprised} alt="" className="mx-auto h-28 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-28 object-contain [image-rendering:pixelated]" />
           <h2 id="delete-product-title" className="mt-6 text-head-03 font-bold text-text-strong">
             이 상품을 삭제할까요?
           </h2>

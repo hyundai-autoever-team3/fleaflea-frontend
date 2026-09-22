@@ -151,7 +151,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
         <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-4 sm:p-5">
           {/* 안내 문구와 불러오기 버튼을 한 줄에 둔다. 좁은 화면에서는 버튼이 아래로 접힌다 */}
           <div className="flex flex-wrap items-center gap-3">
-            <img src={MASCOTS.basket} alt="" className="h-12 w-12 shrink-0 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.basket} alt="" className="h-12 w-12 shrink-0 object-contain [image-rendering:pixelated]" />
             <div className="min-w-[9rem] flex-1">
               <p className="text-body-03 font-bold text-text-strong">{collectionItem ? '내 도감과 연결했어요' : '도감에 있는 물건인가요?'}</p>
               <p className="mt-1 truncate text-body-04 text-text-muted">{collectionItem?.title ?? '이름·설명·사진을 한 번에 가져와요.'}</p>
@@ -177,7 +177,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
                 <CollectionPhoto imageUrl={shownImageUrl} />
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <img src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+                  <img draggable={false} src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
                   <span className="text-body-04 font-semibold text-text-muted">눌러서 상품 사진 선택</span>
                 </div>
               )}

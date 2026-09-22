@@ -41,7 +41,7 @@ export function PolaroidPhoto({ imageUrl, statusLabel }: PolaroidPhotoProps) {
             )}
           </div>
           {/* 아래 빈 여백 오른쪽에 마스코트를 작게 — 폴라로이드에 사인하듯 */}
-          <img
+          <img draggable={false}
             src={MASCOTS.star}
             alt=""
             className="absolute bottom-3 right-4 h-7 select-none object-contain [image-rendering:pixelated]"

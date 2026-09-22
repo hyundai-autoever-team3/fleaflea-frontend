@@ -79,7 +79,7 @@ export function MarketJoinPage() {
     <div className="flex min-h-dvh items-center justify-center bg-primary-subtle p-6">
       <div className="w-full max-w-md drop-shadow-[0_10px_20px_rgba(0,0,0,0.12)]">
         <div style={{ clipPath: pixelBox(6) }} className="bg-bg px-8 py-10 text-center">
-          <img src="/mascot/flea10.png" alt="" className="mx-auto h-24 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src="/mascot/flea10.png" alt="" className="mx-auto h-24 object-contain [image-rendering:pixelated]" />
           <h1 className="mt-4 text-head-03 font-bold text-text-strong">
             {!inviteCode ? '링크를 확인해 주세요' : accessToken ? '이 마켓에 참여할까요?' : '초대받은 마켓이에요'}
           </h1>

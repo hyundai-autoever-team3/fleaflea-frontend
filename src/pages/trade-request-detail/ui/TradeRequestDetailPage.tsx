@@ -99,7 +99,7 @@ export function TradeRequestDetailPage() {
 
         {requestType === null || detailQuery.isError ? (
           <div className="flex flex-col items-center py-16 text-center lg:py-24">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {requestType === null ? '알 수 없는 거래 종류예요.' : getTradeRequestDetailErrorMessage(detailQuery.error)}
             </p>

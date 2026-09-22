@@ -32,7 +32,7 @@ const TAB_EMPTY: Record<TabKey, { title: string; description: string }> = {
 function EmptyState({ image, title, description }: { image: string; title: string; description: string }) {
   return (
     <div className="flex w-full flex-col items-center pb-14 pt-24 text-center">
-      <img src={image} alt="" className="h-24 w-auto object-contain [image-rendering:pixelated]" />
+      <img draggable={false} src={image} alt="" className="h-24 w-auto object-contain [image-rendering:pixelated]" />
       <h3 className="mt-3 text-xl font-bold text-text-strong">{title}</h3>
       <p className="mt-1 text-body-03 text-text-muted">{description}</p>
     </div>
@@ -157,7 +157,7 @@ export function MarketPage() {
             <span className="absolute -bottom-1.5 left-8 size-3 rotate-45 bg-bg shadow-md" />
           </div>
           <div className="absolute bottom-4 right-6 hidden h-3 w-20 rounded-full bg-black/15 blur-md sm:block lg:right-14 lg:w-24" />
-          <img
+          <img draggable={false}
             src="/mascot/flea.png"
             alt=""
             className="absolute -bottom-1 right-2 size-20 object-contain [image-rendering:pixelated] sm:bottom-4 sm:right-6 sm:size-28 lg:right-10 lg:size-32"
@@ -269,7 +269,7 @@ export function MarketPage() {
               초대 링크로 참여하기
             </h2>
             <p className="mt-1 text-body-04 text-text-muted">친구에게 받은 초대 링크나 코드를 붙여 넣어 주세요.</p>
-            <img src={MASCOTS.wink} alt="" className="mx-auto my-6 h-20 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.wink} alt="" className="mx-auto my-6 h-20 object-contain [image-rendering:pixelated]" />
             <JoinMarketForm onJoined={handleJoined} />
           </>
         )}
@@ -309,7 +309,7 @@ export function MarketPage() {
               style={{ clipPath: pixelBox(6) }}
               className="w-[min(360px,100%)] bg-bg p-7 text-center"
             >
-              <img src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
               <p id="close-confirm-title" className="mt-4 text-body-02 font-bold text-text-strong">
                 작성 중인 내용이 사라져요
               </p>

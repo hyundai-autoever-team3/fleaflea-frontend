@@ -29,7 +29,7 @@ export function CollectionCard({ item, onClick }: CollectionCardProps) {
             className="flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
           >
             {imageUrl ? (
-              <img
+              <img draggable={false}
                 src={imageUrl}
                 alt=""
                 loading="lazy"
@@ -37,7 +37,7 @@ export function CollectionCard({ item, onClick }: CollectionCardProps) {
                 className="size-full object-cover"
               />
             ) : (
-              <img src={MASCOTS.default} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.default} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
             )}
           </span>
 

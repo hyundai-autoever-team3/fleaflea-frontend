@@ -168,7 +168,7 @@ export function FriendsPage() {
           style={{ clipPath: pixelBox(6) }}
           className="mt-4 flex items-start gap-3 bg-primary-subtle px-5 py-4"
         >
-          <img src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
           <div>
             <p className="text-body-03 font-bold text-text-strong">친구가 되는 방법!</p>
             <p className="mt-1 text-body-04 text-text-muted">
@@ -330,7 +330,7 @@ export function FriendsPage() {
                   style={{ clipPath: pixelBox(6) }}
                   className="mt-4 flex flex-col items-center bg-primary-subtle py-14 text-center"
                 >
-                  <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                  <img draggable={false} src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                   <p className="mt-3 text-body-03 font-bold text-text-strong">아직 친구가 없어요</p>
                   <p className="mt-1 text-body-04 text-text-muted">
                     마켓에서 만난 사람에게 친구 요청을 보내보세요!
@@ -376,7 +376,7 @@ export function FriendsPage() {
         size="sm"
       >
         <div className="py-6 text-center">
-          <img src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
           <h2 id="delete-friend-title" className="mt-6 text-head-03 font-bold text-text-strong">
             친구를 삭제할까요?
           </h2>

@@ -29,7 +29,7 @@ export function Avatar({ profileImageUrl, size = 'md', className = '' }: AvatarP
       className={`block shrink-0 overflow-hidden bg-primary-subtle ${box} ${className}`}
     >
       {hasPhoto ? (
-        <img
+        <img draggable={false}
           src={profileImageUrl as string}
           alt=""
           onError={() => setFailedUrl(profileImageUrl)}
@@ -37,7 +37,7 @@ export function Avatar({ profileImageUrl, size = 'md', className = '' }: AvatarP
         />
       ) : (
         // 마스코트는 잘리면 표정이 사라지므로 contain으로 넣고, 픽셀이 흐려지지 않게 렌더링을 고정
-        <img src={MASCOTS.default} alt="" className="size-full object-contain [image-rendering:pixelated]" />
+        <img draggable={false} src={MASCOTS.default} alt="" className="size-full object-contain [image-rendering:pixelated]" />
       )}
     </span>
   )
