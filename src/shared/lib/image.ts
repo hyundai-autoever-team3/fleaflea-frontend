@@ -1,7 +1,11 @@
 // 요즘 휴대폰 사진은 5~12MB라 그대로 올리면 업로드가 느리고 서버가 거절한다.
 // 올리기 전에 긴 변을 줄여 다시 만들어 보낸다.
-const MAX_EDGE = 1200
-const QUALITY = 0.85
+//
+// 1200px은 상세 화면(360px)을 2배 화면에서 보는 것만 기준으로 잡은 값이었다.
+// 실제로는 마켓 커버와 목록 칸이 그보다 넓게 늘어나고, 사진을 확대해 보는 사람도 있어
+// 눈에 띄게 뭉갰다. 예산 안에 들어오는 한 큰 쪽을 먼저 쓴다
+const MAX_EDGE = 1600
+const QUALITY = 0.9
 
 // 서버 앞단 nginx가 1MB에서 요청을 끊는다. 그 이상은 백엔드에 닿지도 못하고 413이 난다.
 // 경계에 걸치지 않도록 여유를 두고 이 아래로 맞춘다
@@ -11,7 +15,9 @@ const MAX_UPLOAD_BYTES = 900_000
 // 큰 쪽부터 시도하다 처음으로 예산에 들어오는 것을 쓴다
 const ATTEMPTS: [edge: number, quality: number][] = [
   [MAX_EDGE, QUALITY],
-  [MAX_EDGE, 0.7],
+  [MAX_EDGE, 0.82],
+  [1200, 0.82],
+  [1200, 0.72],
   [900, 0.7],
   [700, 0.6],
   [500, 0.5],
@@ -36,6 +42,11 @@ function encode(bitmap: ImageBitmap, maxEdge: number, quality: number) {
   const context = canvas.getContext('2d')
   if (!context) return Promise.resolve(null)
 
+  // 크게 줄일수록 한 번에 건너뛰는 화소가 많아 가장자리가 지글거린다.
+  // 브라우저에 더 좋은 축소 방법을 쓰라고 알려 준다
+  context.imageSmoothingEnabled = true
+  context.imageSmoothingQuality = 'high'
+
   // 투명한 PNG를 JPEG로 바꾸면 투명한 부분이 검게 나오므로 흰 바탕을 먼저 깔아둔다
   context.fillStyle = '#ffffff'
   context.fillRect(0, 0, canvas.width, canvas.height)
@@ -46,11 +57,18 @@ function encode(bitmap: ImageBitmap, maxEdge: number, quality: number) {
   })
 }
 
-// 상세 화면에서 보이는 최대 폭이 약 360px이라, 고해상도 화면(2배)까지 감안해도 1200px면 충분하다.
 export async function shrinkImage(file: File, maxEdge = MAX_EDGE): Promise<File> {
   try {
     // 휴대폰 사진은 회전 정보가 따로 들어 있어, 그대로 그리면 옆으로 눕는다
     const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+
+    // 이미 작고 가벼운 사진은 손대지 않는다. 다시 구우면 화소가 한 번 더 뭉개지는데,
+    // 줄일 것도 없는 사진에까지 그 손해를 지울 이유가 없다
+    const longestEdge = Math.max(bitmap.width, bitmap.height)
+    if (isServerSupportedImage(file) && file.size <= MAX_UPLOAD_BYTES && longestEdge <= maxEdge) {
+      bitmap.close()
+      return file
+    }
 
     let blob: Blob | null = null
     for (const [edge, quality] of ATTEMPTS) {
