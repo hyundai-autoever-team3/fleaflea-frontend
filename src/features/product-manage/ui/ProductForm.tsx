@@ -287,7 +287,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
                   setPrice(event.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, MAX_PRICE_DIGITS))
                   setFieldErrors((prev) => ({ ...prev, price: undefined }))
                 }}
-                placeholder="0"
+                placeholder="1,000"
                 aria-invalid={Boolean(fieldErrors.price)}
                 style={pixelInputStyle}
                 className={`h-12 pr-10 ${pixelInputClass}`}
