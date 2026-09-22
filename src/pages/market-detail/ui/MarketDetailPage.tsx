@@ -365,10 +365,10 @@ export function MarketDetailPage() {
                 >
                   {visibleMembers.map((member) => {
                     const isMe = member.relationshipStatus === 'SELF'
-                    const chipClass = 'flex h-11 w-full min-w-0 items-center gap-1.5 bg-primary-subtle pl-1.5 pr-2.5'
+                    const chipClass = 'flex h-9 w-full min-w-0 items-center gap-1.5 bg-primary-subtle pl-1 pr-2'
                     const content = (
                       <>
-                        <Avatar profileImageUrl={member.profileImageUrl} size="sm" className="bg-white" />
+                        <Avatar profileImageUrl={member.profileImageUrl} size="xs" className="bg-white" />
                         <span className="min-w-0 truncate text-body-04 font-semibold text-text-strong">
                           {member.nickname}
                           {isMe && ' (나)'}
