@@ -32,7 +32,22 @@ export function isServerSupportedImage(file: File) {
   return SERVER_SUPPORTED.has(file.type)
 }
 
-function encode(bitmap: ImageBitmap, maxEdge: number, quality: number) {
+// 같은 용량이면 WebP가 JPEG보다 더 많이 담는다. 예산이 빠듯한 만큼 화질 차이가 크다.
+// 다만 굽지 못하는 브라우저(사파리 16.3 이하)는 요청한 형식을 말없이 PNG로 돌려주므로,
+// 돌아온 것이 정말 WebP인지 한 번 확인하고 아니면 JPEG로 간다
+let webpSupport: Promise<boolean> | null = null
+
+function canEncodeWebp() {
+  webpSupport ??= new Promise<boolean>((resolve) => {
+    const probe = document.createElement('canvas')
+    probe.width = 1
+    probe.height = 1
+    probe.toBlob((blob) => resolve(blob?.type === 'image/webp'), 'image/webp')
+  })
+  return webpSupport
+}
+
+function encode(bitmap: ImageBitmap, maxEdge: number, quality: number, mimeType: string) {
   const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height))
 
   const canvas = document.createElement('canvas')
@@ -53,7 +68,7 @@ function encode(bitmap: ImageBitmap, maxEdge: number, quality: number) {
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
 
   return new Promise<Blob | null>((resolve) => {
-    canvas.toBlob(resolve, 'image/jpeg', quality)
+    canvas.toBlob(resolve, mimeType, quality)
   })
 }
 
@@ -70,9 +85,11 @@ export async function shrinkImage(file: File, maxEdge = MAX_EDGE): Promise<File>
       return file
     }
 
+    const mimeType = (await canEncodeWebp()) ? 'image/webp' : 'image/jpeg'
+
     let blob: Blob | null = null
     for (const [edge, quality] of ATTEMPTS) {
-      blob = await encode(bitmap, Math.min(edge, maxEdge), quality)
+      blob = await encode(bitmap, Math.min(edge, maxEdge), quality, mimeType)
       if (!blob || blob.size <= MAX_UPLOAD_BYTES) break
     }
     bitmap.close()
@@ -82,8 +99,8 @@ export async function shrinkImage(file: File, maxEdge = MAX_EDGE): Promise<File>
     // HEIC·GIF처럼 서버가 못 받는 형식은 커지더라도 변환본을 보내야 한다
     if (isServerSupportedImage(file) && file.size <= MAX_UPLOAD_BYTES && blob.size >= file.size) return file
 
-    const name = file.name.replace(/\.[^.]+$/, '') + '.jpg'
-    return new File([blob], name, { type: 'image/jpeg', lastModified: Date.now() })
+    const name = file.name.replace(/\.[^.]+$/, '') + (blob.type === 'image/webp' ? '.webp' : '.jpg')
+    return new File([blob], name, { type: blob.type, lastModified: Date.now() })
   } catch {
     // 브라우저가 읽지 못하는 형식(HEIC 등)은 손댈 수 없어 원본을 그대로 올린다.
     // 서버가 거절하면 화면에서 아래 문구로 안내한다
