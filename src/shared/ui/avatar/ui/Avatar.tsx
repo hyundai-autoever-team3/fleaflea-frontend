@@ -3,10 +3,9 @@ import { useState } from 'react'
 import { MASCOTS } from '../../../config/mascots'
 import { pixelBox } from '../../../lib/pixel'
 
-// 촘촘한 칩(xs), 줄 안의 작은 아바타(sm), 목록 줄(md), 프로필 카드·모달(lg).
+// 줄 안의 작은 아바타(sm), 목록 줄(md), 프로필 카드·모달(lg).
 // 계단 모서리 단계는 크기에 맞춰 함께 키운다 — 작은 칸에 큰 계단을 주면 형태가 뭉개진다
 const SIZES = {
-  xs: { box: 'size-7', step: 2 },
   sm: { box: 'size-8', step: 2 },
   md: { box: 'size-12', step: 2 },
   lg: { box: 'size-20', step: 3 },
