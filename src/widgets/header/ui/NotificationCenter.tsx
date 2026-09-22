@@ -7,7 +7,6 @@ import {
   CheckBadgeIcon,
   CheckCircleIcon,
   CheckIcon,
-  FaceSmileIcon,
   TrashIcon,
   UserGroupIcon,
   UserPlusIcon,
@@ -75,7 +74,7 @@ function NotificationIcon({ type }: { type: NotificationType }) {
     case 'FRIEND_ACCEPTED':
       return <UserGroupIcon aria-hidden="true" className={className} />
     case 'POKE_RECEIVED':
-      return <FaceSmileIcon aria-hidden="true" className={className} />
+      return <span aria-hidden="true" className="text-base leading-none">😛</span>
   }
 }
 

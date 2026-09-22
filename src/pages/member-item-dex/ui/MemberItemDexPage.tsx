@@ -1,4 +1,3 @@
-import { FaceSmileIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { isAxiosError } from 'axios'
@@ -87,7 +86,7 @@ export function MemberItemDexPage() {
             style={{ clipPath: pixelBox(2) }}
             className="flex h-8 items-center gap-1.5 bg-status-nudge-subtle px-3 text-xs font-bold text-status-nudge transition-colors duration-200 hover:brightness-95 disabled:opacity-50"
           >
-            <FaceSmileIcon aria-hidden="true" className="size-3.5" />
+            <span aria-hidden="true" className="text-sm leading-none">😛</span>
             {pokeMutation.isPending ? '찌르는 중...' : '콕 찌르기'}
           </button>
         </div>
