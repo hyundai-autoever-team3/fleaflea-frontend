@@ -27,7 +27,7 @@ interface MemberItemDexState {
 function getListErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
   if (status === 401) return '로그인이 필요해요. 다시 로그인해 주세요.'
-  if (status === 403) return '이 사람의 도감은 볼 수 없어요.'
+  if (status === 403) return '친구끼리만 볼 수 있는 도감이에요. 친구를 맺으면 공개한 물건을 둘러볼 수 있어요.'
   if (status === 404) return '회원을 찾을 수 없어요.'
   return '도감을 불러오지 못했어요.'
 }

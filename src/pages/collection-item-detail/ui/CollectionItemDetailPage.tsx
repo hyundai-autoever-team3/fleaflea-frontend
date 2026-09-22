@@ -24,8 +24,10 @@ const ACTIONS: { key: ActionKind; label: string }[] = [
 
 function getDetailErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
-  // 비공개이거나 삭제된 물건에 직접 들어온 경우를 같은 문구로 덮는다
-  if (status === 403 || status === 404) return '볼 수 없는 물건이에요.'
+  // 친구가 아니면 남의 도감은 403이다. 무엇을 하면 볼 수 있는지까지 알려준다
+  if (status === 403) return '친구끼리만 볼 수 있는 물건이에요. 친구를 맺으면 공개한 물건을 둘러볼 수 있어요.'
+  // 비공개이거나 이미 지워진 물건
+  if (status === 404) return '볼 수 없는 물건이에요.'
   if (status === 401) return '로그인이 필요해요. 다시 로그인해 주세요.'
   return '물건 정보를 불러오지 못했어요.'
 }
