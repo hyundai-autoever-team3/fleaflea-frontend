@@ -35,7 +35,7 @@ export function MarketCover({ coverImageUrl, className = '', marketId, variant =
               src={coverImageUrl}
               fallback={fallbackMascot}
               className="size-full object-cover [image-rendering:pixelated]"
-              fallbackClassName="size-full p-6"
+              fallbackClassName="size-full p-[15%]"
             />
           </div>
         </div>
