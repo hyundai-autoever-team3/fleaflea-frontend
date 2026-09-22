@@ -55,6 +55,7 @@
   --green-400: #4fa374;
   --amber-400: #c9863a;
   --pink-400: #cc75a2;
+  --teal-400: #4f9bb3;
 
   /* 알림 상태 칩 — 옅은 면과 함께 써도 작은 글자가 읽히는 짙은 톤 */
   --green-100: #e7f4eb;
@@ -66,6 +67,8 @@
   --amber-700: #7d5524;
   --pink-100: #fdeaf4;
   --pink-700: #97417a;
+  --teal-100: #e3f1f5;
+  --teal-700: #2f6a7d;
 
   /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
   --cosmic-950: #100c2c;
@@ -151,6 +154,9 @@
   /* 콕 찌르기처럼 좋고 나쁨이 아닌 알림 — 성공·경고로 읽히지 않게 따로 둔다 */
   --color-status-accent: var(--pink-700);
   --color-status-accent-subtle: var(--pink-100);
+  /* 콕 찌르기 — 거래도 친구 맺기도 아닌 가벼운 인사라 다른 여섯 색과 겹치지 않게 둔다 */
+  --color-status-nudge: var(--teal-700);
+  --color-status-nudge-subtle: var(--teal-100);
 
   /* 종류 타일 바탕 — 흰 아이콘을 얹는 자리 */
   --color-status-brand-tile: var(--purple-400);
@@ -159,6 +165,7 @@
   --color-status-success-tile: var(--green-400);
   --color-status-warning-tile: var(--amber-400);
   --color-status-accent-tile: var(--pink-400);
+  --color-status-nudge-tile: var(--teal-400);
   --color-status-muted-tile: var(--gray-500);
 
   /* Text */
