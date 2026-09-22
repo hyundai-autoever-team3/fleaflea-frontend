@@ -26,8 +26,8 @@ function PreviewFrame({
   return (
     <figure className="mx-auto w-full max-w-xl min-w-0 text-left">
       <div className="drop-shadow-lg">
-        <div style={{ clipPath: pixelBox(6) }} className="bg-primary-tint p-[2px]">
-          <div style={{ clipPath: pixelBox(6) }} className="bg-bg">
+        <div className="overflow-hidden rounded-3xl bg-primary-tint p-[2px]">
+          <div className="overflow-hidden rounded-[22px] bg-bg">
             <div className="flex items-center justify-between gap-2 border-b border-primary-tint bg-primary-subtle px-4 py-3">
               <span className="font-jua text-body-03 text-text-strong">FleaFlea</span>
               <span className="text-xs text-text-muted">{section} · 미리보기</span>

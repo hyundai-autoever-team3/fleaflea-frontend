@@ -10,6 +10,7 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 
+import { MASCOTS } from '../../../shared/config/mascots'
 import { withRedirect } from '../../../shared/lib/redirect'
 import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
@@ -23,69 +24,61 @@ import {
 } from './FeatureMockups'
 import { LandingHeader } from './LandingHeader'
 
-// Apple(macOS) 글래스모피즘 — 반투명 흰색 레이어 + 블러/채도 + 3겹 그림자(외곽선/남색 큰 그림자/상단 하이라이트).
-// 값은 app/styles/glass.css의 유틸리티에 있다 — 알림 드롭다운도 같은 규칙을 쓴다
-const glass = 'glass rounded-2xl'
-
 // 알약 배지용 가벼운 글래스 — 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임
 const glassPill = 'glass-pill rounded-full'
-
-
-function Mascot({ className = 'size-10' }: { className?: string }) {
-  return (
-    <div className={`${className} shrink-0 overflow-hidden rounded-full`}>
-      <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover" />
-    </div>
-  )
-}
 
 // 로그인 후 실제 앱 화면을 미리 보여주는 브라우저 창 목업. 실제 캡처가 아니라 우리 컴포넌트/토큰으로 재구성한 것.
 function BrowserMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-2xl">
-      <div className="overflow-hidden rounded-2xl border border-border bg-bg shadow-lg">
-        <div className="flex items-center gap-2 border-b border-border bg-bg-subtle px-4 py-2">
-          <span className="flex gap-1.5">
-            <span className="size-2.5 rounded-full bg-[#ff5f57]" />
-            <span className="size-2.5 rounded-full bg-[#febc2e]" />
-            <span className="size-2.5 rounded-full bg-[#28c840]" />
+    <div className="mx-auto w-full max-w-2xl text-left">
+      <div className="overflow-hidden rounded-3xl border border-primary-tint bg-bg shadow-lg">
+        <div className="flex items-center gap-3 border-b border-primary-tint bg-primary-subtle px-4 py-2">
+          <span aria-hidden="true" className="flex shrink-0 gap-1.5">
+            <span className="size-2 rounded-full bg-primary" />
+            <span className="size-2 rounded-full bg-primary-tint" />
+            <span className="size-2 rounded-full bg-bg" />
           </span>
-          <span className="mx-auto flex items-center gap-1 text-body-04 text-text-muted">
-            <LockClosedIcon className="size-3" /> FleaFlea · 우리들의 플리마켓
+          <span className="mx-auto flex min-w-0 items-center gap-1 text-xs text-text-muted">
+            <LockClosedIcon aria-hidden="true" className="size-3 shrink-0" />
+            <span className="truncate">FleaFlea · 서비스 미리보기</span>
           </span>
         </div>
-        <div className="p-6">
-          <div className="flex items-center justify-between">
+        <div className="p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-jua text-body-03 text-text-strong">FleaFlea</span>
-            <span className="rounded-full bg-bg-subtle px-3 py-1 text-body-04 text-text-muted">
-              어떤 보물을 찾고 있나요?
-            </span>
+            <div className="flex items-center gap-3 text-xs text-text-muted">
+              <span className="font-bold text-status-brand">마켓</span>
+              <span>물건 도감</span>
+              <span>친구</span>
+            </div>
           </div>
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-primary-subtle p-4">
-            <div>
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-primary-subtle p-3">
+            <div className="min-w-0">
               <p className="text-body-03 font-bold text-text-strong">우리들의 플리마켓</p>
-              <p className="mt-1 text-body-04 text-text-muted">
+              <p className="mt-1 text-xs text-text-muted">
                 작은 취향을 나누고, 새로운 이야기를 시작해요.
               </p>
             </div>
-            <Mascot className="size-16" />
+            <img src={MASCOTS.smile} alt="" loading="lazy" width={48} height={48} className="size-12 shrink-0 object-contain [image-rendering:pixelated]" />
           </div>
-        </div>
-      </div>
 
-      {/* 글래스모피즘 알림 카드 2개 — 프레임 밖으로 살짝 걸치게 배치 */}
-      <div className={`absolute -left-6 top-10 flex max-w-56 items-center gap-3 p-4 ${glass}`}>
-        <UserGroupIcon className="size-6 shrink-0 text-primary" />
-        <div className="text-left">
-          <p className="text-body-04 font-bold text-glass-ink/92">은지님이 마켓에 참여했어요!</p>
-          <p className="text-body-04 text-glass-ink/58">우리 마켓에 새로운 친구가 생겼어요.</p>
-        </div>
-      </div>
-      <div className={`absolute -right-6 -bottom-6 flex items-center gap-3 p-4 ${glass}`}>
-        <CheckCircleIcon className="size-6 shrink-0 text-primary" />
-        <div className="text-left">
-          <p className="text-body-04 font-bold text-glass-ink/92">기분 좋은 거래 완료</p>
-          <p className="text-body-04 text-glass-ink/58">물건에 새로운 이야기가 생겼어요.</p>
+          {/* 알림을 화면 안의 흐름에 넣어 본문을 가리거나 바깥으로 넘치지 않게 한다. */}
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="flex items-start gap-2 rounded-xl border border-primary-tint p-2">
+              <UserGroupIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-brand" />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-text-strong">새로운 친구 요청</p>
+                <p className="mt-1 text-[11px] text-text-muted">은지님이 친구 요청을 보냈어요.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-2 rounded-xl border border-primary-tint p-2">
+              <CheckCircleIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-brand" />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-text-strong">기분 좋은 거래 완료</p>
+                <p className="mt-1 text-[11px] text-text-muted">물건에 새로운 이야기가 생겼어요.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -210,7 +203,7 @@ export function LandingPage() {
           <h2 className="text-head-02 font-bold text-text-strong">당신의 두 번째 발견! 즐거운 플리마켓</h2>
           <p className="mt-2 text-body-03 text-text-muted">작은 취향을 나누고, 새로운 이야기를 시작해요 💜</p>
         </div>
-        <div data-reveal-item className="relative">
+        <div data-reveal-item className="relative min-w-0 max-w-full">
           <BrowserMockup />
         </div>
       </section>
