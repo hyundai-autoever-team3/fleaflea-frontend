@@ -87,6 +87,21 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     0 8px 20px -6px rgba(20, 30, 60, 0.22);
 
+  /* 유리창 모달 — 패널보다 한 단 더 띄운다. 첫 줄의 0.5px 그림자가 hairline 테두리를
+   * 대신하고(경계선을 따로 그리면 clip과 겹쳐 두꺼워짐), 마지막 줄이 위쪽 하이라이트다 */
+  --shadow-glass-window:
+    0 0 0 0.5px rgba(0, 0, 0, 0.1),
+    0 40px 100px rgba(20, 30, 60, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* 모달 뒤를 덮는 막. 검정을 그대로 깔면 탁해져 남색 쪽으로 기울였다 */
+  --scrim: rgba(20, 30, 60, 0.32);
+
+  /* macOS 창 신호등 — 랜딩 목업과 유리창 모달이 같은 색을 쓴다 */
+  --traffic-red: #ff5f57;
+  --traffic-yellow: #febc2e;
+  --traffic-green: #28c840;
+
   /* 글래스 패널 바탕 — 라벤더 파스텔 그라데이션을 반투명으로 깔아
    * 뒤 화면이 비치면서도 우리 톤을 유지한다 (--gradient-dreamy의 옅은 판).
    * 위에 흰 유리면이 겹치므로 그라데이션 자체는 연하게 둔다 */
@@ -171,6 +186,11 @@
   --color-glass-line: var(--glass-line);
   --shadow-glass: var(--shadow-glass-panel);
   --shadow-glass-pill: var(--shadow-glass-pill);
+  --shadow-glass-window: var(--shadow-glass-window);
+  --color-scrim: var(--scrim);
+  --color-traffic-red: var(--traffic-red);
+  --color-traffic-yellow: var(--traffic-yellow);
+  --color-traffic-green: var(--traffic-green);
 
   /* ---- 3) TYPOGRAPHY ---- */
   /* 전역 기본 폰트 — Tailwind의 font-sans + 기본 body 폰트를 덮어씀 (클래스 없이 전체 적용) */
