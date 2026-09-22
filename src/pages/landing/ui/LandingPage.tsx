@@ -14,6 +14,13 @@ import { withRedirect } from '../../../shared/lib/redirect'
 import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
+import {
+  CollectionMockup,
+  FriendsMockup,
+  InviteMockup,
+  TradeFlowMockup,
+  TradeWaysMockup,
+} from './FeatureMockups'
 import { LandingHeader } from './LandingHeader'
 
 // Apple(macOS) 글래스모피즘 — 반투명 흰색 레이어 + 블러/채도 + 3겹 그림자(외곽선/남색 큰 그림자/상단 하이라이트).
@@ -233,9 +240,8 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 오른쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="min-h-64 w-full flex-1 rounded-3xl bg-primary-subtle p-6 md:min-h-96">
-          <span className="text-body-04 font-bold tracking-widest text-text-muted">INVITE YOUR PEOPLE</span>
+        <div data-reveal-item className="w-full flex-1">
+          <InviteMockup />
         </div>
       </section>
 
@@ -266,11 +272,8 @@ export function LandingPage() {
           </span>
         </div>
 
-        {/* 왼쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="min-h-64 w-full flex-1 rounded-3xl bg-primary-subtle p-6 md:min-h-96">
-          <span className="text-body-04 font-bold tracking-widest text-text-muted">
-            A LITTLE SOMETHING FOR EVERYONE
-          </span>
+        <div data-reveal-item className="w-full flex-1">
+          <TradeWaysMockup />
         </div>
       </section>
 
@@ -301,8 +304,8 @@ export function LandingPage() {
         </div>
 
         {/* 오른쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="min-h-64 w-full flex-1 rounded-3xl bg-primary-subtle p-6 md:min-h-96">
-          <span className="text-body-04 font-bold tracking-widest text-text-muted">YOUR PERSONAL COLLECTION</span>
+        <div data-reveal-item className="w-full flex-1">
+          <CollectionMockup />
         </div>
       </section>
 
@@ -335,8 +338,8 @@ export function LandingPage() {
         </div>
 
         {/* 왼쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="min-h-64 w-full flex-1 rounded-3xl bg-primary-subtle p-6 md:min-h-96">
-          <span className="text-body-04 font-bold tracking-widest text-text-muted">BETTER WITH FRIENDS</span>
+        <div data-reveal-item className="w-full flex-1">
+          <FriendsMockup />
         </div>
       </section>
 
@@ -365,8 +368,8 @@ export function LandingPage() {
         </div>
 
         {/* 오른쪽 그래픽은 별도로 채워 넣을 예정 — 자리만 확보 */}
-        <div data-reveal-item className="min-h-64 w-full flex-1 rounded-3xl bg-primary-subtle p-6 md:min-h-96">
-          <span className="text-body-04 font-bold tracking-widest text-text-muted">A HAPPY NEW CHAPTER</span>
+        <div data-reveal-item className="w-full flex-1">
+          <TradeFlowMockup />
         </div>
       </section>
 
