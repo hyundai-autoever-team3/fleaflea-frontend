@@ -78,7 +78,7 @@ export function Modal({ open, onRequestClose, labelledBy, size = 'md', showClose
         if (!open && event.target === event.currentTarget && event.propertyName === 'opacity') setShownChildren(null)
       }}
       // 내용이 길면 스크롤은 되지만 스크롤바는 숨김. 열릴 때 창 자체에 생기는 포커스 테두리도 제거
-      className={`m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
+      className={`glass-window m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
     >
       {showClose && (
         <button
