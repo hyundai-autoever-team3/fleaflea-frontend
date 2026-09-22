@@ -119,7 +119,11 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
     else if (title.length > TITLE_MAX) nextErrors.title = `상품명은 ${TITLE_MAX}자 이내로 입력해 주세요.`
     if (!trimmedDescription) nextErrors.description = '상품 설명을 입력해 주세요.'
     else if (description.length > DESCRIPTION_MAX) nextErrors.description = `상품 설명은 ${DESCRIPTION_MAX.toLocaleString()}자 이내로 입력해 주세요.`
+    // '0'은 빈 값이 아니라 통과해 버린다. 공짜로 주려는 것이면 판매가 아니라 나눔이다
     if (needsPrice && !price) nextErrors.price = '판매 가격을 입력해 주세요.'
+    else if (needsPrice && Number(price) <= 0) {
+      nextErrors.price = '판매 가격은 1원부터 입력할 수 있어요. 그냥 주려면 나눔을 선택해 주세요.'
+    }
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
