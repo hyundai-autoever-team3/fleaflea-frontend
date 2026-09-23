@@ -1,10 +1,11 @@
 import {useState} from 'react'
 import type {FormEvent} from 'react'
-import {Link, useNavigate} from 'react-router'
+import {Link, useLocation, useNavigate} from 'react-router'
 import {isAxiosError} from 'axios'
 import {EyeIcon, EyeSlashIcon} from '@heroicons/react/24/outline'
 
 import {EMAIL_PATTERN, FIELD_LIMITS} from '../../../shared/config/field-limits'
+import {readRedirect, withRedirect} from '../../../shared/lib/redirect'
 import {StarField} from '../../../shared/ui/star-field'
 import {useToastStore} from '../../../shared/ui/toast'
 import {login, signup} from '../api/auth-api'
@@ -25,6 +26,8 @@ function getSignupErrorMessage(error: unknown) {
 
 export function SignupForm() {
     const navigate = useNavigate()
+    // 초대 링크처럼 가입 전에 들어왔던 화면이 있으면 그 자리로 돌려보낸다
+    const redirectTo = readRedirect(useLocation().search)
     const [showPassword, setShowPassword] = useState(false)
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
     const [error, setError] = useState('')
@@ -76,22 +79,22 @@ export function SignupForm() {
             const { data } = await login({ email, password })
             useSessionStore.getState().setSession(data)
             useToastStore.getState().showToast('가입을 환영해요!')
-            navigate('/market', { replace: true, viewTransition: true })
+            navigate(redirectTo ?? '/market', { replace: true, viewTransition: true })
         } catch {
             // 가입은 이미 끝나서 다시 가입하면 409가 나므로, 자동 로그인만 실패한 경우 로그인 화면으로 안내
             useToastStore.getState().showToast('가입은 완료됐어요. 로그인해 주세요.')
-            navigate('/login', { replace: true })
+            navigate(redirectTo ? withRedirect('/login', redirectTo) : '/login', { replace: true })
         }
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-bg-subtle p-6">
+        <div className="flex min-h-screen items-center justify-center bg-primary-subtle p-6">
             <div className="grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10">
                 {/* 왼쪽: 폼 */}
                 <div className="flex h-full flex-col p-6 md:p-10">
                     <div className="flex items-center gap-2">
                         <div className="size-8 overflow-hidden rounded-full">
-                            <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover"/>
+                            <img draggable={false} src="/mascot/flea.png" alt="" className="h-full w-full object-cover"/>
                         </div>
                         <span className="font-jua text-body-02 text-text-strong">FleaFlea</span>
                     </div>
@@ -205,7 +208,7 @@ export function SignupForm() {
 
                             <p className="text-center text-body-04 text-text-muted">
                                 이미 계정이 있으신가요?{' '}
-                                <Link to="/login" viewTransition className="font-bold text-primary">
+                                <Link to={redirectTo ? withRedirect('/login', redirectTo) : '/login'} viewTransition className="font-bold text-primary">
                                     로그인
                                 </Link>
                             </p>
@@ -223,7 +226,7 @@ export function SignupForm() {
                         }}
                     />
                     <StarField/>
-                    <img
+                    <img draggable={false}
                         src="/mascot/flea-bg.png"
                         alt=""
                         className="relative h-full w-full object-cover"

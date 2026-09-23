@@ -6,7 +6,7 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { shrinkImage } from '../../../shared/lib/image'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
-import { createMarket, type CreateMarketResponse } from '../api/market-api'
+import { useCreateMarket, type CreateMarketResponse } from '../api/market-api'
 
 const TITLE_MAX = FIELD_LIMITS.marketTitle.max
 const DESCRIPTION_MAX = FIELD_LIMITS.marketDescription.max
@@ -23,7 +23,9 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [titleError, setTitleError] = useState('')
   const [error, setError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // 내 마켓 목록 새로고침은 useCreateMarket 안에서 한다
+  const createMutation = useCreateMarket()
+  const isSubmitting = createMutation.isPending
 
   const isDirty = Boolean(title || description || coverImage)
   useEffect(() => {
@@ -52,7 +54,7 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
     selectCover(file ? await shrinkImage(file) : null)
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
@@ -60,20 +62,18 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
       return
     }
 
-    setIsSubmitting(true)
     setError('')
-    try {
-      const { data } = await createMarket({
+    createMutation.mutate(
+      {
         title: trimmedTitle,
         description: description.trim() || undefined,
         coverImage,
-      })
-      onCreated(data)
-    } catch {
-      setError('마켓을 만들지 못했어요. 잠시 후 다시 시도해 주세요.')
-    } finally {
-      setIsSubmitting(false)
-    }
+      },
+      {
+        onSuccess: onCreated,
+        onError: () => setError('마켓을 만들지 못했어요. 잠시 후 다시 시도해 주세요.'),
+      },
+    )
   }
 
   return (
@@ -123,7 +123,7 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             rows={4}
             placeholder="서로의 물건에 새로운 주인을 찾아줘요."
             style={pixelInputStyle}
-            className={`resize-none py-3 ${pixelInputClass}`}
+            className={`py-3 ${pixelInputClass}`}
           />
         </PixelField>
       </div>
@@ -141,10 +141,10 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             className="group relative flex h-44 items-center justify-center overflow-hidden bg-[image:var(--gradient-dreamy)]"
           >
             {previewUrl ? (
-              <img src={previewUrl} alt="선택한 마켓 커버 미리보기" className="size-full object-cover" />
+              <img draggable={false} src={previewUrl} alt="선택한 마켓 커버 미리보기" className="size-full object-cover" />
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <img src={MASCOTS.beret} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                <img draggable={false} src={MASCOTS.beret} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                 <span className="text-body-04 font-semibold text-text-muted">눌러서 커버 이미지 선택</span>
               </div>
             )}

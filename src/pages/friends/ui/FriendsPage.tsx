@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 
 import {
-  friendKeys,
   getMemberSearchErrorMessage,
   useFriendRequests,
   useMemberSearch,
@@ -12,15 +10,16 @@ import {
 } from '../../../entities/friend'
 import type { Friendship, RelationshipStatus } from '../../../entities/friend'
 import {
-  acceptFriendRequest,
-  cancelFriendRequest,
-  deleteFriendship,
+  FRIEND_REQUEST_ACTION_LABEL,
   getDeleteFriendshipErrorMessage,
   getFriendRequestActionErrorMessage,
   getSendFriendRequestErrorMessage,
-  rejectFriendRequest,
-  sendFriendRequest,
+  useDeleteFriendship,
+  useRespondToFriendRequest,
+  useSendFriendRequest,
+  type FriendRequestAction,
 } from '../../../features/friend-manage'
+import { useMyProfile } from '../../../entities/user'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { Avatar } from '../../../shared/ui/avatar'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -32,6 +31,7 @@ const ACTION_BUTTON = 'flex h-9 items-center px-3 text-xs font-bold transition-c
 
 // 검색 결과에서 관계 상태를 한 줄로 알려줌. NONE은 아직 아무 관계가 없어 표시하지 않음
 const SEARCH_CAPTION: Record<RelationshipStatus, string> = {
+  SELF: '나예요',
   NONE: '',
   REQUESTED: '요청을 보냈어요',
   REQUEST_RECEIVED: '나에게 친구 요청을 보냈어요',
@@ -57,7 +57,7 @@ function FriendRow({
           <p className="truncate text-body-03 font-bold text-text-strong">{friend.nickname}</p>
           {caption && <p className="mt-0.5 text-body-04 text-text-muted">{caption}</p>}
         </div>
-        <div className="flex shrink-0 gap-2">{children}</div>
+        <div className="flex shrink-0 flex-wrap justify-end gap-2">{children}</div>
       </div>
     </li>
   )
@@ -73,12 +73,11 @@ function SectionTitle({ label, count }: { label: string; count?: number }) {
 }
 
 export function FriendsPage() {
-  const queryClient = useQueryClient()
+  const meQuery = useMyProfile()
   const friendsQuery = useMyFriends()
   const receivedQuery = useFriendRequests('RECEIVED')
   const sentQuery = useFriendRequests('SENT')
 
-  const [pendingId, setPendingId] = useState<number | null>(null)
   const [error, setError] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Friendship | null>(null)
 
@@ -99,7 +98,9 @@ export function FriendsPage() {
     const friend = friends.find((entry) => entry.memberId === person.memberId)
     const receivedRequest = received.find((entry) => entry.memberId === person.memberId)
     const sentRequest = sent.find((entry) => entry.memberId === person.memberId)
-    const relationshipStatus: RelationshipStatus | null = !relationshipsReady ? null
+    // 내 닉네임으로 검색하면 나도 결과에 나온다. 나에게는 요청을 보낼 수 없어(400) 먼저 가른다
+    const relationshipStatus: RelationshipStatus | null = person.memberId === meQuery.data?.memberId ? 'SELF'
+      : !relationshipsReady ? null
       : friend ? 'FRIEND'
       : receivedRequest ? 'REQUEST_RECEIVED'
       : sentRequest ? 'REQUESTED'
@@ -111,58 +112,46 @@ export function FriendsPage() {
     }
   })
 
-  function refreshAll() {
-    void queryClient.invalidateQueries({ queryKey: friendKeys.all })
-  }
+  // 목록 새로고침은 각 mutation 안에서 한다. 여기서는 어느 줄이 처리 중인지와
+  // 실패 문구만 다루면 된다
+  const sendRequestMutation = useSendFriendRequest()
+  const respondMutation = useRespondToFriendRequest()
+  const deleteFriendshipMutation = useDeleteFriendship()
+
+  const pendingId = sendRequestMutation.isPending ? sendRequestMutation.variables
+    : respondMutation.isPending ? respondMutation.variables.memberId
+    : deleteFriendshipMutation.isPending ? deleteTarget?.memberId ?? null
+    : null
 
   // 수락·거절·취소는 처리 흐름이 같아 한 곳에서 실행하고, 문구만 동작에 맞춰 바꿈
-  async function runRequestAction(
-    memberId: number,
-    action: '수락' | '거절' | '취소',
-    request: (id: number) => Promise<unknown>,
-    successMessage: string,
-  ) {
-    setPendingId(memberId)
+  function runRequestAction(memberId: number, action: FriendRequestAction, successMessage: string) {
     setError('')
-    try {
-      await request(memberId)
-      refreshAll()
-      useToastStore.getState().showToast(successMessage)
-    } catch (actionError) {
-      setError(getFriendRequestActionErrorMessage(actionError, action))
-    } finally {
-      setPendingId(null)
-    }
+    respondMutation.mutate({ action, memberId }, {
+      onSuccess: () => useToastStore.getState().showToast(successMessage),
+      onError: (actionError) => setError(
+        getFriendRequestActionErrorMessage(actionError, FRIEND_REQUEST_ACTION_LABEL[action]),
+      ),
+    })
   }
 
-  async function handleSendRequest(memberId: number) {
-    setPendingId(memberId)
+  function handleSendRequest(memberId: number) {
     setError('')
-    try {
-      await sendFriendRequest(memberId)
-      refreshAll()
-      useToastStore.getState().showToast('친구 요청을 보냈어요')
-    } catch (sendError) {
-      setError(getSendFriendRequestErrorMessage(sendError))
-    } finally {
-      setPendingId(null)
-    }
+    sendRequestMutation.mutate(memberId, {
+      onSuccess: () => useToastStore.getState().showToast('친구 요청을 보냈어요'),
+      onError: (sendError) => setError(getSendFriendRequestErrorMessage(sendError)),
+    })
   }
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!deleteTarget) return
-    setPendingId(deleteTarget.memberId)
     setError('')
-    try {
-      await deleteFriendship(deleteTarget.friendshipId)
-      refreshAll()
-      useToastStore.getState().showToast('친구를 삭제했어요')
-      setDeleteTarget(null)
-    } catch (deleteError) {
-      setError(getDeleteFriendshipErrorMessage(deleteError))
-    } finally {
-      setPendingId(null)
-    }
+    deleteFriendshipMutation.mutate(deleteTarget.friendshipId, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구를 삭제했어요')
+        setDeleteTarget(null)
+      },
+      onError: (deleteError) => setError(getDeleteFriendshipErrorMessage(deleteError)),
+    })
   }
 
   const isLoading = friendsQuery.isPending || receivedQuery.isPending || sentQuery.isPending
@@ -179,7 +168,7 @@ export function FriendsPage() {
           style={{ clipPath: pixelBox(6) }}
           className="mt-4 flex items-start gap-3 bg-primary-subtle px-5 py-4"
         >
-          <img src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.wink} alt="" className="h-10 shrink-0 object-contain [image-rendering:pixelated]" />
           <div>
             <p className="text-body-03 font-bold text-text-strong">친구가 되는 방법!</p>
             <p className="mt-1 text-body-04 text-text-muted">
@@ -205,7 +194,7 @@ export function FriendsPage() {
                         type="button"
                         disabled={pendingId === friend.memberId}
                         onClick={() =>
-                          void runRequestAction(friend.memberId, '수락', acceptFriendRequest, '친구가 됐어요!')
+                          runRequestAction(friend.memberId, 'accept', '친구가 됐어요!')
                         }
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary text-white hover:bg-primary/90 disabled:bg-primary/50`}
@@ -216,7 +205,7 @@ export function FriendsPage() {
                         type="button"
                         disabled={pendingId === friend.memberId}
                         onClick={() =>
-                          void runRequestAction(friend.memberId, '거절', rejectFriendRequest, '요청을 거절했어요')
+                          runRequestAction(friend.memberId, 'reject', '요청을 거절했어요')
                         }
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-red-100 hover:text-red-600`}
@@ -240,7 +229,7 @@ export function FriendsPage() {
                         type="button"
                         disabled={pendingId === friend.memberId}
                         onClick={() =>
-                          void runRequestAction(friend.memberId, '취소', cancelFriendRequest, '요청을 취소했어요')
+                          runRequestAction(friend.memberId, 'cancel', '요청을 취소했어요')
                         }
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong`}
@@ -309,7 +298,7 @@ export function FriendsPage() {
                             <button
                               type="button"
                               disabled={pendingId === person.memberId}
-                              onClick={() => void handleSendRequest(person.memberId)}
+                              onClick={() => handleSendRequest(person.memberId)}
                               style={{ clipPath: pixelBox(2) }}
                               className={`${ACTION_BUTTON} bg-primary text-white hover:bg-primary/90 disabled:bg-primary/50`}
                             >
@@ -321,7 +310,7 @@ export function FriendsPage() {
                               type="button"
                               disabled={pendingId === person.memberId}
                               onClick={() =>
-                                void runRequestAction(person.memberId, '수락', acceptFriendRequest, '친구가 됐어요!')
+                                runRequestAction(person.memberId, 'accept', '친구가 됐어요!')
                               }
                               style={{ clipPath: pixelBox(2) }}
                               className={`${ACTION_BUTTON} bg-primary text-white hover:bg-primary/90 disabled:bg-primary/50`}
@@ -341,7 +330,7 @@ export function FriendsPage() {
                   style={{ clipPath: pixelBox(6) }}
                   className="mt-4 flex flex-col items-center bg-primary-subtle py-14 text-center"
                 >
-                  <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                  <img draggable={false} src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                   <p className="mt-3 text-body-03 font-bold text-text-strong">아직 친구가 없어요</p>
                   <p className="mt-1 text-body-04 text-text-muted">
                     마켓에서 만난 사람에게 친구 요청을 보내보세요!
@@ -387,7 +376,7 @@ export function FriendsPage() {
         size="sm"
       >
         <div className="py-6 text-center">
-          <img src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
           <h2 id="delete-friend-title" className="mt-6 text-head-03 font-bold text-text-strong">
             친구를 삭제할까요?
           </h2>
@@ -401,12 +390,12 @@ export function FriendsPage() {
           <div className="mt-8 flex gap-3">
             <button
               type="button"
-              onClick={() => void handleDelete()}
-              disabled={pendingId !== null}
+              onClick={() => handleDelete()}
+              disabled={deleteFriendshipMutation.isPending}
               style={{ clipPath: pixelBox(4) }}
               className="flex-1 bg-red-500 py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-red-600 disabled:bg-red-300"
             >
-              {pendingId !== null ? '삭제하는 중...' : '삭제하기'}
+              {deleteFriendshipMutation.isPending ? '삭제하는 중...' : '삭제하기'}
             </button>
             <button
               type="button"

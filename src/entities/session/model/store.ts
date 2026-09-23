@@ -6,13 +6,15 @@ import { queryClient } from '../../../shared/api/query-client'
 
 interface SessionTokens {
     accessToken: string
-    refreshToken: string
 }
 
+// 리프레시 토큰은 HttpOnly 쿠키라 브라우저가 들고 있다. 여기서 다루지 않는다
 interface SessionState {
     accessToken: string | null
-    refreshToken: string | null
     setSession: (tokens: SessionTokens, rememberMe?: boolean) => void
+    // 토큰을 다시 받았을 때 접근 토큰만 갈아끼운다. 같은 사람의 같은 세션이므로
+    // setSession과 달리 캐시를 비우지 않는다
+    setAccessToken: (accessToken: string) => void
     clearSession: () => void
 }
 
@@ -56,26 +58,24 @@ export const useSessionStore = create<SessionState>()(
     persist(
         (set) => ({
             accessToken: null,
-            refreshToken: null,
 
             setSession: (
-                { accessToken, refreshToken },
+                { accessToken },
                 rememberMe = remember,
             ) => {
                 remember = rememberMe
                 // 이전 세션(가짜·만료 토큰, 다른 계정)의 조회 결과와 에러가 새 로그인에 남지 않도록 캐시 비움
                 queryClient.clear()
-                set({ accessToken, refreshToken })
+                set({ accessToken })
             },
+
+            setAccessToken: (accessToken) => set({ accessToken }),
 
             clearSession: () => {
                 // 로그아웃 뒤 다른 계정으로 로그인했을 때 이전 사용자의 데이터가 보이지 않도록 캐시 비움
                 queryClient.clear()
                 // 메모리 상태를 먼저 초기화한 뒤 저장된 데이터도 삭제
-                set({
-                    accessToken: null,
-                    refreshToken: null,
-                        })
+                set({ accessToken: null })
 
                 dualStorage.removeItem(SESSION_STORAGE_KEY)
                 remember = true
@@ -88,7 +88,6 @@ export const useSessionStore = create<SessionState>()(
             // 브라우저에 저장할 필드 명시
             partialize: (state) => ({
                 accessToken: state.accessToken,
-                refreshToken: state.refreshToken,
             }),
         },
     ),

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { useMarket } from '../../../entities/market'
@@ -8,17 +7,17 @@ import {
   formatProductPrice,
   getRequestActionLabel,
   getStatusTagLabel,
-  productKeys,
   useMarketProducts,
   useProduct,
 } from '../../../entities/product'
+import type { ProductDetail } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { deleteProduct, getDeleteProductErrorMessage } from '../../../features/product-manage'
+import { getDeleteProductErrorMessage, useDeleteProduct } from '../../../features/product-manage'
 import { ProductTradeRequestModal } from '../../../features/trade-request'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Avatar } from '../../../shared/ui/avatar'
+import { BackLink } from '../../../shared/ui/back-link'
 import { Modal } from '../../../shared/ui/modal'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -31,14 +30,15 @@ function getDetailErrorMessage(error: unknown) {
   return '상품 정보를 불러오지 못했어요.'
 }
 
-// 돌아갈 곳은 들어온 경로에 따라 달라진다 (마켓 / 마이페이지 거래 목록)
-function BackLink({ fallback }: { fallback: BackTarget }) {
-  const back = useBackTarget(fallback)
-  return (
-    <Link to={back.to} viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
-      ← {back.label}
-    </Link>
-  )
+// 요청을 못 보내는 이유는 상태마다 다르다. 하나로 묶어 '끝났다'고만 하면
+// 대여는 돌아올 물건인데 영영 끝난 것처럼 읽힌다
+function closedNotice({ status, tradeType }: ProductDetail) {
+  if (status === 'IN_PROGRESS') {
+    return tradeType === 'RENTAL'
+      ? { button: '지금 대여 중이에요', hint: '다른 분이 빌려 갔어요. 반납되면 다시 빌릴 수 있어요.' }
+      : { button: '지금 예약 중이에요', hint: '거래가 진행 중이에요. 취소되면 다시 요청할 수 있어요.' }
+  }
+  return { button: '거래가 끝난 상품이에요', hint: '이미 거래를 마친 상품이에요.' }
 }
 
 export function ProductDetailPage() {
@@ -47,7 +47,6 @@ export function ProductDetailPage() {
   const isValidId = Number.isInteger(itemId) && itemId > 0
 
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const productQuery = useProduct(itemId)
   const meQuery = useMyProfile()
   const product = productQuery.data
@@ -65,23 +64,22 @@ export function ProductDetailPage() {
   const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  // 상세를 받기 전에는 마켓을 몰라 0으로 두지만, 삭제 버튼은 상품이 있어야 보인다
+  const deleteMutation = useDeleteProduct(itemId, product?.marketId ?? 0)
+  const isDeleting = deleteMutation.isPending
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!product) return
-    setIsDeleting(true)
     setDeleteError('')
-    try {
-      await deleteProduct(product.itemId)
-      void queryClient.invalidateQueries({ queryKey: productKeys.market(product.marketId) })
-      useToastStore.getState().showToast('상품을 삭제했어요')
-      navigate(`/market/${product.marketId}`, { replace: true, viewTransition: true })
-    } catch (error) {
-      setDeleteError(getDeleteProductErrorMessage(error))
-    } finally {
-      setIsDeleting(false)
-    }
+    // 마켓 상품 목록 새로고침은 useDeleteProduct 안에서 한다
+    deleteMutation.mutate(undefined, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('상품을 삭제했어요')
+        navigate(`/market/${product.marketId}`, { replace: true, viewTransition: true })
+      },
+      onError: (error) => setDeleteError(getDeleteProductErrorMessage(error)),
+    })
   }
 
   return (
@@ -93,7 +91,7 @@ export function ProductDetailPage() {
       <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {!isValidId || productQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(productQuery.error) : '상품을 찾을 수 없어요.'}
             </p>
@@ -114,11 +112,10 @@ export function ProductDetailPage() {
             </p>
 
             <div className="mt-8 grid gap-10 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-              {/* 사진 — 폴라로이드. 액자와 사진 칸 모두 픽셀 계단 모서리. 액자는 기울이지 않는다 */}
-              <PolaroidPhoto
-                imageUrl={imageUrl}
-                statusLabel={isClosed ? getStatusTagLabel(product.status, product.tradeType) : undefined}
-              />
+              {/* 사진 — 폴라로이드. 액자와 사진 칸 모두 픽셀 계단 모서리. 액자는 기울이지 않는다.
+                  목록에서는 고를 수 없다는 뜻으로 썸네일을 흐리게 덮지만, 여기까지 들어온 사람은
+                  이 물건을 보러 온 것이다. 상태는 옆 태그와 안내 문구가 이미 말해 준다 */}
+              <PolaroidPhoto imageUrl={imageUrl} />
 
               {/* 정보 */}
               <div className="flex flex-col py-2 md:py-4">
@@ -132,22 +129,29 @@ export function ProductDetailPage() {
                   </span>
                   {isOwner && (
                     <div className="flex shrink-0 gap-2">
-                      <Link
-                        to={`/items/${product.itemId}/edit`}
-                        viewTransition
-                        style={{ clipPath: pixelBox(2) }}
-                        className="flex h-7 items-center bg-primary px-2.5 text-[11px] font-bold text-white transition-colors duration-200 hover:bg-primary/90"
-                      >
-                        정보 수정
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => setIsDeleteOpen(true)}
-                        style={{ clipPath: pixelBox(2) }}
-                        className="flex h-7 items-center bg-primary-subtle px-2.5 text-[11px] font-bold text-text-muted transition-colors duration-200 hover:bg-red-100 hover:text-red-600"
-                      >
-                        삭제
-                      </button>
+                      {/* 거래가 끝난 상품은 서버가 수정도 막는다(거래 중은 아직 고칠 수 있다) */}
+                      {product.status !== 'COMPLETED' && (
+                        <Link
+                          to={`/items/${product.itemId}/edit`}
+                          viewTransition
+                          style={{ clipPath: pixelBox(2) }}
+                          className="flex h-7 items-center bg-primary px-2.5 text-[11px] font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                        >
+                          정보 수정
+                        </Link>
+                      )}
+                      {/* 거래 중이거나 끝난 상품은 서버가 삭제를 막는다. 눌러도 실패할 버튼 대신
+                          바로 왼쪽의 상태 표시가 이유를 말해 준다 */}
+                      {product.status === 'AVAILABLE' && (
+                        <button
+                          type="button"
+                          onClick={() => setIsDeleteOpen(true)}
+                          style={{ clipPath: pixelBox(2) }}
+                          className="flex h-7 items-center bg-primary-subtle px-2.5 text-[11px] font-bold text-text-muted transition-colors duration-200 hover:bg-red-100 hover:text-red-600"
+                        >
+                          삭제
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -172,13 +176,13 @@ export function ProductDetailPage() {
                     shapeRendering="crispEdges"
                     fill="var(--color-primary-subtle)"
                     aria-hidden
-                    className="absolute -top-2 left-6 w-3"
+                    className="absolute -top-2 left-3 w-3"
                   >
                     <rect x="4" y="0" width="4" height="2" />
                     <rect x="2" y="2" width="8" height="2" />
                     <rect x="0" y="4" width="12" height="4" />
                   </svg>
-                  <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-3">
+                  <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-4">
                     <h3 className="text-body-03 font-bold text-text-strong">이 물건을 소개해요</h3>
                     <p className="mt-2 whitespace-pre-wrap text-body-04 leading-relaxed text-text-muted">
                       {product.description || '소개글이 없어요'}
@@ -187,19 +191,21 @@ export function ProductDetailPage() {
                 </div>
 
                 <div className="mt-8">
+                  {/* 왜 요청할 수 없는지는 주인에게도 알려준다 — 주인 화면에는 버튼이 없어
+                      사진 위 표시만으로는 지금 어떤 상태인지 읽히지 않는다 */}
+                  {isClosed && (
+                    <p className="mb-3 text-body-04 text-text-muted">{closedNotice(product).hint}</p>
+                  )}
                   {!isOwner && (
-                    <>
-                      {/* 거래가 끝난 상품에는 요청을 보낼 수 없다 */}
-                      <button
-                        type="button"
-                        disabled={isClosed}
-                        onClick={() => setIsRequestOpen(true)}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="h-11 w-full max-w-[260px] bg-primary text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
-                      >
-                        {isClosed ? '거래가 끝난 상품이에요' : getRequestActionLabel(product.tradeType)}
-                      </button>
-                    </>
+                    <button
+                      type="button"
+                      disabled={isClosed}
+                      onClick={() => setIsRequestOpen(true)}
+                      style={{ clipPath: pixelBox(4) }}
+                      className="h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                    >
+                      {isClosed ? closedNotice(product).button : getRequestActionLabel(product.tradeType)}
+                    </button>
                   )}
                 </div>
               </div>
@@ -212,7 +218,7 @@ export function ProductDetailPage() {
       {/* 삭제 확인 */}
       <Modal open={isDeleteOpen} onRequestClose={() => setIsDeleteOpen(false)} labelledBy="delete-product-title">
         <div className="py-8 text-center">
-          <img src={MASCOTS.surprised} alt="" className="mx-auto h-28 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-28 object-contain [image-rendering:pixelated]" />
           <h2 id="delete-product-title" className="mt-6 text-head-03 font-bold text-text-strong">
             이 상품을 삭제할까요?
           </h2>

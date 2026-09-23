@@ -6,6 +6,7 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { Modal } from '../../../shared/ui/modal'
+import { Photo } from '../../../shared/ui/photo'
 import { useToastStore } from '../../../shared/ui/toast'
 import {
   TRADE_TYPE_LABEL,
@@ -129,7 +130,7 @@ export function TradeRequestModal({
         ) : tradableCount === 0 ? (
           // 물건이 아예 없는 것과 전부 비공개인 것은 다음에 할 일이 달라 문구를 가른다
           <div className="flex flex-col items-center py-10 text-center">
-            <img src={MASCOTS.basket} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.basket} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
             <p className="mt-3 text-body-03 font-bold text-text-strong">
               {myItems.length === 0 ? '바꿀 물건이 없어요' : '바꿀 수 있는 물건이 없어요'}
             </p>
@@ -187,11 +188,12 @@ export function TradeRequestModal({
                         style={{ clipPath: pixelBox(3) }}
                         className="relative flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
                       >
-                        {item.imageUrl ? (
-                          <img src={item.imageUrl} alt="" loading="lazy" className="size-full object-cover" />
-                        ) : (
-                          <img src={MASCOTS.default} alt="" className="h-2/3 object-contain [image-rendering:pixelated]" />
-                        )}
+                        <Photo
+                          src={item.imageUrl}
+                          fallback={MASCOTS.default}
+                          className="size-full object-cover"
+                          fallbackClassName="h-2/3"
+                        />
                         {selected && (
                           <span
                             style={{ clipPath: pixelBox(2) }}

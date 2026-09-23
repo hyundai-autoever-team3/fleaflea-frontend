@@ -48,11 +48,10 @@ export function MyPage() {
 
   return (
     <div className="min-h-dvh bg-primary-subtle/30">
-      <Header sticky />
+      <Header />
 
       <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
-        <p className="mt-2 text-body-04 leading-relaxed text-text-muted">나의 물건, 이웃과의 거래를 한곳에서 관리해요.</p>
 
         {profileQuery.isPending ? (
           <div role="status" aria-label="내 정보를 불러오는 중이에요" className="mt-8 grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
@@ -71,7 +70,7 @@ export function MyPage() {
         ) : profileQuery.isError || !profile ? (
           <div style={{ clipPath: pixelBox(6) }} className="mt-8 bg-primary-tint p-[2px]">
             <div style={{ clipPath: pixelBox(6) }} className="flex flex-col items-center bg-bg px-6 py-20 text-center">
-              <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
               <p role="alert" className="mt-5 text-body-02 font-bold text-text-strong">내 정보를 불러오지 못했어요</p>
               <p className="mt-2 text-body-04 text-text-muted">잠시 후 다시 시도해 주세요.</p>
               <button
@@ -93,7 +92,9 @@ export function MyPage() {
                   <div className="p-4 sm:p-5">
                     <h2 id="my-profile-title" className="text-body-04 font-bold text-text-muted">내 프로필</h2>
                     <div className="mt-4 flex items-center gap-4 lg:flex-col lg:items-start">
-                      <Avatar profileImageUrl={profile.profileImageUrl} size="lg" />
+                      <span style={{ clipPath: pixelBox(4) }} className="shrink-0 bg-primary-tint p-[3px]">
+                        <Avatar profileImageUrl={profile.profileImageUrl} size="lg" />
+                      </span>
                       <div className="min-w-0 flex-1 lg:w-full">
                         <p className="break-words text-body-02 font-bold leading-relaxed text-text-strong">{profile.nickname}</p>
                         <p className="mt-1 break-all text-body-04 leading-relaxed text-text-muted">{profile.email}</p>

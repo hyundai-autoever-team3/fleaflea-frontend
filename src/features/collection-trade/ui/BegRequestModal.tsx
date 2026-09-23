@@ -85,7 +85,7 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
             aria-invalid={Boolean(error)}
             aria-describedby={error ? `${id}-story-error` : undefined}
             style={pixelInputStyle}
-            className={`resize-y py-3 disabled:opacity-60 ${pixelInputClass}`}
+            className={`py-3 disabled:opacity-60 ${pixelInputClass}`}
           />
         </PixelField>
         <p className="mt-2 text-right text-body-04 text-text-muted">

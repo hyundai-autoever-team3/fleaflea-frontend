@@ -13,6 +13,7 @@ import {
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { Modal } from '../../../shared/ui/modal'
+import { Photo } from '../../../shared/ui/photo'
 import { useToastStore } from '../../../shared/ui/toast'
 import { Header } from '../../../widgets/header'
 
@@ -108,7 +109,7 @@ export function ItemDexPage() {
           <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">도감을 불러오는 중이에요...</p>
         ) : itemsQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">도감을 불러오지 못했어요.</p>
             <button
               type="button"
@@ -170,7 +171,7 @@ export function ItemDexPage() {
             {/* 물건이 없을 때는 빈 판 위에 겹쳐 안내. 빈 칸은 클릭 대상이 아니라 가려도 무방 */}
             {items.length === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-                <img
+                <img draggable={false}
                   src={MASCOTS.basket}
                   alt=""
                   className="h-20 object-contain [image-rendering:pixelated]"
@@ -244,7 +245,7 @@ export function ItemDexPage() {
               style={{ clipPath: pixelBox(6) }}
               className="w-[min(360px,100%)] bg-bg p-7 text-center"
             >
-              <img src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
               <p id="collection-close-confirm-title" className="mt-4 text-body-02 font-bold text-text-strong">
                 작성 중인 내용이 사라져요
               </p>
@@ -289,13 +290,13 @@ export function ItemDexPage() {
           <p className="py-10 text-center text-body-03 text-text-muted">불러오는 중이에요...</p>
         ) : detailQuery.isError || !detail ? (
           <div className="py-10 text-center">
-            <img src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">물건 정보를 불러오지 못했어요.</p>
           </div>
         ) : isDeleteOpen ? (
           // 모달 위에 모달을 겹치지 않도록, 같은 모달 안에서 내용만 확인 화면으로 바꿈
           <div className="py-6 text-center">
-            <img src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
             <h2 id="collection-detail-title" className="mt-6 text-head-03 font-bold text-text-strong">
               물건을 삭제할까요?
             </h2>
@@ -331,11 +332,7 @@ export function ItemDexPage() {
               style={{ clipPath: pixelBox(4) }}
               className="flex aspect-square items-center justify-center overflow-hidden bg-primary-subtle"
             >
-              {detail.imageUrl ? (
-                <img src={detail.imageUrl} alt="" className="size-full object-cover" />
-              ) : (
-                <img src={MASCOTS.default} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
-              )}
+              <Photo src={detail.imageUrl} fallback={MASCOTS.default} className="size-full object-cover" fallbackClassName="h-20" />
             </div>
 
             <span
@@ -371,16 +368,22 @@ export function ItemDexPage() {
                 닫기
               </button>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setDeleteError('')
-                setIsDeleteOpen(true)
-              }}
-              className="mt-4 w-full text-body-04 font-bold text-text-muted underline transition-colors duration-200 hover:text-red-600"
-            >
-              도감에서 삭제
-            </button>
+            {detail.status === 'IN_PROGRESS' ? (
+              <p className="mt-4 text-center text-body-04 text-text-muted">
+                거래 중인 물건은 삭제할 수 없어요.
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteError('')
+                  setIsDeleteOpen(true)
+                }}
+                className="mt-4 w-full text-body-04 font-bold text-text-muted underline transition-colors duration-200 hover:text-red-600"
+              >
+                도감에서 삭제
+              </button>
+            )}
           </div>
         )}
       </Modal>

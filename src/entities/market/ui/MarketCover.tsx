@@ -1,5 +1,6 @@
 import { MASCOTS, pickMascot } from '../../../shared/config/mascots'
 import { pixelBox, pixelCorners } from '../../../shared/lib/pixel'
+import { Photo } from '../../../shared/ui/photo'
 
 interface MarketCoverProps {
   coverImageUrl: string | null
@@ -17,11 +18,7 @@ export function MarketCover({ coverImageUrl, className = '', marketId, variant =
   if (variant === 'bare') {
     return (
       <div className={`overflow-hidden bg-[image:var(--gradient-dreamy)] ${className}`}>
-        {coverImageUrl ? (
-          <img src={coverImageUrl} alt="" className="size-full object-cover" />
-        ) : (
-          <img src={fallbackMascot} alt="" className="size-full object-contain p-10 [image-rendering:pixelated]" />
-        )}
+        <Photo src={coverImageUrl} fallback={fallbackMascot} className="size-full object-cover" fallbackClassName="size-full p-10" />
       </div>
     )
   }
@@ -34,11 +31,12 @@ export function MarketCover({ coverImageUrl, className = '', marketId, variant =
             className="aspect-square overflow-hidden bg-[image:var(--gradient-dreamy)]"
             style={{ clipPath: pixelBox(3) }}
           >
-            {coverImageUrl ? (
-              <img src={coverImageUrl} alt="" className="size-full object-cover [image-rendering:pixelated]" />
-            ) : (
-              <img src={fallbackMascot} alt="" className="size-full object-contain p-6 [image-rendering:pixelated]" />
-            )}
+            <Photo
+              src={coverImageUrl}
+              fallback={fallbackMascot}
+              className="size-full object-cover [image-rendering:pixelated]"
+              fallbackClassName="size-full p-[15%]"
+            />
           </div>
         </div>
       </div>

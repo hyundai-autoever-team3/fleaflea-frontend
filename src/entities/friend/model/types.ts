@@ -1,11 +1,10 @@
 // Swagger FriendshipResponse — 친구 목록(GET /api/v1/members/me/friendship)과
 // 친구 요청 목록(GET /api/v1/friend-requests)이 같은 형태를 씀.
-// 요청 → 수락 모델이라 맞팔로우가 아니며, 상태는 로그인한 사용자 기준으로 내려옴
-export type RelationshipStatus =
-  | 'NONE' // 아무 관계 없음 (검색 결과에만 나옴)
-  | 'REQUESTED' // 내가 상대에게 요청을 보낸 상태
-  | 'REQUEST_RECEIVED' // 상대가 나에게 요청을 보낸 상태
-  | 'FRIEND' // 서로 친구
+// 요청 → 수락 모델이라 맞팔로우가 아니며, 상태는 로그인한 사용자 기준으로 내려옴.
+// 마켓 참여자 응답도 같은 값을 쓰므로 정의는 shared에 둔다
+import type { RelationshipStatus } from '../../../shared/api/relationship-status'
+
+export type { RelationshipStatus }
 
 export interface Friendship {
   friendshipId: number

@@ -1,14 +1,18 @@
-import { Fragment, useLayoutEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
-import { friendKeys } from '../../../entities/friend'
 import { MarketCover, useMarket, useMarketInvitation, useMarketMembers } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
+import type { RelationshipStatus } from '../../../entities/friend'
 import { ProductCard, useMarketProducts } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { getSendFriendRequestErrorMessage, sendFriendRequest } from '../../../features/friend-manage'
+import {
+  getFriendRequestActionErrorMessage,
+  getSendFriendRequestErrorMessage,
+  useRespondToFriendRequest,
+  useSendFriendRequest,
+} from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -33,6 +37,21 @@ function formatDate(isoDate: string) {
 // 옆에 놓인 커버(288px) 높이에 맞춘 줄 수. 이보다 적게 접으면 커버 옆에 빈 공간만 생김.
 // Tailwind는 소스의 문자열을 그대로 훑어 클래스를 만들므로 `line-clamp-${n}`처럼 조립하면 안 됨
 const DESCRIPTION_CLAMP_CLASS = 'line-clamp-8'
+
+// 참여자 목록이 나와의 친구 관계를 함께 내려주므로, 눌러도 실패할 버튼을 미리 감출 수 있다.
+// 아무 관계도 없을 때(NONE)는 "친구 추가" 버튼이 그 자리를 대신하므로 문구를 두지 않는다
+const FRIEND_RELATIONSHIP_CAPTION: Record<RelationshipStatus, string> = {
+  SELF: '',
+  NONE: '',
+  REQUESTED: '친구 요청을 보냈어요',
+  REQUEST_RECEIVED: '나에게 친구 요청을 보냈어요',
+  FRIEND: '이미 친구예요',
+}
+const PRODUCTS_PER_PAGE = 12
+
+function readProductPage(value: string | null) {
+  return value !== null && /^\d+$/.test(value) ? Number(value) : 0
+}
 
 // line-clamp는 잘렸는지를 알려주지 않아, 접힌 상태의 실제 내용 높이와 보이는 높이를 재서 판단.
 // 창 폭이 바뀌면 줄 수가 달라지므로 ResizeObserver로 다시 잼
@@ -81,6 +100,8 @@ export function MarketDetailPage() {
   const { marketId: marketIdParam } = useParams()
   const marketId = Number(marketIdParam)
   const isValidId = Number.isInteger(marketId) && marketId > 0
+  const [searchParams, setSearchParams] = useSearchParams()
+  const productPage = readProductPage(searchParams.get('productPage'))
 
   const marketQuery = useMarket(marketId)
   const membersQuery = useMarketMembers(marketId)
@@ -91,32 +112,102 @@ export function MarketDetailPage() {
   const isHost = market !== undefined && market.hostId === meQuery.data?.memberId
   const invitationQuery = useMarketInvitation(marketId, isHost)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const membersListRef = useRef<HTMLUListElement>(null)
+  const [areMembersExpanded, setAreMembersExpanded] = useState(false)
+  const [memberColumnCount, setMemberColumnCount] = useState(2)
 
-  // 닉네임 검색 API가 없어 memberId를 알 수 있는 곳이 참여자 목록뿐이라, 친구 추가를 여기서 함
-  const queryClient = useQueryClient()
+  const products = productsQuery.data ?? []
+  const productPageCount = Math.ceil(products.length / PRODUCTS_PER_PAGE)
+  const pageProducts = products.slice(
+    productPage * PRODUCTS_PER_PAGE,
+    (productPage + 1) * PRODUCTS_PER_PAGE,
+  )
+  const productListParams = new URLSearchParams(searchParams)
+  if (productPage === 0) productListParams.delete('productPage')
+  else productListParams.set('productPage', String(productPage))
+  const productListQuery = productListParams.toString()
+  const productListPath = productListQuery ? `/market/${marketId}?${productListQuery}` : `/market/${marketId}`
+  const members = membersQuery.data ?? []
+  const hasMoreMembers = members.length > memberColumnCount
+  const visibleMembers = areMembersExpanded ? members : members.slice(0, memberColumnCount)
+
+  useEffect(() => {
+    if (!productsQuery.data) return
+    const lastPage = Math.max(0, productPageCount - 1)
+    if (productPage <= lastPage) return
+
+    const params = new URLSearchParams(searchParams)
+    if (lastPage === 0) params.delete('productPage')
+    else params.set('productPage', String(lastPage))
+    setSearchParams(params, { replace: true, preventScrollReset: true })
+  }, [productPage, productPageCount, productsQuery.data, searchParams, setSearchParams])
+
+  useLayoutEffect(() => {
+    const list = membersListRef.current
+    if (!list) return
+
+    const measure = () => {
+      const columns = window.getComputedStyle(list).gridTemplateColumns
+        .split(' ')
+        .filter(Boolean).length
+      setMemberColumnCount(Math.max(1, columns))
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(list)
+    return () => observer.disconnect()
+  }, [membersQuery.data])
+
+  useEffect(() => {
+    setAreMembersExpanded(false)
+  }, [marketId])
+
+  useEffect(() => {
+    if (!hasMoreMembers) setAreMembersExpanded(false)
+  }, [hasMoreMembers])
+
+  function selectProductPage(page: number) {
+    const params = new URLSearchParams(searchParams)
+    if (page === 0) params.delete('productPage')
+    else params.set('productPage', String(page))
+    setSearchParams(params, { replace: true, preventScrollReset: true })
+  }
+
+  // 참여자를 누르면 프로필과 함께, 그 사람에게 할 수 있는 일을 보여준다
   const [selectedMember, setSelectedMember] = useState<MarketMember | null>(null)
-  const [isRequesting, setIsRequesting] = useState(false)
   const [friendError, setFriendError] = useState('')
+  const sendFriendRequestMutation = useSendFriendRequest()
+  const respondFriendRequestMutation = useRespondToFriendRequest()
+  const isFriendActionRunning = sendFriendRequestMutation.isPending || respondFriendRequestMutation.isPending
 
   function openMember(member: MarketMember) {
     setSelectedMember(member)
     setFriendError('')
   }
 
-  async function handleSendFriendRequest(memberId: number) {
-    setIsRequesting(true)
+  function handleSendFriendRequest(memberId: number) {
     setFriendError('')
-    try {
-      await sendFriendRequest(memberId)
-      // 이미 친구이거나 보낸 요청이면 서버가 409를 주므로 목록을 미리 받아 두지 않음
-      void queryClient.invalidateQueries({ queryKey: friendKeys.all })
-      useToastStore.getState().showToast('친구 요청을 보냈어요')
-      setSelectedMember(null)
-    } catch (error) {
-      setFriendError(getSendFriendRequestErrorMessage(error))
-    } finally {
-      setIsRequesting(false)
-    }
+    // 목록 새로고침은 useSendFriendRequest 안에서 한다
+    sendFriendRequestMutation.mutate(memberId, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구 요청을 보냈어요')
+        setSelectedMember(null)
+      },
+      onError: (error) => setFriendError(getSendFriendRequestErrorMessage(error)),
+    })
+  }
+
+  // 상대가 먼저 보낸 요청은 여기서 바로 받아 줄 수 있다
+  function handleAcceptFriendRequest(memberId: number) {
+    setFriendError('')
+    respondFriendRequestMutation.mutate({ action: 'accept', memberId }, {
+      onSuccess: () => {
+        useToastStore.getState().showToast('친구가 되었어요')
+        setSelectedMember(null)
+      },
+      onError: (error) => setFriendError(getFriendRequestActionErrorMessage(error, '수락')),
+    })
   }
 
   const newProductPath = `/market/${marketId}/items/new`
@@ -132,7 +223,7 @@ export function MarketDetailPage() {
 
         {!isValidId || marketQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(marketQuery.error) : '마켓을 찾을 수 없어요.'}
             </p>
@@ -218,7 +309,7 @@ export function MarketDetailPage() {
             {/* 상품 */}
             <section className="mt-14">
               <h2 className="text-head-03 font-bold text-text-strong">
-                상품 {productsQuery.data && <span className="text-primary">{productsQuery.data.length}</span>}
+                상품 {productsQuery.data && <span className="text-primary">{products.length}</span>}
               </h2>
               {productsQuery.isPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">상품을 불러오는 중이에요...</p>
@@ -229,9 +320,9 @@ export function MarketDetailPage() {
                     다시 시도
                   </button>
                 </div>
-              ) : productsQuery.data.length === 0 ? (
+              ) : products.length === 0 ? (
                 <div className="mt-4 flex flex-col items-center bg-primary-subtle py-14 text-center" style={{ clipPath: pixelBox(6) }}>
-                  <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+                  <img draggable={false} src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
                   <p className="mt-3 text-body-03 font-bold text-text-strong">아직 등록된 상품이 없어요</p>
                   <p className="mt-1 text-body-04 text-text-muted">첫 상품을 올려서 마켓을 채워보세요!</p>
                   <Link
@@ -244,45 +335,92 @@ export function MarketDetailPage() {
                   </Link>
                 </div>
               ) : (
-                <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
-                  {productsQuery.data.map((product) => (
-                    <li key={product.itemId}>
-                      <ProductCard product={product} />
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+                    {pageProducts.map((product) => (
+                      <li key={product.itemId}>
+                        <ProductCard
+                          product={product}
+                          backTarget={{ to: productListPath, label: market.title }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+
+                  {productPageCount > 1 && (
+                    <nav
+                      aria-label="마켓 상품 목록 페이지"
+                      className="mt-6 flex flex-wrap justify-center gap-1.5 border-t border-primary-subtle pt-4"
+                    >
+                      {Array.from({ length: productPageCount }, (_, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectProductPage(index)}
+                          aria-label={`${index + 1}페이지`}
+                          aria-current={productPage === index ? 'page' : undefined}
+                          style={{ clipPath: pixelBox(2) }}
+                          className={
+                            productPage === index
+                              ? 'size-8 bg-primary text-body-04 font-bold text-white'
+                              : 'size-8 bg-primary-subtle text-body-04 font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong'
+                          }
+                        >
+                          {index + 1}
+                        </button>
+                      ))}
+                    </nav>
+                  )}
+                </>
               )}
             </section>
 
             {/* 참여자 */}
             <section className="mt-14">
-              <h2 className="text-head-03 font-bold text-text-strong">
-                참여자 <span className="text-primary">{market.memberCount}</span>
-              </h2>
+              <div className="flex items-center justify-between gap-4">
+                <h2 className="text-head-03 font-bold text-text-strong">
+                  참여자 <span className="text-primary">{market.memberCount}</span>
+                </h2>
+                {hasMoreMembers && (
+                  <button
+                    type="button"
+                    onClick={() => setAreMembersExpanded((value) => !value)}
+                    aria-expanded={areMembersExpanded}
+                    aria-controls="market-members"
+                    className="shrink-0 text-body-04 font-bold text-gray-400 transition-colors hover:text-gray-500"
+                  >
+                    {areMembersExpanded ? '접기' : '더보기'}
+                  </button>
+                )}
+              </div>
               {membersQuery.isPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">참여자를 불러오는 중이에요...</p>
               ) : membersQuery.isError ? (
                 <p className="mt-4 text-body-04 text-text-muted">참여자 목록을 불러오지 못했어요.</p>
               ) : (
-                <ul className="mt-4 flex flex-wrap gap-3">
-                  {membersQuery.data.map((member) => {
-                    const isMe = member.memberId === meQuery.data?.memberId
-                    const chipClass = 'flex items-center gap-2 bg-primary-subtle py-2 pl-2 pr-4'
+                <ul
+                  id="market-members"
+                  ref={membersListRef}
+                  className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7"
+                >
+                  {visibleMembers.map((member) => {
+                    const isMe = member.relationshipStatus === 'SELF'
+                    const chipClass = 'flex h-11 w-full min-w-0 items-center gap-1.5 bg-primary-subtle pl-1.5 pr-2.5'
                     const content = (
                       <>
                         <Avatar profileImageUrl={member.profileImageUrl} size="sm" className="bg-white" />
-                        <span className="text-body-04 font-semibold text-text-strong">
+                        <span className="min-w-0 truncate text-body-04 font-semibold text-text-strong">
                           {member.nickname}
                           {isMe && ' (나)'}
                         </span>
                         {member.host && (
-                          <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">HOST</span>
+                          <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">HOST</span>
                         )}
                       </>
                     )
 
                     return (
-                      <li key={member.memberId}>
+                      <li key={member.memberId} className="min-w-0">
                         {/* 내 프로필은 모달을 열어도 할 수 있는 게 없어 누를 수 없게 둠 */}
                         {isMe ? (
                           <div style={{ clipPath: pixelBox() }} className={chipClass}>
@@ -311,7 +449,6 @@ export function MarketDetailPage() {
               onRequestClose={() => setSelectedMember(null)}
               labelledBy="member-modal-title"
               size="sm"
-              showClose={false}
             >
               {selectedMember && (
                 <div className="py-6 text-center">
@@ -322,34 +459,39 @@ export function MarketDetailPage() {
                   <p className="mt-2 text-body-04 text-text-muted">
                     {selectedMember.host ? '이 마켓을 연 호스트예요' : '이 마켓에 참여하고 있어요'}
                   </p>
+                  {FRIEND_RELATIONSHIP_CAPTION[selectedMember.relationshipStatus] && (
+                    <p className="mt-1 text-body-04 font-bold text-primary">
+                      {FRIEND_RELATIONSHIP_CAPTION[selectedMember.relationshipStatus]}
+                    </p>
+                  )}
                   {friendError && <p className="mt-4 text-body-04 text-red-600">{friendError}</p>}
 
-                  {/* X를 없앤 대신 닫기를 둠. 주요 동작인 친구 추가를 왼쪽에 */}
-                  <div className="mt-8 flex gap-3">
-                    {/* 나 자신에게는 보낼 수 없어(400) 숨김 */}
-                    {selectedMember.memberId !== meQuery.data?.memberId && (
-                      <button
-                        type="button"
-                        disabled={isRequesting}
-                        onClick={() => void handleSendFriendRequest(selectedMember.memberId)}
-                        style={{ clipPath: pixelBox(4) }}
-                        className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
-                      >
-                        {isRequesting ? '보내는 중...' : '친구 추가'}
-                      </button>
-                    )}
+                  {/* 이미 친구거나 요청이 오간 사이에 다시 보내면 409라서, 관계에 맞는 버튼만 둔다 */}
+                  {selectedMember.relationshipStatus === 'NONE' && (
                     <button
                       type="button"
-                      onClick={() => setSelectedMember(null)}
+                      disabled={isFriendActionRunning}
+                      onClick={() => handleSendFriendRequest(selectedMember.memberId)}
                       style={{ clipPath: pixelBox(4) }}
-                      className="flex-1 bg-primary-subtle py-3 text-body-04 font-bold text-text-muted transition-colors duration-200 hover:bg-primary-tint hover:text-text-strong"
+                      className="mt-8 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                     >
-                      닫기
+                      {isFriendActionRunning ? '보내는 중...' : '친구 추가'}
                     </button>
-                  </div>
+                  )}
+                  {selectedMember.relationshipStatus === 'REQUEST_RECEIVED' && (
+                    <button
+                      type="button"
+                      disabled={isFriendActionRunning}
+                      onClick={() => handleAcceptFriendRequest(selectedMember.memberId)}
+                      style={{ clipPath: pixelBox(4) }}
+                      className="mt-8 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
+                    >
+                      {isFriendActionRunning ? '받는 중...' : '친구 수락'}
+                    </button>
+                  )}
 
-                  {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둠 (좁은 모달에 버튼 3개는 글자가 눌림) */}
-                  {selectedMember.memberId !== meQuery.data?.memberId && (
+                  {/* 도감 보기는 이동이라 버튼 줄에 끼우지 않고 아래에 둔다 */}
+                  {selectedMember.relationshipStatus !== 'SELF' && (
                     <Link
                       to={`/members/${selectedMember.memberId}/item-dex`}
                       state={{ nickname: selectedMember.nickname }}

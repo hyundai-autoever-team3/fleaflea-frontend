@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { collectionKeys, type CollectionItemDetail } from '../../../entities/collection-item'
+import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
 export interface CollectionItemPayload {
@@ -60,7 +61,14 @@ export function useDeleteCollectionItem(collectionItemId: number) {
     mutationFn: () => deleteCollectionItem(collectionItemId),
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: collectionKeys.detail(collectionItemId), exact: true })
-      void queryClient.invalidateQueries({ queryKey: collectionKeys.all }).catch(() => undefined)
+      // 물건을 지우면 아직 오가던 요청도 서버에서 함께 사라진다.
+      // 내가 받은 요청은 물론, 그 물건을 내주겠다고 내놓은 교환 요청까지 지워지므로
+      // 내 거래 목록을 그대로 두면 없어진 요청의 줄이 남는다
+      void Promise.all([
+        queryClient.invalidateQueries({ queryKey: collectionKeys.all }),
+        queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ['trade-requests'] }),
+      ]).catch(() => undefined)
     },
   })
 }
@@ -104,14 +112,19 @@ export function getUpdateCollectionErrorMessage(error: unknown) {
 }
 
 export function getDeleteCollectionErrorMessage(error: unknown) {
-  const status = isAxiosError(error) ? error.response?.status : undefined
-  switch (status) {
+  const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
+  switch (response?.status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
     case 403:
       return '내가 등록한 물건만 삭제할 수 있어요.'
     case 404:
       return '이미 삭제되었거나 찾을 수 없는 물건이에요.'
+    case 409:
+      // 끝난 거래는 더 이상 막지 않는다. 아직 오가는 중인 요청만 삭제를 막는다
+      return response?.data?.code === 'COLLECTION_ITEM_TRADE_IN_PROGRESS'
+        ? '아직 오가는 거래 요청이 있어요. 마이페이지에서 요청을 처리한 뒤 삭제해 주세요.'
+        : '거래가 걸려 있는 물건은 삭제할 수 없어요. 마이페이지의 내 거래에서 상태를 확인해 주세요.'
     default:
       return '물건을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.'
   }

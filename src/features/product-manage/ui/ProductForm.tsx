@@ -119,7 +119,11 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
     else if (title.length > TITLE_MAX) nextErrors.title = `상품명은 ${TITLE_MAX}자 이내로 입력해 주세요.`
     if (!trimmedDescription) nextErrors.description = '상품 설명을 입력해 주세요.'
     else if (description.length > DESCRIPTION_MAX) nextErrors.description = `상품 설명은 ${DESCRIPTION_MAX.toLocaleString()}자 이내로 입력해 주세요.`
+    // '0'은 빈 값이 아니라 통과해 버린다. 공짜로 주려는 것이면 판매가 아니라 나눔이다
     if (needsPrice && !price) nextErrors.price = '판매 가격을 입력해 주세요.'
+    else if (needsPrice && Number(price) <= 0) {
+      nextErrors.price = '판매 가격은 1원부터 입력할 수 있어요. 그냥 주려면 나눔을 선택해 주세요.'
+    }
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
@@ -147,7 +151,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
         <div style={{ clipPath: pixelBox(4) }} className="bg-primary-subtle p-4 sm:p-5">
           {/* 안내 문구와 불러오기 버튼을 한 줄에 둔다. 좁은 화면에서는 버튼이 아래로 접힌다 */}
           <div className="flex flex-wrap items-center gap-3">
-            <img src={MASCOTS.basket} alt="" className="h-12 w-12 shrink-0 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.basket} alt="" className="h-12 w-12 shrink-0 object-contain [image-rendering:pixelated]" />
             <div className="min-w-[9rem] flex-1">
               <p className="text-body-03 font-bold text-text-strong">{collectionItem ? '내 도감과 연결했어요' : '도감에 있는 물건인가요?'}</p>
               <p className="mt-1 truncate text-body-04 text-text-muted">{collectionItem?.title ?? '이름·설명·사진을 한 번에 가져와요.'}</p>
@@ -173,7 +177,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
                 <CollectionPhoto imageUrl={shownImageUrl} />
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <img src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+                  <img draggable={false} src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
                   <span className="text-body-04 font-semibold text-text-muted">눌러서 상품 사진 선택</span>
                 </div>
               )}
@@ -283,7 +287,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
                   setPrice(event.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, MAX_PRICE_DIGITS))
                   setFieldErrors((prev) => ({ ...prev, price: undefined }))
                 }}
-                placeholder="0"
+                placeholder="1,000"
                 aria-invalid={Boolean(fieldErrors.price)}
                 style={pixelInputStyle}
                 className={`h-12 pr-10 ${pixelInputClass}`}
@@ -317,7 +321,7 @@ export function ProductForm({ allowCollectionImport = false, initialValue, submi
             placeholder="상품 상태나 거래 방법을 적어 주세요."
             aria-invalid={Boolean(fieldErrors.description)}
             style={pixelInputStyle}
-            className={`resize-none py-3 ${pixelInputClass}`}
+            className={`py-3 ${pixelInputClass}`}
           />
         </PixelField>
         {fieldErrors.description && <p className="mt-2 text-body-04 text-red-600">{fieldErrors.description}</p>}

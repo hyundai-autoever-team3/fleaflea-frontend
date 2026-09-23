@@ -7,8 +7,8 @@ import { useMyProfile } from '../../../entities/user'
 import { BegRequestModal, TradeRequestModal } from '../../../features/collection-trade'
 import type { CollectionTradeType } from '../../../features/collection-trade'
 import { MASCOTS } from '../../../shared/config/mascots'
-import { useBackTarget, type BackTarget } from '../../../shared/lib/back-target'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { BackLink } from '../../../shared/ui/back-link'
 import { PolaroidPhoto } from '../../../shared/ui/polaroid'
 import { Header } from '../../../widgets/header'
 
@@ -24,22 +24,15 @@ const ACTIONS: { key: ActionKind; label: string }[] = [
 
 function getDetailErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
-  // 비공개이거나 삭제된 물건에 직접 들어온 경우를 같은 문구로 덮는다
-  if (status === 403 || status === 404) return '볼 수 없는 물건이에요.'
+  // 친구가 아니면 남의 도감은 403이다. 무엇을 하면 볼 수 있는지까지 알려준다
+  if (status === 403) return '친구끼리만 볼 수 있는 물건이에요. 친구를 맺으면 공개한 물건을 둘러볼 수 있어요.'
+  // 비공개이거나 이미 지워진 물건
+  if (status === 404) return '볼 수 없는 물건이에요.'
   if (status === 401) return '로그인이 필요해요. 다시 로그인해 주세요.'
   return '물건 정보를 불러오지 못했어요.'
 }
 
 // 돌아갈 곳은 들어온 경로에 따라 달라진다 (도감 목록 / 마이페이지 거래 목록)
-function BackLink({ fallback }: { fallback: BackTarget }) {
-  const back = useBackTarget(fallback)
-  return (
-    <Link to={back.to} viewTransition className="text-body-04 text-text-muted hover:text-text-strong">
-      ← {back.label}
-    </Link>
-  )
-}
-
 export function CollectionItemDetailPage() {
   const { collectionItemId: idParam } = useParams()
   const collectionItemId = Number(idParam)
@@ -54,6 +47,8 @@ export function CollectionItemDetailPage() {
   const [isRequestOpen, setIsRequestOpen] = useState(false)
 
   const isMine = detail !== undefined && detail.ownerId === meQuery.data?.memberId
+  // 이미 거래가 걸린 물건에는 새 요청을 보낼 수 없다. 물건은 그대로 보여주되 고르기만 막는다
+  const inTrade = detail?.status === 'IN_PROGRESS'
 
   return (
     <div>
@@ -62,7 +57,7 @@ export function CollectionItemDetailPage() {
       <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 md:px-14 lg:px-24">
         {!isValidId || detailQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(detailQuery.error) : '볼 수 없는 물건이에요.'}
             </p>
@@ -98,6 +93,8 @@ export function CollectionItemDetailPage() {
                   {/* 내 물건에는 요청을 보낼 수 없어 고르기 자체를 두지 않는다 */}
                   {isMine ? (
                     <p className="mt-8 text-body-04 text-text-muted">내가 등록한 물건이에요.</p>
+                  ) : inTrade ? (
+                    <p className="mt-8 text-body-04 text-text-muted">지금 거래가 진행 중인 물건이에요.</p>
                   ) : (
                     <div className="mt-8">
                       <p className="text-body-03 font-bold text-text-strong">무엇을 하고 싶나요?</p>

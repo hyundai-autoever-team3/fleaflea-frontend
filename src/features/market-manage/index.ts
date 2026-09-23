@@ -1,2 +1,3 @@
 export { CreateMarketForm } from './ui/CreateMarketForm'
-export type { CreateMarketResponse } from './api/market-api'
+export { useCreateMarket } from './api/market-api'
+export type { CreateMarketPayload, CreateMarketResponse } from './api/market-api'

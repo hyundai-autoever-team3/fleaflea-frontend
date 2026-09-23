@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
+import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { StarField } from '../../../shared/ui/star-field'
 import { login } from '../api/auth-api'
 import { useSessionStore } from '../../../entities/session'
 
 export function LoginForm() {
   const navigate = useNavigate()
+  // 초대 링크처럼 로그인 전에 들어왔던 화면이 있으면 그 자리로 돌려보낸다
+  const redirectTo = readRedirect(useLocation().search)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
@@ -33,20 +36,20 @@ export function LoginForm() {
     try {
       const { data } = await login({ email, password })
       useSessionStore.getState().setSession(data, rememberMe)
-      navigate('/market', { replace: true, viewTransition: true })
+      navigate(redirectTo ?? '/market', { replace: true, viewTransition: true })
     } catch {
       setError('이메일 또는 비밀번호가 올바르지 않습니다.')
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-subtle p-6">
+    <div className="flex min-h-screen items-center justify-center bg-primary-subtle p-6">
       <div className="grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10">
         {/* 왼쪽: 폼 */}
         <div className="flex h-full flex-col p-6 md:p-10">
           <div className="flex items-center gap-2">
             <div className="size-8 overflow-hidden rounded-full">
-              <img src="/mascot/flea.png" alt="" className="h-full w-full object-cover" />
+              <img draggable={false} src="/mascot/flea.png" alt="" className="h-full w-full object-cover" />
             </div>
             <span className="font-jua text-body-02 text-text-strong">FleaFlea</span>
           </div>
@@ -69,7 +72,7 @@ export function LoginForm() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  placeholder=" flee@example.com"
+                  placeholder="flee@example.com"
                   aria-invalid={Boolean(fieldErrors.email)}
                   className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
                 />
@@ -93,7 +96,7 @@ export function LoginForm() {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   maxLength={FIELD_LIMITS.password.max}
-                  placeholder=" 비밀번호를 입력해 주세요"
+                  placeholder="비밀번호를 입력해 주세요"
                   aria-invalid={Boolean(fieldErrors.password)}
                   className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
                 />
@@ -138,7 +141,7 @@ export function LoginForm() {
 
             <p className="text-center text-body-04 text-text-muted">
               계정이 없으신가요?{' '}
-              <Link to="/signup" className="font-bold text-primary">
+              <Link to={redirectTo ? withRedirect('/signup', redirectTo) : '/signup'} className="font-bold text-primary">
                 회원가입
               </Link>
             </p>
@@ -156,7 +159,7 @@ export function LoginForm() {
             }}
           />
           <StarField />
-          <img
+          <img draggable={false}
             src="/mascot/flea-bg.png"
             alt=""
             className="relative h-full w-full object-cover"

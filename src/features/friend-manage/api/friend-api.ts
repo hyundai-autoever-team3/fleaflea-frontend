@@ -1,5 +1,8 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
+import { friendKeys } from '../../../entities/friend'
+import { marketKeys } from '../../../entities/market'
 import { api } from '../../../shared/api/axios'
 
 // POST /api/v1/members/{memberId}/friend-requests
@@ -25,6 +28,52 @@ export function cancelFriendRequest(addresseeId: number) {
 // DELETE /api/v1/friendships/{friendshipId}
 export function deleteFriendship(friendshipId: number) {
   return api.delete(`/api/v1/friendships/${friendshipId}`)
+}
+
+export type FriendRequestAction = 'accept' | 'reject' | 'cancel'
+
+const RESPOND_CALL: Record<FriendRequestAction, (memberId: number) => Promise<unknown>> = {
+  accept: acceptFriendRequest,
+  reject: rejectFriendRequest,
+  cancel: cancelFriendRequest,
+}
+
+export const FRIEND_REQUEST_ACTION_LABEL: Record<FriendRequestAction, '수락' | '거절' | '취소'> = {
+  accept: '수락',
+  reject: '거절',
+  cancel: '취소',
+}
+
+// 친구를 맺고 끊는 동작은 친구 목록·받은 요청·보낸 요청·검색 결과를 한꺼번에 바꾼다.
+// 마켓 참여자 목록도 참여자마다 나와의 친구 관계를 함께 내려주므로 같이 새로 받는다.
+// 무효화를 호출부마다 적어 두면 한 곳만 빠뜨려도 화면이 낡은 채로 남으므로 여기에 모은다
+function useFriendMutation<TVariables>(mutationFn: (variables: TVariables) => Promise<unknown>) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn,
+    // 새 목록이 도착할 때까지 기다렸다 끝낸다. 기다리지 않으면 버튼이 잠깐
+    // 되살아났다가 줄이 바뀌어 깜박이는 것처럼 보인다
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: friendKeys.all }),
+        queryClient.invalidateQueries({ queryKey: marketKeys.all }),
+      ]).catch(() => undefined)
+    },
+  })
+}
+
+export function useSendFriendRequest() {
+  return useFriendMutation(sendFriendRequest)
+}
+
+export function useRespondToFriendRequest() {
+  return useFriendMutation(({ action, memberId }: { action: FriendRequestAction; memberId: number }) =>
+    RESPOND_CALL[action](memberId))
+}
+
+export function useDeleteFriendship() {
+  return useFriendMutation(deleteFriendship)
 }
 
 export function getSendFriendRequestErrorMessage(error: unknown) {

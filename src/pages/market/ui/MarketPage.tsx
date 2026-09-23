@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { Header } from '../../../widgets/header'
-import { MarketCard, marketKeys, useMyMarkets } from '../../../entities/market'
+import { MarketCard, useMyMarkets } from '../../../entities/market'
 import { useSessionStore } from '../../../entities/session'
 import { useMyProfile } from '../../../entities/user'
 import { InviteLinkContent } from '../../../features/market-invite'
@@ -12,25 +11,28 @@ import { JoinMarketForm, type JoinMarketResponse } from '../../../features/marke
 import { CreateMarketForm, type CreateMarketResponse } from '../../../features/market-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { LoadingScreen } from '../../../shared/ui/loading-screen'
 import { Modal } from '../../../shared/ui/modal'
 import { PixelShops } from './PixelShops'
 
+// 먼저 보이는 것이 기본. 내가 만든 마켓도 참여 중인 마켓이므로
+// 첫 탭에 전부 담고, 둘째 탭에서 내가 연 것만 추린다
 const TABS = [
-  { key: 'hosted', label: '내가 만든 마켓' },
   { key: 'joined', label: '참여 중인 마켓' },
+  { key: 'hosted', label: '내가 만든 마켓' },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
 
 const TAB_EMPTY: Record<TabKey, { title: string; description: string }> = {
   hosted: { title: '아직 연 마켓이 없어요', description: '위에서 친구들과 함께할 첫 플리마켓을 만들어보세요!' },
-  joined: { title: '아직 참여한 마켓이 없어요', description: '친구에게 받은 초대 링크로 마켓에 참여해보세요!' },
+  joined: { title: '아직 참여한 마켓이 없어요', description: '마켓을 직접 열거나, 친구에게 받은 초대 링크로 참여해보세요!' },
 }
 
 function EmptyState({ image, title, description }: { image: string; title: string; description: string }) {
   return (
     <div className="flex w-full flex-col items-center pb-14 pt-24 text-center">
-      <img src={image} alt="" className="h-24 w-auto object-contain [image-rendering:pixelated]" />
+      <img draggable={false} src={image} alt="" className="h-24 w-auto object-contain [image-rendering:pixelated]" />
       <h3 className="mt-3 text-xl font-bold text-text-strong">{title}</h3>
       <p className="mt-1 text-body-03 text-text-muted">{description}</p>
     </div>
@@ -41,11 +43,10 @@ type ModalKind = 'create' | 'join' | null
 
 export function MarketPage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const marketsQuery = useMyMarkets()
   const meQuery = useMyProfile()
 
-  const [tab, setTab] = useState<TabKey>('hosted')
+  const [tab, setTab] = useState<TabKey>('joined')
   const [keyword, setKeyword] = useState('')
   // 한글 조합 중(예: '맠')에는 필터를 바꾸지 않아 카드가 깜빡이지 않도록, 조합이 끝난 글자만 검색에 반영
   const [appliedKeyword, setAppliedKeyword] = useState('')
@@ -67,14 +68,14 @@ export function MarketPage() {
   const isLoading = marketsQuery.isPending || meQuery.isPending
   const isError = marketsQuery.isError || meQuery.isError
 
-  // 개설자도 참여자로 등록되므로, 한 목록을 호스트 여부로 나눔
+  // 개설자도 참여자로 등록되므로 목록 하나에 다 들어 있다.
+  // '참여 중인 마켓'은 내가 연 것까지 전부, '내가 만든 마켓'만 호스트로 추린다
   const myMemberId = meQuery.data?.memberId
   const allMarkets = marketsQuery.data ?? []
   const hostedMarkets = allMarkets.filter((market) => market.hostId === myMemberId)
-  const joinedMarkets = allMarkets.filter((market) => market.hostId !== myMemberId)
 
   const hasAnyMarket = allMarkets.length > 0
-  const tabMarkets = isHostTab ? hostedMarkets : joinedMarkets
+  const tabMarkets = isHostTab ? hostedMarkets : allMarkets
   const query = appliedKeyword.trim().toLowerCase()
   const markets = tabMarkets.filter(
     (market) =>
@@ -98,14 +99,13 @@ export function MarketPage() {
     closeModal()
   }
 
+  // 목록 새로고침은 useCreateMarket·useJoinMarket 안에서 끝난다
   function handleCreated(market: CreateMarketResponse) {
     setCreatedMarket(market)
-    void queryClient.invalidateQueries({ queryKey: marketKeys.all })
   }
 
   function handleJoined(market: JoinMarketResponse) {
     closeModal()
-    void queryClient.invalidateQueries({ queryKey: marketKeys.all })
     navigate(`/market/${market.marketId}`, { viewTransition: true })
   }
 
@@ -120,14 +120,14 @@ export function MarketPage() {
 
       <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {/* 히어로 — 마스코트 + 말풍선 + 시작 버튼 */}
-        <div className="relative min-h-72 overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-8 lg:min-h-80 lg:p-10">
-          <h1 className="mt-6 max-w-[60%] text-head-01 font-bold text-text-strong lg:mt-8 lg:text-4xl">
+        <div className="relative overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-6 sm:min-h-72 sm:p-8 lg:min-h-80 lg:p-10">
+          <h1 className="mt-2 max-w-full text-head-01 font-bold text-text-strong sm:mt-6 sm:max-w-[60%] lg:mt-8 lg:text-4xl">
             친구들과 여는
             <br />
             우리들만의 비밀 마켓
           </h1>
 
-          <div className="relative z-10 mt-6 flex flex-wrap gap-3">
+          <div className="relative z-10 mt-5 flex w-[calc(100%-5rem)] flex-wrap gap-2 sm:mt-6 sm:w-auto sm:gap-3">
             <button
               type="button"
               onClick={() => setModal('create')}
@@ -152,20 +152,20 @@ export function MarketPage() {
             </button>
           </div>
 
-          <div className="absolute right-6 top-24 max-w-56 rounded-2xl bg-bg px-4 py-3 text-body-04 text-text-muted shadow-md lg:right-8 lg:top-28">
+          <div className="absolute right-6 top-24 hidden max-w-56 rounded-2xl bg-bg px-4 py-3 text-body-04 text-text-muted shadow-md sm:block lg:right-8 lg:top-28">
             친구들과 함께 마켓을 열어보세요!
             <span className="absolute -bottom-1.5 left-8 size-3 rotate-45 bg-bg shadow-md" />
           </div>
-          <div className="absolute bottom-6 right-10 h-3 w-20 rounded-full bg-black/15 blur-md lg:right-14 lg:w-24" />
-          <img
+          <div className="absolute bottom-4 right-6 hidden h-3 w-20 rounded-full bg-black/15 blur-md sm:block lg:right-14 lg:w-24" />
+          <img draggable={false}
             src="/mascot/flea.png"
             alt=""
-            className="absolute bottom-4 right-6 size-28 object-contain [image-rendering:pixelated] lg:right-10 lg:size-32"
+            className="absolute -bottom-1 right-2 size-20 object-contain [image-rendering:pixelated] sm:bottom-4 sm:right-6 sm:size-28 lg:right-10 lg:size-32"
           />
         </div>
 
         {isLoading ? (
-          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">마켓을 불러오는 중이에요...</p>
+          <LoadingScreen fullScreen={false} message="마켓을 불러오는 중이에요" />
         ) : isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
             <p className="text-body-03 text-text-muted">마켓 목록을 불러오지 못했어요.</p>
@@ -269,7 +269,7 @@ export function MarketPage() {
               초대 링크로 참여하기
             </h2>
             <p className="mt-1 text-body-04 text-text-muted">친구에게 받은 초대 링크나 코드를 붙여 넣어 주세요.</p>
-            <img src={MASCOTS.wink} alt="" className="mx-auto my-6 h-20 object-contain [image-rendering:pixelated]" />
+            <img draggable={false} src={MASCOTS.wink} alt="" className="mx-auto my-6 h-20 object-contain [image-rendering:pixelated]" />
             <JoinMarketForm onJoined={handleJoined} />
           </>
         )}
@@ -309,7 +309,7 @@ export function MarketPage() {
               style={{ clipPath: pixelBox(6) }}
               className="w-[min(360px,100%)] bg-bg p-7 text-center"
             >
-              <img src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
+              <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-16 object-contain [image-rendering:pixelated]" />
               <p id="close-confirm-title" className="mt-4 text-body-02 font-bold text-text-strong">
                 작성 중인 내용이 사라져요
               </p>

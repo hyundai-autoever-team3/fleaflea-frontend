@@ -4,7 +4,7 @@ import type { FormEvent } from 'react'
 import { parseInviteCode } from '../../../shared/lib/invite'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
-import { getJoinErrorMessage, joinMarket, type JoinMarketResponse } from '../api/market-join-api'
+import { getJoinErrorMessage, useJoinMarket, type JoinMarketResponse } from '../api/market-join-api'
 
 interface JoinMarketFormProps {
   onJoined: (market: JoinMarketResponse) => void
@@ -13,9 +13,11 @@ interface JoinMarketFormProps {
 export function JoinMarketForm({ onJoined }: JoinMarketFormProps) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // 내 마켓 목록 새로고침은 useJoinMarket 안에서 한다
+  const joinMutation = useJoinMarket()
+  const isSubmitting = joinMutation.isPending
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const inviteCode = parseInviteCode(value)
     if (!inviteCode) {
@@ -23,16 +25,11 @@ export function JoinMarketForm({ onJoined }: JoinMarketFormProps) {
       return
     }
 
-    setIsSubmitting(true)
     setError('')
-    try {
-      const { data } = await joinMarket(inviteCode)
-      onJoined(data)
-    } catch (joinError) {
-      setError(getJoinErrorMessage(joinError))
-    } finally {
-      setIsSubmitting(false)
-    }
+    joinMutation.mutate(inviteCode, {
+      onSuccess: onJoined,
+      onError: (joinError) => setError(getJoinErrorMessage(joinError)),
+    })
   }
 
   return (

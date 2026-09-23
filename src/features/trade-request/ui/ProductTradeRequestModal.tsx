@@ -1,7 +1,9 @@
 import { useId, useState } from 'react'
 
-import { TRADE_TYPE_LABEL, type TradeType } from '../../../entities/product'
+import { REQUEST_ACTION_LABEL, type TradeType } from '../../../entities/product'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { daysBetween, todayString } from '../../../shared/lib/date'
+import { DateRangeCalendar } from '../../../shared/ui/date-range'
 import { PixelField, pixelInputClass, pixelInputStyle } from '../../../shared/ui/input'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -18,11 +20,6 @@ interface ProductTradeRequestModalProps {
 const MESSAGE_MAX = 500
 
 // 오늘 이전 날짜를 고르지 못하게 min으로 막는다
-function todayString() {
-  const now = new Date()
-  const pad = (value: number) => String(value).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-}
 
 export function ProductTradeRequestModal({
   open,
@@ -40,7 +37,8 @@ export function ProductTradeRequestModal({
 
   // 대여만 기간을 받는다. 판매·나눔은 날짜 개념이 없음
   const needsDates = tradeType === 'RENTAL'
-  const label = TRADE_TYPE_LABEL[tradeType]
+  // 보내는 사람 입장의 이름을 쓴다 — 파는 물건이라도 누르는 쪽은 '구매'다
+  const label = REQUEST_ACTION_LABEL[tradeType]
 
   function close() {
     setMessage('')
@@ -89,44 +87,29 @@ export function ProductTradeRequestModal({
       </p>
 
       {needsDates && (
-        <div className="mt-6 flex gap-3">
-          <div className="flex-1">
-            <label htmlFor={`${id}-start`} className="text-body-03 font-bold text-text-strong">
-              대여 시작일 <span className="text-primary">*</span>
-            </label>
-            <PixelField invalid={Boolean(error)} className="mt-2">
-              <input
-                id={`${id}-start`}
-                type="date"
-                value={startDate}
-                min={todayString()}
-                onChange={(event) => {
-                  setStartDate(event.target.value)
-                  setError('')
-                }}
-                style={pixelInputStyle}
-                className={`h-12 ${pixelInputClass}`}
-              />
-            </PixelField>
-          </div>
-          <div className="flex-1">
-            <label htmlFor={`${id}-end`} className="text-body-03 font-bold text-text-strong">
-              반납일 <span className="text-primary">*</span>
-            </label>
-            <PixelField invalid={Boolean(error)} className="mt-2">
-              <input
-                id={`${id}-end`}
-                type="date"
-                value={endDate}
-                min={startDate || todayString()}
-                onChange={(event) => {
-                  setEndDate(event.target.value)
-                  setError('')
-                }}
-                style={pixelInputStyle}
-                className={`h-12 ${pixelInputClass}`}
-              />
-            </PixelField>
+        <div className="mt-6">
+          <p id={`${id}-dates`} className="text-body-03 font-bold text-text-strong">
+            대여 기간 <span className="text-primary">*</span>
+          </p>
+          <p className="mt-1 text-body-04 text-text-muted">
+            {!startDate
+              ? '빌릴 첫날을 골라 주세요.'
+              : !endDate
+                ? '반납할 날을 골라 주세요.'
+                : `${startDate} ~ ${endDate} · ${daysBetween(startDate, endDate)}일`}
+          </p>
+          <div className="mt-3">
+            <DateRangeCalendar
+              start={startDate}
+              end={endDate}
+              minDate={todayString()}
+              labelledBy={`${id}-dates`}
+              onChange={({ start: nextStart, end: nextEnd }) => {
+                setStartDate(nextStart)
+                setEndDate(nextEnd)
+                setError('')
+              }}
+            />
           </div>
         </div>
       )}
@@ -149,7 +132,7 @@ export function ProductTradeRequestModal({
             rows={4}
             placeholder="언제 어디서 만나면 좋을지 적어 주세요."
             style={pixelInputStyle}
-            className={`resize-y py-3 ${pixelInputClass}`}
+            className={`py-3 ${pixelInputClass}`}
           />
         </PixelField>
       </div>

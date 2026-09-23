@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
+import { CameraIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 import type { MyProfile } from '../../../entities/user'
 import { FIELD_LIMITS } from '../../../shared/config/field-limits'
@@ -29,6 +30,7 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
   const [nicknameError, setNicknameError] = useState('')
   const [error, setError] = useState('')
   const [isProcessingImage, setIsProcessingImage] = useState(false)
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const imageRequest = useRef(0)
   const mutation = useUpdateMyProfile()
   const busy = mutation.isPending || isProcessingImage
@@ -103,30 +105,44 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
       <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-6">
         <fieldset disabled={busy} className="flex min-w-0 flex-col gap-6">
           <div className="flex items-center gap-4">
-            <Avatar profileImageUrl={shownImageUrl} size="lg" />
-            <div className="flex min-w-0 flex-1 flex-wrap gap-2">
-              <label
-                htmlFor={imageInputId}
-                style={{ clipPath: pixelBox(3) }}
-                className="flex min-h-11 cursor-pointer items-center bg-primary px-4 text-body-04 font-bold text-white transition-colors hover:bg-primary/90"
-              >
-                {hasPhoto ? '사진 바꾸기' : '사진 올리기'}
-              </label>
+            <div className="relative shrink-0">
+              <Avatar profileImageUrl={shownImageUrl} size="lg" />
               {hasPhoto && (
                 <button
                   type="button"
                   onClick={handleRemovePhoto}
-                  className="min-h-11 px-1 text-body-04 text-text-muted underline transition-colors hover:text-text-strong"
+                  aria-label="프로필 사진 지우기"
+                  title="프로필 사진 지우기"
+                  style={{ clipPath: pixelBox(2) }}
+                  className="absolute right-1 top-1 grid size-7 place-items-center bg-text-strong/75 text-white transition-colors hover:bg-text-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong"
                 >
-                  사진 지우기
+                  <XMarkIcon aria-hidden="true" className="size-4" />
                 </button>
               )}
-              {isProcessingImage && (
-                <p role="status" className="w-full text-body-04 text-text-muted">사진을 준비하는 중이에요...</p>
-              )}
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                aria-label={hasPhoto ? '프로필 사진 바꾸기' : '프로필 사진 올리기'}
+                title={hasPhoto ? '프로필 사진 바꾸기' : '프로필 사진 올리기'}
+                style={{ clipPath: pixelBox(2) }}
+                className="absolute bottom-1 right-1 grid size-8 place-items-center bg-primary text-white transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong"
+              >
+                <CameraIcon aria-hidden="true" className="size-4" />
+              </button>
             </div>
+            {isProcessingImage && (
+              <p role="status" className="text-body-04 text-text-muted">사진을 준비하는 중이에요...</p>
+            )}
           </div>
-          <input id={imageInputId} type="file" accept="image/*" onChange={handleImageChange} className="sr-only" />
+          <input
+            ref={imageInputRef}
+            id={imageInputId}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            tabIndex={-1}
+            className="sr-only"
+          />
 
           <div>
             <div className="flex items-baseline justify-between">

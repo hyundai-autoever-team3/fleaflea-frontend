@@ -1,6 +1,7 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
+import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
 // 도감 거래는 대여와 교환 두 가지. 교환만 내 도감 물건을 하나 걸고, 대여는 상대 물건을 빌리기만 한다
@@ -51,16 +52,28 @@ export function createBegRequest(collectionItemId: number, story: string) {
   return api.post<BegRequest>(`/api/v1/collection-items/${collectionItemId}/beg-requests`, { story })
 }
 
+// 보낸 요청은 마이페이지 거래 목록에 바로 보여야 한다. 받아둔 목록을 1분간
+// 그대로 쓰므로, 여기서 비워주지 않으면 방금 보낸 요청이 한동안 나타나지 않는다
+function refreshMyTradeRequests(queryClient: ReturnType<typeof useQueryClient>) {
+  return queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
+}
+
 export function useCreateCollectionTradeRequest(collectionItemId: number) {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (payload: CollectionTradePayload) =>
       createCollectionTradeRequest(collectionItemId, payload).then((response) => response.data),
+    onSuccess: () => refreshMyTradeRequests(queryClient),
   })
 }
 
 export function useCreateBegRequest(collectionItemId: number) {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (story: string) => createBegRequest(collectionItemId, story).then((response) => response.data),
+    onSuccess: () => refreshMyTradeRequests(queryClient),
   })
 }
 

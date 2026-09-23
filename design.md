@@ -168,9 +168,12 @@ Tailwind 기본 스케일(4px 단위)을 쓴다. 섹션 사이 `mt-10`~`mt-14`, 
 ### 한글 줄바꿈
 전역 규칙은 `index.css`에 있다.
 ```css
-body { overflow-wrap: break-word; text-wrap: pretty; }
+body { word-break: keep-all; overflow-wrap: break-word; text-wrap: pretty; }
 ```
-`word-break: keep-all`은 **쓰지 않는다** — 좁은 폭에서 줄 끝이 들쑥날쑥해진다.
+`word-break: keep-all`로 **한글 단어를 붙여 둔다.** 글자 단위로 끊으면 "프로필 수 / 정"처럼
+단어 한가운데가 갈라져 읽기 나쁘다. 줄 끝이 들쑥날쑥해지는 것은 `text-wrap: pretty`로 완화하고,
+단어 하나가 칸보다 길 때만 `overflow-wrap`이 끊는다.
+이메일·초대 링크처럼 단어 안에서 끊어야 하는 값은 그 요소에서 `break-all`로 되돌린다.
 
 ### 사용자 입력 텍스트
 - 길이를 통제할 수 없으므로 **제목 자리에 넣지 않는다.** 닉네임 20자, 마켓 소개 1000자, 상품 설명 2000자까지 올 수 있다.

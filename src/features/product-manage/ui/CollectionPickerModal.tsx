@@ -25,10 +25,10 @@ interface CollectionPickerModalProps {
 export function CollectionPhoto({ imageUrl, className = '' }: { imageUrl: string | null; className?: string }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null)
   return imageUrl && imageUrl !== failedUrl ? (
-    <img src={imageUrl} alt="" onError={() => setFailedUrl(imageUrl)} className={`size-full object-cover ${className}`} />
+    <img draggable={false} src={imageUrl} alt="" onError={() => setFailedUrl(imageUrl)} className={`size-full object-cover ${className}`} />
   ) : (
     <span className={`flex size-full items-center justify-center bg-primary-subtle ${className}`}>
-      <img src={MASCOTS.default} alt="" className="h-1/2 object-contain [image-rendering:pixelated]" />
+      <img draggable={false} src={MASCOTS.default} alt="" className="h-1/2 object-contain [image-rendering:pixelated]" />
     </span>
   )
 }
@@ -143,7 +143,7 @@ export function CollectionPickerModal({ currentItemId, replacesContent, onApply,
       ) : importableCount === 0 ? (
         // 물건이 아예 없는 것과 전부 비공개인 것은 다음에 할 일이 달라 문구를 가른다
         <div className="flex flex-col items-center py-10 text-center">
-          <img src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
+          <img draggable={false} src={MASCOTS.basket} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
           <p className="mt-4 text-body-03 font-bold text-text-strong">
             {items.length === 0 ? '아직 도감에 물건이 없어요' : '불러올 수 있는 물건이 없어요'}
           </p>

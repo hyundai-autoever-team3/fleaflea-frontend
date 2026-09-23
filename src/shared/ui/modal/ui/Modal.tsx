@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import type { MouseEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
 interface ModalProps {
@@ -23,8 +23,9 @@ const SIZE_CLASS = {
   compact: 'w-[min(480px,calc(100vw-36px))] p-6 sm:p-8',
 } as const
 
-// 클릭 좌표가 모달 창 사각형 밖이면 바깥(backdrop) 클릭
-function isOutsideDialog(event: MouseEvent<HTMLDialogElement>) {
+// 클릭 좌표가 모달 창 사각형 밖이면 바깥(backdrop) 클릭.
+// <dialog>를 직접 쓰는 랜딩 초대 모달도 같은 판정을 쓰도록 내보낸다
+export function isOutsideDialog(event: { currentTarget: HTMLDialogElement; clientX: number; clientY: number }) {
   const rect = event.currentTarget.getBoundingClientRect()
   return (
     event.clientX < rect.left ||
@@ -65,7 +66,7 @@ export function Modal({ open, onRequestClose, labelledBy, size = 'md', showClose
         event.preventDefault()
         onRequestClose()
       }}
-      onMouseDown={(event) => {
+      onPointerDown={(event) => {
         pressedOutsideRef.current = event.target === event.currentTarget && isOutsideDialog(event)
       }}
       onClick={(event) => {
@@ -77,8 +78,10 @@ export function Modal({ open, onRequestClose, labelledBy, size = 'md', showClose
         if (!open && event.target === event.currentTarget && event.propertyName === 'opacity') setShownChildren(null)
       }}
       // 내용이 길면 스크롤은 되지만 스크롤바는 숨김. 열릴 때 창 자체에 생기는 포커스 테두리도 제거
-      className={`m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl shadow-lg outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
+      className={`glass-window m-auto max-h-[calc(100dvh-48px)] overflow-y-auto overscroll-contain rounded-2xl outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${SIZE_CLASS[size]}`}
     >
+      {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
+      <div tabIndex={-1} autoFocus className="outline-none" aria-hidden="true" />
       {showClose && (
         <button
           type="button"

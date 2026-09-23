@@ -21,6 +21,7 @@
   --purple-100: #f5f0fc;
   --purple-300: #b196dc;
   --purple-500: #e0d3f6;
+  --purple-700: #674b86;
 
   /* 보라 그라데이션 보더 — background-clip 트릭(padding-box + border-box)으로 쓰는 용도라 Tailwind 컬러 유틸이 아닌 순수 CSS 변수로 둠 */
   --gradient-primary-border: linear-gradient(135deg, var(--purple-100), var(--purple-300));
@@ -43,6 +44,33 @@
 
   /* 인트로 섹션 배경 그라데이션용 (design.md "카테고리 칩" 규칙 중 blue만 실사용) */
   --blue-100: #e5edf8;
+  --blue-700: #365b88;
+
+  /* 알림 종류 타일 — 흰 아이콘을 얹어도 형태가 읽히는 중간 파스텔.
+   * 옅은 100번대는 흰 아이콘이 묻히고, 짙은 700번대는 파스텔 톤에서 벗어나
+   * 그 사이 한 단을 따로 둔다 */
+  --purple-400: #9b7fd4;
+  --blue-400: #5e8fcd;
+  --red-400: #cf6d84;
+  --green-400: #4fa374;
+  --amber-400: #c9863a;
+  --pink-400: #cc75a2;
+
+  /* 알림 상태 칩 — 옅은 면과 함께 써도 작은 글자가 읽히는 짙은 톤 */
+  --green-100: #e7f4eb;
+  --green-700: #356a4b;
+  --red-100: #fbe9ed;
+  --red-500: #e0334b; /* 안 읽은 알림 배지 — 멀리서도 '새것'으로 읽히는 선명한 빨강 */
+
+  /* 콕 찌르기 — 붉은 계열이되 주황 쪽으로 기울여, 거절의 장미빛(red-400)과 겹쳐 보이지 않게 한다 */
+  --coral-100: #ffeceb;
+  --coral-400: #fc746d; /* 사용자 지정 */
+  --coral-700: #b3423c;
+  --red-700: #99394e;
+  --amber-100: #fff1da;
+  --amber-700: #7d5524;
+  --pink-100: #fdeaf4;
+  --pink-700: #97417a;
 
   /* 우주 그라데이션 배경 — Figma 소스 없음, 사용자가 지정한 팔레트 기준 (design.md 5장 "임팩트 배경" 참고) */
   --cosmic-950: #100c2c;
@@ -51,6 +79,44 @@
 
   /* 글래스모피즘 표면(반투명 흰 배경) 위에 올라가는 텍스트 전용 남색. 투명도는 Tailwind opacity modifier(/92, /58)로 조절. */
   --navy-900: #1c1e32;
+
+  /* 글래스 패널 — 반투명 흰 면 + 뒤 배경 블러. 랜딩의 알림 카드에서 쓰던 값을
+   * 토큰으로 올려 컴포넌트가 rgba를 직접 적지 않게 했다 (9장) */
+  --glass-white: rgba(255, 255, 255, 0.7);
+  --glass-white-strong: rgba(252, 252, 254, 0.92);
+  --glass-white-faint: rgba(255, 255, 255, 0.35);
+  --glass-line: rgba(0, 0, 0, 0.1);
+  --shadow-glass-panel:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 20px 48px -10px rgba(20, 30, 60, 0.28);
+  --shadow-glass-pill:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 8px 20px -6px rgba(20, 30, 60, 0.22);
+
+  /* 유리창 모달 — 패널보다 한 단 더 띄운다. 첫 줄의 0.5px 그림자가 hairline 테두리를
+   * 대신하고(경계선을 따로 그리면 clip과 겹쳐 두꺼워짐), 마지막 줄이 위쪽 하이라이트다 */
+  --shadow-glass-window:
+    0 0 0 0.5px rgba(0, 0, 0, 0.1),
+    0 40px 100px rgba(20, 30, 60, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* 모달 뒤를 덮는 막. 검정을 그대로 깔면 탁해져 남색 쪽으로 기울였다 */
+  --scrim: rgba(20, 30, 60, 0.32);
+
+  /* macOS 창 신호등 — 랜딩 목업과 유리창 모달이 같은 색을 쓴다 */
+  --traffic-red: #ff5f57;
+  --traffic-yellow: #febc2e;
+  --traffic-green: #28c840;
+
+  /* 글래스 패널 바탕 — 라벤더 파스텔 그라데이션을 반투명으로 깔아
+   * 뒤 화면이 비치면서도 우리 톤을 유지한다 (--gradient-dreamy의 옅은 판).
+   * 위에 흰 유리면이 겹치므로 그라데이션 자체는 연하게 둔다 */
+  --gradient-glass-panel: linear-gradient(
+    in oklch 145deg,
+    rgba(250, 247, 254, 0.72),
+    rgba(235, 227, 250, 0.66) 55%,
+    rgba(253, 241, 247, 0.68)
+  );
 
   /* 핀테크 앱 카드 배경 느낌의 부드러운 다색 블러 그라데이션(살구/하늘/라벤더 3개 블롭). 카드/플레이스홀더 배경용. */
   --gradient-mesh-soft:
@@ -75,6 +141,35 @@
   --color-primary-tint: var(--purple-500); /* 파스텔 카드/배경 강조 (design.md의 "라벤더 SaaS 카드") */
   --color-primary-subtle: var(--purple-100); /* 옅은 배경 틴트 */
 
+  /* Notification status */
+  --color-status-brand: var(--purple-700);
+  --color-status-info: var(--blue-700);
+  --color-status-info-subtle: var(--blue-100);
+  --color-status-success: var(--green-700);
+  --color-status-success-subtle: var(--green-100);
+  --color-status-danger: var(--red-700);
+  --color-status-danger-subtle: var(--red-100);
+  /* 작은 면을 꽉 채우는 배지용. 글자에 쓰기엔 옅어 danger와 따로 둔다 */
+  --color-badge-danger: var(--red-500);
+  --color-status-warning: var(--amber-700);
+  --color-status-warning-subtle: var(--amber-100);
+  /* 콕 찌르기처럼 좋고 나쁨이 아닌 알림 — 성공·경고로 읽히지 않게 따로 둔다 */
+  --color-status-accent: var(--pink-700);
+  --color-status-accent-subtle: var(--pink-100);
+  /* 콕 찌르기 — 거래도 친구 맺기도 아닌 가벼운 인사라 다른 여섯 색과 겹치지 않게 둔다 */
+  --color-status-nudge: var(--coral-700);
+  --color-status-nudge-subtle: var(--coral-100);
+
+  /* 종류 타일 바탕 — 흰 아이콘을 얹는 자리 */
+  --color-status-brand-tile: var(--purple-400);
+  --color-status-info-tile: var(--blue-400);
+  --color-status-danger-tile: var(--red-400);
+  --color-status-success-tile: var(--green-400);
+  --color-status-warning-tile: var(--amber-400);
+  --color-status-accent-tile: var(--pink-400);
+  --color-status-nudge-tile: var(--coral-400);
+  --color-status-muted-tile: var(--gray-500);
+
   /* Text */
   --color-text-strong: var(--gray-900);
   --color-text: var(--gray-800);
@@ -96,6 +191,17 @@
 
   /* 글래스모피즘 카드/모달 전용 텍스트 색 — text-glass-ink/92, text-glass-ink/58 처럼 opacity modifier로 사용 */
   --color-glass-ink: var(--navy-900);
+  --color-glass: var(--glass-white);
+  --color-glass-strong: var(--glass-white-strong);
+  --color-glass-faint: var(--glass-white-faint);
+  --color-glass-line: var(--glass-line);
+  --shadow-glass: var(--shadow-glass-panel);
+  --shadow-glass-pill: var(--shadow-glass-pill);
+  --shadow-glass-window: var(--shadow-glass-window);
+  --color-scrim: var(--scrim);
+  --color-traffic-red: var(--traffic-red);
+  --color-traffic-yellow: var(--traffic-yellow);
+  --color-traffic-green: var(--traffic-green);
 
   /* ---- 3) TYPOGRAPHY ---- */
   /* 전역 기본 폰트 — Tailwind의 font-sans + 기본 body 폰트를 덮어씀 (클래스 없이 전체 적용) */

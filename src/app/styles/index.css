@@ -1,11 +1,28 @@
 @import 'tailwindcss';
 @import './tokens.css';
 @import './animations.css';
+@import './glass.css';
 
-/* 줄바꿈은 한글 문서처럼 글자 단위(브라우저 기본값)로 둬서 한 줄을 끝까지 채움.
-   keep-all은 좁은 폭에서 줄 끝이 들쑥날쑥해져 쓰지 않음.
-   공백 없는 긴 문자열(초대 링크 등)만 끊어 넘침을 막고, 마지막 줄에 한 글자만 남는 건 pretty로 완화 */
+/* 내용이 짧은 화면에서는 스크롤바가 없다가, 목록이 길어지면 갑자기 생긴다.
+   그때 스크롤바 너비만큼 화면이 옆으로 밀려 글자와 카드가 한 번 흔들린다.
+   자리를 늘 비워 두어 생기고 사라져도 폭이 그대로이게 한다 */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* 사진을 끌면 브라우저가 반투명한 복사본을 만들어 따라다니게 한다.
+   이 서비스에는 끌어서 옮길 사진이 없어, 누르다 실수로 집히는 일만 생긴다.
+   draggable={false}만으로는 사파리·크롬에서 막히지 않아 함께 건다 */
+img {
+  -webkit-user-drag: none;
+}
+
+/* 한글은 글자 단위로 끊으면 '프로필 수 / 정'처럼 단어 한가운데가 갈라져 읽기 나쁘다.
+   keep-all로 단어를 붙여 두고, 그래도 넘치는 것(공백 없는 긴 주소, 이메일)만
+   overflow-wrap으로 끊는다. 줄 끝이 들쑥날쑥해지는 것은 pretty로 완화한다.
+   단어 안에서 끊어야 읽히는 값(이메일 등)은 그 요소에서 break-all로 되돌린다 */
 body {
+  word-break: keep-all;
   overflow-wrap: break-word;
   text-wrap: pretty;
 }

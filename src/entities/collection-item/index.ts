@@ -1,4 +1,4 @@
-export type { CollectionItem, CollectionItemDetail, CollectionItemSummary } from './model/types'
+export type { CollectionItem, CollectionItemDetail, CollectionItemStatus, CollectionItemSummary } from './model/types'
 export {
   collectionKeys,
   getCollectionItem,
