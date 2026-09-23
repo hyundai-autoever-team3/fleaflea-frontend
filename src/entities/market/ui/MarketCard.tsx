@@ -24,7 +24,7 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
 
                 <div className="min-w-0">
                     <div className="flex min-w-0 flex-col items-start gap-1.5 @lg:flex-row @lg:items-center @lg:gap-2">
-                        <h3 title={market.title} className="order-2 min-w-0 w-full line-clamp-2 text-body-03 font-bold text-text-strong [overflow-wrap:anywhere] @lg:order-none @lg:w-auto @lg:flex-1 @lg:text-xl">{market.title}</h3>
+                        <h3 title={market.title} className="order-2 min-w-0 w-full line-clamp-2 text-body-03 font-bold text-text-strong [overflow-wrap:anywhere] @lg:order-none @lg:w-auto @lg:line-clamp-none @lg:truncate @lg:text-xl">{market.title}</h3>
                         {isHost && (
                             <span className="order-1 shrink-0 rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white @lg:order-none">HOST</span>
                         )}
