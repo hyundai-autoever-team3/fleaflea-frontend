@@ -1,6 +1,9 @@
 # FleaFlea
 
-**배포 주소: https://fleaflea.app**
+| | 주소 |
+|---|---|
+| 서비스 | https://fleaflea.app |
+| API 문서 (Swagger) | https://api.fleaflea.app/swagger-ui/index.html |
 
 초대받은 사람들끼리 여는 플리마켓 서비스. 친구를 초대해 마켓을 열고, 물건을 팔거나 나누거나 빌려주고, 개인 물건 도감을 꾸미며 친구와 거래합니다.
 
