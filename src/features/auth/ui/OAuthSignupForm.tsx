@@ -14,6 +14,7 @@ import { AuthCard } from './AuthCard'
 
 export function OAuthSignupForm() {
   const navigate = useNavigate()
+
   const [nickname, setNickname] = useState('')
   const [error, setError] = useState('')
   const [needsRestart, setNeedsRestart] = useState(false)
@@ -35,11 +36,14 @@ export function OAuthSignupForm() {
 
     try {
       const { data } = await completeOAuthSignup(value)
+
       useSessionStore.getState().setSession(data)
       useToastStore.getState().showToast('가입을 환영해요!')
+
       navigate(consumeOAuthRedirect() ?? '/market', { replace: true, viewTransition: true })
     } catch (signupError) {
       const { message, restart } = getOAuthSignupError(signupError)
+
       setError(message)
       setNeedsRestart(restart)
       setIsSubmitting(false)
@@ -55,6 +59,7 @@ export function OAuthSignupForm() {
       {needsRestart ? (
         <>
           <p className="mt-6 text-body-04 text-red-600">{error}</p>
+
           <Link
             to="/login"
             replace
@@ -69,6 +74,7 @@ export function OAuthSignupForm() {
           <label htmlFor="oauth-nickname" className="text-body-04 font-bold text-text-strong">
             닉네임
           </label>
+
           <PixelField invalid={Boolean(error)} className="mt-2">
             <input
               id="oauth-nickname"
@@ -86,6 +92,7 @@ export function OAuthSignupForm() {
               className={`${pixelInputClass} h-12`}
             />
           </PixelField>
+
           {error && <p className="mt-2 text-body-04 text-red-600">{error}</p>}
 
           <button

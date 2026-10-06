@@ -12,11 +12,13 @@ export function OAuthSuccessPage() {
 
   useEffect(() => {
     if (startedRef.current) return
+
     startedRef.current = true
 
     refreshAccessToken()
       .then((accessToken) => {
         useSessionStore.getState().setSession({ accessToken })
+
         navigate(consumeOAuthRedirect() ?? '/market', { replace: true, viewTransition: true })
       })
       .catch(() => navigate('/oauth/failure', { replace: true }))

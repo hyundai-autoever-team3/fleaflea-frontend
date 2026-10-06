@@ -85,6 +85,7 @@ export function MemberItemDexPage() {
 
   // 친구가 아니어서 볼 수 없는 경우에는 다시 불러와도 결과가 같으므로 친구 요청을 권한다.
   const listStatus = isAxiosError(itemsQuery.error) ? itemsQuery.error.response?.status : undefined
+
   const friendRequestMutation = useSendFriendRequest()
   const [friendRequestSent, setFriendRequestSent] = useState(false)
   const [friendRequestError, setFriendRequestError] = useState('')
@@ -95,6 +96,7 @@ export function MemberItemDexPage() {
     friendRequestMutation.mutate(memberId, {
       onSuccess: () => {
         setFriendRequestSent(true)
+
         useToastStore.getState().showToast('친구 요청을 보냈어요')
       },
       onError: (error) => setFriendRequestError(getSendFriendRequestErrorMessage(error)),
@@ -180,6 +182,7 @@ export function MemberItemDexPage() {
                       ? '요청하는 중...'
                       : '친구 요청'}
                 </button>
+
                 {friendRequestError && (
                   <p className="mt-2 text-body-04 text-red-600">{friendRequestError}</p>
                 )}

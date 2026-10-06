@@ -90,6 +90,7 @@ export function SocialLoginButtons({
     }
 
     saveOAuthRedirect(redirectTo)
+
     window.location.assign(getOAuthStartUrl(provider))
   }
 

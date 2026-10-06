@@ -161,6 +161,7 @@ export function LandingPage() {
     }
     // 비로그인 상태에서 넣은 링크이므로 안내 단계 없이 로그인으로 보내고, 로그인 후 바로 참여시킨다
     dialogRef.current?.close()
+
     navigate(withRedirect('/login', `/invite/${encodeURIComponent(code)}?join=1`), {
       viewTransition: true,
     })

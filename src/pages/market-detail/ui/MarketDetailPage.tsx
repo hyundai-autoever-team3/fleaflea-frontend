@@ -130,6 +130,7 @@ export function MarketDetailPage() {
   // 상품 상세에서 돌아와도 같은 조건으로 보이도록 검색어와 상태도 URL에 둔다.
   const statusFilter = readStatusFilter(searchParams.get('status'))
   const appliedKeyword = searchParams.get('q') ?? ''
+
   const [keyword, setKeyword] = useState(appliedKeyword)
   const isComposingRef = useRef(false)
 
@@ -149,6 +150,7 @@ export function MarketDetailPage() {
 
   const allProducts = productsQuery.data ?? []
   const normalizedKeyword = appliedKeyword.trim().toLowerCase()
+
   const products = allProducts.filter(
     (product) =>
       (statusFilter === 'ALL' || product.status === statusFilter) &&
@@ -235,6 +237,7 @@ export function MarketDetailPage() {
     else params.delete('q')
 
     params.delete('productPage')
+
     setSearchParams(params, { replace: true, preventScrollReset: true })
   }
 
@@ -396,6 +399,7 @@ export function MarketDetailPage() {
                 상품{' '}
                 {productsQuery.data && <span className="text-primary">{allProducts.length}</span>}
               </h2>
+
               {allProducts.length > 0 && (
                 <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div role="group" aria-label="거래 상태" className="flex flex-wrap gap-1.5">
@@ -416,6 +420,7 @@ export function MarketDetailPage() {
                       </button>
                     ))}
                   </div>
+
                   <label className="flex w-full items-center gap-2 rounded-full bg-primary-subtle px-5 py-2.5 focus-within:ring-2 focus-within:ring-primary-tint md:max-w-xs">
                     <svg
                       viewBox="0 0 24 24"
@@ -428,6 +433,7 @@ export function MarketDetailPage() {
                       <circle cx="11" cy="11" r="7" />
                       <path d="m20 20-3.5-3.5" strokeLinecap="round" />
                     </svg>
+
                     <input
                       type="search"
                       value={keyword}

@@ -24,6 +24,7 @@ export function AuthCard({
             alt=""
             className="mx-auto h-24 object-contain [image-rendering:pixelated]"
           />
+
           <h1 className="mt-4 text-head-03 font-bold text-text-strong">{title}</h1>
           {description && <p className="mt-2 text-body-03 text-text-muted">{description}</p>}
           {children}
