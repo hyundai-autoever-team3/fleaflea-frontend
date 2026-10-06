@@ -19,9 +19,14 @@ interface BegRequestModalProps {
 
 const MAX_STORY = 1000
 
-// 구걸은 내 물건을 걸지 않고 사연만 보낸다 (Swagger BeggingRequest: story 필수).
-// 대여·교환과 같은 판·같은 칸 문법을 쓰되, 사연 입력칸이 길어 사진은 작게 둔다
-export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUrl, onClose }: BegRequestModalProps) {
+// 구걸 요청은 교환할 물건 없이 필수 사연만 전송한다.
+export function BegRequestModal({
+  open,
+  collectionItemId,
+  itemTitle,
+  itemImageUrl,
+  onClose,
+}: BegRequestModalProps) {
   const id = useId()
   const [story, setStory] = useState('')
   const [error, setError] = useState('')
@@ -40,6 +45,7 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
       return
     }
     setError('')
+
     try {
       await mutation.mutateAsync(trimmed)
       useToastStore.getState().showToast('구걸 요청을 보냈어요')
@@ -50,11 +56,17 @@ export function BegRequestModal({ open, collectionItemId, itemTitle, itemImageUr
   }
 
   return (
-    <Modal open={open} onRequestClose={close} labelledBy="beg-request-title" size="compact" showClose={false}>
+    <Modal
+      open={open}
+      onRequestClose={close}
+      labelledBy="beg-request-title"
+      size="compact"
+      showClose={false}
+    >
       <h2 id="beg-request-title" className="text-xl font-bold text-text-strong">
         구걸하기
       </h2>
-      {/* 물건 이름은 아래 판이 보여주므로 여기서는 무엇을 하는 화면인지만 말한다 */}
+      {/* 대상 물건의 이름은 아래 미리보기에 표시한다. */}
       <p className="mt-1 text-body-04 text-text-muted">갖고 싶은 마음을 사연으로 전해요</p>
 
       <div style={{ clipPath: pixelBox(4) }} className="mt-4 bg-primary-subtle p-3">

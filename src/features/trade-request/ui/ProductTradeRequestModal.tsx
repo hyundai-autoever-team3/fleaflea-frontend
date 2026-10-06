@@ -19,8 +19,6 @@ interface ProductTradeRequestModalProps {
 
 const MESSAGE_MAX = 500
 
-// 오늘 이전 날짜를 고르지 못하게 min으로 막는다
-
 export function ProductTradeRequestModal({
   open,
   itemId,
@@ -35,9 +33,9 @@ export function ProductTradeRequestModal({
   const [error, setError] = useState('')
   const mutation = useCreateTradeRequest(itemId)
 
-  // 대여만 기간을 받는다. 판매·나눔은 날짜 개념이 없음
+  // 판매·나눔 요청에는 대여 기간을 포함하지 않는다.
   const needsDates = tradeType === 'RENTAL'
-  // 보내는 사람 입장의 이름을 쓴다 — 파는 물건이라도 누르는 쪽은 '구매'다
+  // 판매 여부가 아닌 요청자의 동작을 기준으로 버튼 이름을 표시한다.
   const label = REQUEST_ACTION_LABEL[tradeType]
 
   function close() {
@@ -76,7 +74,12 @@ export function ProductTradeRequestModal({
   }
 
   return (
-    <Modal open={open} onRequestClose={close} labelledBy="product-trade-request-title" showClose={false}>
+    <Modal
+      open={open}
+      onRequestClose={close}
+      labelledBy="product-trade-request-title"
+      showClose={false}
+    >
       <h2 id="product-trade-request-title" className="text-head-03 font-bold text-text-strong">
         {label} 요청 보내기
       </h2>

@@ -20,6 +20,7 @@ export function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     const formData = new FormData(event.currentTarget)
     const email = String(formData.get('email') ?? '').trim()
     const password = String(formData.get('password') ?? '')
@@ -29,7 +30,8 @@ export function LoginForm() {
     if (!email) nextErrors.email = '이메일을 입력해 주세요.'
     else if (!EMAIL_PATTERN.test(email)) nextErrors.email = '올바른 이메일 형식이 아니에요.'
     if (!password) nextErrors.password = '비밀번호를 입력해 주세요.'
-    else if (password.length < min || password.length > max) nextErrors.password = `비밀번호는 ${min}~${max}자로 입력해 주세요.`
+    else if (password.length < min || password.length > max)
+      nextErrors.password = `비밀번호는 ${min}~${max}자로 입력해 주세요.`
     setFieldErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
@@ -49,7 +51,12 @@ export function LoginForm() {
         <div className="flex h-full flex-col p-6 md:p-10">
           <div className="flex items-center gap-2">
             <div className="size-8 overflow-hidden rounded-full">
-              <img draggable={false} src="/mascot/flea.png" alt="" className="h-full w-full object-cover" />
+              <img
+                draggable={false}
+                src="/mascot/flea.png"
+                alt=""
+                className="h-full w-full object-cover"
+              />
             </div>
             <span className="font-jua text-body-02 text-text-strong">FleaFlea</span>
           </div>
@@ -59,92 +66,99 @@ export function LoginForm() {
             <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
 
             <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-6">
-            <div>
-              <div className="relative">
-                <label
-                  htmlFor="email"
-                  className="absolute -top-2 left-3 bg-bg px-1 text-gray-800 text-body-04 text-text-muted"
-                >
-                  이메일
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="flee@example.com"
-                  aria-invalid={Boolean(fieldErrors.email)}
-                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
-                />
+              <div>
+                <div className="relative">
+                  <label
+                    htmlFor="email"
+                    className="absolute -top-2 left-3 bg-bg px-1 text-gray-800 text-body-04 text-text-muted"
+                  >
+                    이메일
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="flee@example.com"
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
+                  />
+                </div>
+                {fieldErrors.email && (
+                  <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.email}</p>
+                )}
               </div>
-              {fieldErrors.email && (
-                <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.email}</p>
-              )}
-            </div>
 
-            <div>
-              <div className="relative">
-                <label
-                  htmlFor="password"
-                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
-                >
-                  비밀번호
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  maxLength={FIELD_LIMITS.password.max}
-                  placeholder="비밀번호를 입력해 주세요"
-                  aria-invalid={Boolean(fieldErrors.password)}
-                  className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((value) => !value)}
-                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
-                >
-                  {showPassword ? <EyeSlashIcon className="size-5" /> : <EyeIcon className="size-5" />}
-                </button>
+              <div>
+                <div className="relative">
+                  <label
+                    htmlFor="password"
+                    className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+                  >
+                    비밀번호
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    maxLength={FIELD_LIMITS.password.max}
+                    placeholder="비밀번호를 입력해 주세요"
+                    aria-invalid={Boolean(fieldErrors.password)}
+                    className="h-14 w-full rounded-lg border border-border px-3 pr-10 text-body-03"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((value) => !value)}
+                    aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="size-5" />
+                    ) : (
+                      <EyeIcon className="size-5" />
+                    )}
+                  </button>
+                </div>
+                {fieldErrors.password && (
+                  <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.password}</p>
+                )}
               </div>
-              {fieldErrors.password && (
-                <p className="mt-1 ml-2 text-body-04 text-red-600">{fieldErrors.password}</p>
-              )}
-            </div>
 
-            <label className="ml-1 flex items-center gap-2 text-body-04 text-text-muted">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="size-4 rounded border-border"
-              />
-              로그인 상태 유지
-            </label>
+              <label className="ml-1 flex items-center gap-2 text-body-04 text-text-muted">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  className="size-4 rounded border-border"
+                />
+                로그인 상태 유지
+              </label>
 
-            <button
-              type="submit"
-              className="h-14 rounded-lg bg-primary text-body-03 font-bold text-white"
-            >
-              로그인
-            </button>
+              <button
+                type="submit"
+                className="h-14 rounded-lg bg-primary text-body-03 font-bold text-white"
+              >
+                로그인
+              </button>
 
-            {error && <p className="text-body-04 text-red-600">{error}</p>}
+              {error && <p className="text-body-04 text-red-600">{error}</p>}
 
-            <div className="flex items-center gap-3">
-              <hr className="flex-1 border-border" />
-              <span className="text-body-04 text-text-muted">또는</span>
-              <hr className="flex-1 border-border" />
-            </div>
+              <div className="flex items-center gap-3">
+                <hr className="flex-1 border-border" />
+                <span className="text-body-04 text-text-muted">또는</span>
+                <hr className="flex-1 border-border" />
+              </div>
 
-            <p className="text-center text-body-04 text-text-muted">
-              계정이 없으신가요?{' '}
-              <Link to={redirectTo ? withRedirect('/signup', redirectTo) : '/signup'} className="font-bold text-primary">
-                회원가입
-              </Link>
-            </p>
+              <p className="text-center text-body-04 text-text-muted">
+                계정이 없으신가요?{' '}
+                <Link
+                  to={redirectTo ? withRedirect('/signup', redirectTo) : '/signup'}
+                  className="font-bold text-primary"
+                >
+                  회원가입
+                </Link>
+              </p>
             </form>
           </div>
         </div>
@@ -159,7 +173,8 @@ export function LoginForm() {
             }}
           />
           <StarField />
-          <img draggable={false}
+          <img
+            draggable={false}
             src="/mascot/flea-bg.png"
             alt=""
             className="relative h-full w-full object-cover"

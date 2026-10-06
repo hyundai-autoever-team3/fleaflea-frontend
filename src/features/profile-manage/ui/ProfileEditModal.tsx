@@ -25,7 +25,7 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
   const [nickname, setNickname] = useState(profile.nickname)
   const [image, setImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  // 사진을 지우는 것과 손대지 않는 것을 구분해야 해서 따로 기억한다
+  // 사진 미변경과 명시적 삭제를 구분한다.
   const [removePhoto, setRemovePhoto] = useState(false)
   const [nicknameError, setNicknameError] = useState('')
   const [error, setError] = useState('')
@@ -41,27 +41,37 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
   // 미리보기 URL이 바뀌거나 모달을 닫을 때 이전 URL 메모리 해제
   useEffect(() => {
     if (!previewUrl) return
+
     return () => URL.revokeObjectURL(previewUrl)
   }, [previewUrl])
 
-  useEffect(() => () => { imageRequest.current += 1 }, [])
+  // 모달이 닫힌 뒤 완료되는 이미지 처리 결과를 무효화한다.
+  useEffect(
+    () => () => {
+      imageRequest.current += 1
+    },
+    [],
+  )
 
   async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null
     // 같은 파일을 지웠다가 다시 골라도 change가 발생하도록 입력값을 비움
     event.target.value = ''
     if (!file) return
+
     if (!file.type.startsWith('image/')) {
       setError('이미지 파일만 올릴 수 있어요.')
       return
     }
     setError('')
-    // 올리기 전에 줄여서 업로드 실패(413)와 긴 대기를 막음
+    // 여러 압축 작업이 겹쳐도 가장 최근에 선택한 사진만 반영한다.
     const request = ++imageRequest.current
     setIsProcessingImage(true)
+
     try {
       const processed = await shrinkImage(file)
       if (request !== imageRequest.current) return
+
       setImage(processed)
       setPreviewUrl(URL.createObjectURL(processed))
       setRemovePhoto(false)
@@ -71,6 +81,7 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
   }
 
   function handleRemovePhoto() {
+    // 처리 중이던 사진이 삭제 이후 다시 표시되지 않도록 한다.
     imageRequest.current += 1
     setImage(null)
     setPreviewUrl(null)
@@ -80,7 +91,9 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     if (busy) return
+
     const trimmed = nickname.trim()
     if (trimmed.length < NICKNAME_MIN || trimmed.length > NICKNAME_MAX) {
       setNicknameError(`닉네임은 ${NICKNAME_MIN}~${NICKNAME_MAX}자로 지어 주세요.`)
@@ -88,6 +101,7 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
     }
 
     setError('')
+
     try {
       await mutation.mutateAsync({ nickname: trimmed, image, deleteProfileImage: removePhoto })
       useToastStore.getState().showToast('프로필을 수정했어요')
@@ -99,7 +113,9 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
 
   return (
     <Modal open onRequestClose={onClose} labelledBy={titleId} size="md">
-      <h2 id={titleId} className="pr-5 text-head-03 font-bold text-text-strong">프로필 수정</h2>
+      <h2 id={titleId} className="pr-5 text-head-03 font-bold text-text-strong">
+        프로필 수정
+      </h2>
       <p className="mt-2 text-body-04 text-text-muted">친구들에게 보이는 이름과 사진이에요.</p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-6">
@@ -131,7 +147,9 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
               </button>
             </div>
             {isProcessingImage && (
-              <p role="status" className="text-body-04 text-text-muted">사진을 준비하는 중이에요...</p>
+              <p role="status" className="text-body-04 text-text-muted">
+                사진을 준비하는 중이에요...
+              </p>
             )}
           </div>
           <input
@@ -149,7 +167,9 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
               <label htmlFor="profile-nickname" className="text-body-03 font-bold text-text-strong">
                 닉네임 <span className="text-primary">*</span>
               </label>
-              <span className="text-body-04 text-text-muted">{nickname.length}/{NICKNAME_MAX}</span>
+              <span className="text-body-04 text-text-muted">
+                {nickname.length}/{NICKNAME_MAX}
+              </span>
             </div>
             <PixelField invalid={Boolean(nicknameError)} className="mt-2">
               <input
@@ -170,7 +190,11 @@ export function ProfileEditModal({ profile, onClose }: ProfileEditModalProps) {
           </div>
         </fieldset>
 
-        {error && <p role="alert" className="text-body-04 text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-body-04 text-red-600">
+            {error}
+          </p>
+        )}
 
         {/* 주요 동작을 왼쪽에 */}
         <div className="flex gap-3">

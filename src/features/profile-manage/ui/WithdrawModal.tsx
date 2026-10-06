@@ -16,6 +16,7 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
 
   async function handleWithdraw() {
     setError('')
+
     try {
       await mutation.mutateAsync()
       // 세션을 지우면 RequireAuth가 막으므로, 로그인 전에도 볼 수 있는 첫 화면으로 보낸다
@@ -30,13 +31,24 @@ export function WithdrawModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open onRequestClose={onClose} labelledBy={titleId} size="sm">
       <div className="py-6 text-center">
-        <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-20 object-contain [image-rendering:pixelated]" />
-        <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">정말 탈퇴할까요?</h2>
+        <img
+          draggable={false}
+          src={MASCOTS.surprised}
+          alt=""
+          className="mx-auto h-20 object-contain [image-rendering:pixelated]"
+        />
+        <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">
+          정말 탈퇴할까요?
+        </h2>
         <p className="mt-2 text-body-04 text-text-muted">
           내 도감과 마켓, 주고받은 거래 기록이 사라져요. 되돌릴 수 없어요.
         </p>
 
-        {error && <p role="alert" className="mt-4 text-body-04 text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="mt-4 text-body-04 text-red-600">
+            {error}
+          </p>
+        )}
 
         {/* 주요 동작을 왼쪽에. 확인 모달의 취소는 "하지 않겠다"는 답이라 오른쪽 위 X와 중복이 아니다 */}
         <div className="mt-8 flex gap-3">

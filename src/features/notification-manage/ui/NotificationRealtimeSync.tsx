@@ -28,9 +28,11 @@ function streamUrl() {
 function isCached(queryClient: QueryClient, notificationId: number) {
   return queryClient
     .getQueriesData<NotificationPages>({ queryKey: notificationKeys.lists() })
-    .some(([, current]) => current?.pages.some((page) => (
-      page.content.some((notification) => notification.notificationId === notificationId)
-    )))
+    .some(([, current]) =>
+      current?.pages.some((page) =>
+        page.content.some((notification) => notification.notificationId === notificationId),
+      ),
+    )
 }
 
 // 이미 열어 본 알림 목록이 있으면 새 알림을 맨 앞에 넣는다.
@@ -40,9 +42,13 @@ function prependToCachedLists(queryClient: QueryClient, notification: Notificati
   queryClient.setQueriesData<NotificationPages>(
     { queryKey: notificationKeys.lists() },
     (current) => {
-      if (!current || current.pages.some((page) => (
-        page.content.some((item) => item.notificationId === notification.notificationId)
-      ))) return current
+      if (
+        !current ||
+        current.pages.some((page) =>
+          page.content.some((item) => item.notificationId === notification.notificationId),
+        )
+      )
+        return current
 
       let carry: NotificationItem | undefined = notification
       const totalElements = (current.pages[0]?.totalElements ?? 0) + 1
@@ -53,6 +59,7 @@ function prependToCachedLists(queryClient: QueryClient, notification: Notificati
           const candidates = carry ? [carry, ...page.content] : page.content
           const content = candidates.slice(0, page.size)
           carry = candidates[page.size]
+
           const totalPages = page.size > 0 ? Math.ceil(totalElements / page.size) : page.totalPages
 
           return {
@@ -72,13 +79,14 @@ function prependToCachedLists(queryClient: QueryClient, notification: Notificati
 }
 
 function receiveNotification(queryClient: QueryClient, notification: NotificationItem) {
+  // 캐시 삽입 전에 중복 여부를 확인해 같은 이벤트로 배지가 다시 증가하지 않도록 한다.
   const alreadyCached = isCached(queryClient, notification.notificationId)
   prependToCachedLists(queryClient, notification)
 
   if (!notification.isRead && !alreadyCached) {
-    queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), (current) => (
-      current ? { unreadCount: current.unreadCount + 1 } : current
-    ))
+    queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), (current) =>
+      current ? { unreadCount: current.unreadCount + 1 } : current,
+    )
   }
 }
 
@@ -128,6 +136,7 @@ export function NotificationRealtimeSync() {
           reconcileNotifications(queryClient)
           return
         }
+
         if (message.event !== 'notification') return
 
         try {
@@ -145,6 +154,7 @@ export function NotificationRealtimeSync() {
 
       onerror: (error: unknown) => {
         if (error instanceof StopSseError) throw error
+
         return RECONNECT_DELAY
       },
     }).catch(() => undefined)

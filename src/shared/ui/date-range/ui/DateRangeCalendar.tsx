@@ -5,12 +5,13 @@ import { pixelBox } from '../../../lib/pixel'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
-const FOCUS_RING = 'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text-strong'
+const FOCUS_RING =
+  'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text-strong'
 
 interface DateRangeCalendarProps {
   start: string
   end: string
-  // 시작일만 고른 중간 상태도 그대로 올려보낸다. 바깥에서 안내 문구를 바꾸기 위함
+  // 시작일만 선택한 상태는 end를 비워 전달한다.
   onChange: (next: { start: string; end: string }) => void
   minDate?: string
   labelledBy?: string
@@ -23,7 +24,6 @@ export function DateRangeCalendar({
   minDate = todayString(),
   labelledBy,
 }: DateRangeCalendarProps) {
-  // 고른 날이 있으면 그 달부터 보여준다
   const [cursor, setCursor] = useState(() => {
     const base = new Date(`${start || minDate}T00:00:00`)
     return { year: base.getFullYear(), month: base.getMonth() }
@@ -31,11 +31,13 @@ export function DateRangeCalendar({
 
   const first = new Date(cursor.year, cursor.month, 1)
   const daysInMonth = new Date(cursor.year, cursor.month + 1, 0).getDate()
-  // 1일이 무슨 요일인지에 맞춰 앞을 비워 둔다
+
+  // 첫 주에서 1일 이전 요일은 빈 칸으로 채운다.
   const leading = first.getDay()
 
-  // 지난 달에는 고를 수 있는 날이 하나도 없어, 넘어가 봐야 빈 판만 본다
-  const atFirstMonth = `${cursor.year}-${String(cursor.month + 1).padStart(2, '0')}` <= minDate.slice(0, 7)
+  // 선택 가능한 날짜가 없는 이전 달로는 이동하지 않는다.
+  const atFirstMonth =
+    `${cursor.year}-${String(cursor.month + 1).padStart(2, '0')}` <= minDate.slice(0, 7)
 
   function moveMonth(step: number) {
     setCursor((current) => {
@@ -45,12 +47,12 @@ export function DateRangeCalendar({
   }
 
   function pick(day: string) {
-    // 시작일만 있거나 이미 둘 다 골랐으면 새로 시작한다.
-    // 시작일보다 앞을 누르면 그 날을 새 시작일로 삼는 게 자연스럽다
+    // 선택 전, 범위 선택 완료 후, 시작일보다 이른 날짜를 누른 경우에는 새 범위를 시작한다.
     if (!start || end || day < start) {
       onChange({ start: day, end: '' })
       return
     }
+
     onChange({ start, end: day })
   }
 
@@ -90,7 +92,11 @@ export function DateRangeCalendar({
         <div role="grid" aria-labelledby={labelledBy} className="mt-3">
           <div role="row" className="grid grid-cols-7">
             {WEEKDAYS.map((weekday) => (
-              <span key={weekday} role="columnheader" className="py-1 text-center text-[11px] text-text-muted">
+              <span
+                key={weekday}
+                role="columnheader"
+                className="py-1 text-center text-[11px] text-text-muted"
+              >
                 {weekday}
               </span>
             ))}
@@ -106,15 +112,18 @@ export function DateRangeCalendar({
               const inRange = Boolean(start && end) && day > start && day < end
               const edge = isStart || isEnd
               const hasRange = Boolean(start && end)
-              const rangeTrack = !hasRange || (isStart && isEnd)
-                ? ''
-                : isStart
-                  ? 'bg-[linear-gradient(to_right,transparent_50%,var(--color-primary-subtle)_50%)]'
-                  : isEnd
-                    ? 'bg-[linear-gradient(to_right,var(--color-primary-subtle)_50%,transparent_50%)]'
-                    : inRange
-                      ? 'bg-primary-subtle'
-                      : ''
+
+              // 범위 양 끝은 절반만 칠해 날짜 원과 이어지는 배경을 만든다.
+              const rangeTrack =
+                !hasRange || (isStart && isEnd)
+                  ? ''
+                  : isStart
+                    ? 'bg-[linear-gradient(to_right,transparent_50%,var(--color-primary-subtle)_50%)]'
+                    : isEnd
+                      ? 'bg-[linear-gradient(to_right,var(--color-primary-subtle)_50%,transparent_50%)]'
+                      : inRange
+                        ? 'bg-primary-subtle'
+                        : ''
 
               return (
                 <button
@@ -127,17 +136,18 @@ export function DateRangeCalendar({
                   onClick={() => pick(day)}
                   className={`group grid h-10 place-items-center text-body-04 disabled:pointer-events-none disabled:text-text-muted/40 ${rangeTrack} ${FOCUS_RING}`}
                 >
-                  {/* 색은 이 안쪽 칸이 들고 있다. 바깥 버튼에만 흐린 색을 걸면
-                      여기서 다시 제 색으로 덮어써 지난 날이 멀쩡해 보인다 */}
-                  <span className={`relative z-10 grid size-9 place-items-center rounded-full transition-colors ${
-                    disabled
-                      ? 'text-text-muted/40'
-                      : edge
-                        ? 'bg-primary font-bold text-white'
-                        : inRange
-                          ? 'text-text-strong'
-                          : 'text-text group-hover:bg-primary-subtle'
-                  }`}>
+                  {/* 날짜의 색을 직접 지정하므로 비활성 색도 이 요소에 적용한다. */}
+                  <span
+                    className={`relative z-10 grid size-9 place-items-center rounded-full transition-colors ${
+                      disabled
+                        ? 'text-text-muted/40'
+                        : edge
+                          ? 'bg-primary font-bold text-white'
+                          : inRange
+                            ? 'text-text-strong'
+                            : 'text-text group-hover:bg-primary-subtle'
+                    }`}
+                  >
                     {Number(day.slice(-2))}
                   </span>
                 </button>

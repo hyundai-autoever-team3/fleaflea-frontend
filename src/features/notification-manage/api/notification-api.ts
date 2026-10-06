@@ -27,7 +27,7 @@ export function deleteAllNotifications() {
   return api.delete<void>('/api/v1/notifications')
 }
 
-// 받아둔 모든 장에서 알림 한 건을 찾아 바꾼다. 어느 장에 있었는지는 알 수 없다
+// 알림이 저장된 페이지를 특정할 수 없으므로 캐시된 모든 페이지를 갱신한다.
 function updateCachedNotification(
   queryClient: ReturnType<typeof useQueryClient>,
   notificationId: number,
@@ -35,34 +35,41 @@ function updateCachedNotification(
 ) {
   queryClient.setQueriesData<NotificationPages>(
     { queryKey: notificationKeys.lists() },
-    (current) => current
-      ? {
-          ...current,
-          pages: current.pages.map((page) => ({
-            ...page,
-            content: page.content.map((notification) => notification.notificationId === notificationId
-              ? change(notification)
-              : notification),
-          })),
-        }
-      : current,
+    (current) =>
+      current
+        ? {
+            ...current,
+            pages: current.pages.map((page) => ({
+              ...page,
+              content: page.content.map((notification) =>
+                notification.notificationId === notificationId
+                  ? change(notification)
+                  : notification,
+              ),
+            })),
+          }
+        : current,
   )
 }
 
 function decreaseUnreadCount(queryClient: ReturnType<typeof useQueryClient>) {
-  queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), (current) => current
-    ? { unreadCount: Math.max(0, current.unreadCount - 1) }
-    : current,
+  queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), (current) =>
+    current ? { unreadCount: Math.max(0, current.unreadCount - 1) } : current,
   )
 }
 
 function wasUnread(queryClient: ReturnType<typeof useQueryClient>, notificationId: number) {
-  for (const [, cached] of queryClient.getQueriesData<NotificationPages>({ queryKey: notificationKeys.lists() })) {
+  for (const [, cached] of queryClient.getQueriesData<NotificationPages>({
+    queryKey: notificationKeys.lists(),
+  })) {
     for (const page of cached?.pages ?? []) {
-      const found = page.content.find((notification) => notification.notificationId === notificationId)
+      const found = page.content.find(
+        (notification) => notification.notificationId === notificationId,
+      )
       if (found) return !found.isRead
     }
   }
+
   return false
 }
 
@@ -72,13 +79,18 @@ export function useReadNotification() {
   return useMutation({
     mutationFn: readNotification,
     onSuccess: (_response, notificationId) => {
-      // 목록을 다시 받기 전에 읽음 스타일과 배지를 먼저 반영한다.
+      // 캐시를 읽음으로 바꾸기 전에 이전 상태를 확인해 배지를 중복 차감하지 않는다.
       const unread = wasUnread(queryClient, notificationId)
-      updateCachedNotification(queryClient, notificationId, (notification) => ({ ...notification, isRead: true }))
+      updateCachedNotification(queryClient, notificationId, (notification) => ({
+        ...notification,
+        isRead: true,
+      }))
       if (unread) decreaseUnreadCount(queryClient)
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }).catch(() => undefined)
+      void queryClient
+        .invalidateQueries({ queryKey: notificationKeys.unreadCount() })
+        .catch(() => undefined)
     },
   })
 }
@@ -91,23 +103,26 @@ export function useReadAllNotifications() {
     onSuccess: () => {
       queryClient.setQueriesData<NotificationPages>(
         { queryKey: notificationKeys.lists() },
-        (current) => current
-          ? {
-              ...current,
-              pages: current.pages.map((page) => ({
-                ...page,
-                content: page.content.map((notification) => ({ ...notification, isRead: true })),
-              })),
-            }
-          : current,
+        (current) =>
+          current
+            ? {
+                ...current,
+                pages: current.pages.map((page) => ({
+                  ...page,
+                  content: page.content.map((notification) => ({ ...notification, isRead: true })),
+                })),
+              }
+            : current,
       )
-      queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), (current) => current
-        ? { unreadCount: 0 }
-        : current,
+      queryClient.setQueryData<NotificationUnreadCount>(
+        notificationKeys.unreadCount(),
+        (current) => (current ? { unreadCount: 0 } : current),
       )
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }).catch(() => undefined)
+      void queryClient
+        .invalidateQueries({ queryKey: notificationKeys.unreadCount() })
+        .catch(() => undefined)
     },
   })
 }
@@ -118,13 +133,15 @@ export function useDeleteNotification() {
   return useMutation({
     mutationFn: deleteNotification,
     onSuccess: async (_response, notificationId) => {
-      // 지운 줄이 빠지면 뒤쪽 알림이 한 칸씩 당겨 올라오므로 목록을 다시 받는다.
-      // 읽지 않은 알림을 지웠다면 배지 숫자도 하나 줄어든다
+      // 삭제로 페이지 경계가 바뀌므로 목록을 다시 조회한다. 읽지 않은 알림만 배지에서 뺀다.
       if (wasUnread(queryClient, notificationId)) decreaseUnreadCount(queryClient)
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: notificationKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }),
-      ].map((task) => task.catch(() => undefined)))
+
+      await Promise.all(
+        [
+          queryClient.invalidateQueries({ queryKey: notificationKeys.lists() }),
+          queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }),
+        ].map((task) => task.catch(() => undefined)),
+      )
     },
   })
 }
@@ -135,18 +152,24 @@ export function useDeleteAllNotifications() {
   return useMutation({
     mutationFn: deleteAllNotifications,
     onSuccess: async () => {
-      // 하나도 남지 않으므로 배지도 0으로 맞춘다
-      queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), { unreadCount: 0 })
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: notificationKeys.lists() }),
-        queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }),
-      ].map((task) => task.catch(() => undefined)))
+      // 전체 삭제 직후 배지를 먼저 초기화하고 서버 값과 다시 동기화한다.
+      queryClient.setQueryData<NotificationUnreadCount>(notificationKeys.unreadCount(), {
+        unreadCount: 0,
+      })
+
+      await Promise.all(
+        [
+          queryClient.invalidateQueries({ queryKey: notificationKeys.lists() }),
+          queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() }),
+        ].map((task) => task.catch(() => undefined)),
+      )
     },
   })
 }
 
 export function getNotificationActionErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'

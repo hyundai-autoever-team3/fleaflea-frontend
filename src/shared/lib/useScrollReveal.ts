@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
 
 /**
- * 요소가 화면 가운데 띠에 닿으면 등장 애니메이션(opacity/translateY)을 재생한다.
- * 실제 트랜지션은 CSS([data-reveal].is-visible)에서 처리하고, 이 훅은 트리거 타이밍만 담당한다.
- * prefers-reduced-motion이면 애니메이션 없이 바로 보이는 상태로 둔다.
+ * 요소가 뷰포트 중앙 영역에 진입하면 CSS 등장 애니메이션을 시작한다.
+ * 동작 줄이기 설정에서는 관찰하지 않고 즉시 표시한다.
  */
 export function useScrollReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null)
@@ -17,16 +16,12 @@ export function useScrollReveal<T extends HTMLElement>() {
       return
     }
 
-    // 띠를 벗어나면 표시를 걷어, 다시 들어올 때 처음부터 다시 재생되게 한다
+    // 중앙 영역을 벗어나면 상태를 초기화해 재진입 시에도 애니메이션을 재생한다.
     const observer = new IntersectionObserver(
       ([entry]) => {
         el.classList.toggle('is-visible', entry.isIntersecting)
       },
-      // 화면 위아래 20%를 잘라낸 가운데 띠에 닿을 때 재생한다.
-      // 요소 넓이의 20%가 보이면(threshold) 바로 켜지게 두었더니, 스냅 스크롤이
-      // 자리를 잡기도 전에 애니메이션이 끝나 효과가 보이지 않았다.
-      // 띠로 재면 섹션 길이와 상관없이 같은 지점에서 켜진다 — 길쭉한 섹션이
-      // threshold를 영영 못 넘겨 내용이 안 보이게 되는 일도 없다
+      // 요소의 노출 비율 대신 상하 여백을 줄인 관찰 영역에 닿는 시점을 기준으로 삼는다.
       { threshold: 0, rootMargin: '-20% 0px -20% 0px' },
     )
     observer.observe(el)

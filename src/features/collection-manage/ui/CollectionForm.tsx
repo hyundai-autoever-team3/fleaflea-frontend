@@ -35,12 +35,13 @@ export function CollectionForm({
   onDirtyChange,
 }: CollectionFormProps) {
   const id = useId()
+  // 편집 시작 시점의 값을 보존해 이후 입력의 변경 여부를 비교한다.
   const [initial] = useState(initialValue)
   const imageInput = useRef<HTMLInputElement>(null)
   const submitting = useRef(false)
   const [title, setTitle] = useState(initialValue?.title ?? '')
   const [description, setDescription] = useState(initialValue?.description ?? '')
-  // 새 물건은 공개가 기본. 스위치를 켜 둔 상태가 공개다
+  // 새 물건은 공개 상태로 시작한다.
   const [isPublic, setIsPublic] = useState(initialValue?.isPublic ?? true)
   const [image, setImage] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -49,10 +50,11 @@ export function CollectionForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const shownImageUrl = previewUrl ?? initial?.imageUrl ?? null
-  const isDirty = title !== (initial?.title ?? '')
-    || description !== (initial?.description ?? '')
-    || isPublic !== (initial?.isPublic ?? true)
-    || image !== null
+  const isDirty =
+    title !== (initial?.title ?? '') ||
+    description !== (initial?.description ?? '') ||
+    isPublic !== (initial?.isPublic ?? true) ||
+    image !== null
 
   useEffect(() => {
     onDirtyChange?.(isDirty)
@@ -60,6 +62,7 @@ export function CollectionForm({
 
   useEffect(() => {
     if (!previewUrl) return
+
     return () => URL.revokeObjectURL(previewUrl)
   }, [previewUrl])
 
@@ -70,30 +73,37 @@ export function CollectionForm({
 
   async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
+    // 같은 파일을 다시 선택해도 change 이벤트가 발생하도록 초기화한다.
     event.target.value = ''
+
     if (!file) return
+
     if (!file.type.startsWith('image/')) {
       setError('이미지 파일만 올릴 수 있어요.')
       return
     }
     setError('')
-    // 올리기 전에 줄여서 업로드 실패(413)와 긴 대기를 막음
+    // 업로드 전에 이미지 크기를 줄여 전송 용량을 제한한다.
     selectImage(await shrinkImage(file))
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     if (submitting.current) return
+
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
       setTitleError('물건 이름을 입력해 주세요.')
       return
     }
 
+    // 상태 업데이트가 렌더링되기 전의 연속 제출도 ref로 차단한다.
     submitting.current = true
     setIsSubmitting(true)
     setTitleError('')
     setError('')
+
     try {
       await onSubmit({ title: trimmedTitle, description: description.trim(), isPublic, image })
     } catch (submitError) {
@@ -109,14 +119,14 @@ export function CollectionForm({
       <fieldset disabled={isSubmitting} className="flex min-w-0 flex-col gap-6">
         <legend className="sr-only">물건 정보</legend>
         <div>
-          {/* 공개 설정을 별도 블록으로 두면 자리를 많이 먹어, 사진 라벨과 같은 줄 오른쪽에 붙임.
-              조작용 컨트롤이라 픽셀 모서리 대신 둥글게. 손잡이 이동 = 안쪽 폭(40) - 손잡이(20) = 20px */}
+          {/* 스위치 손잡이의 이동 거리는 내부 너비 40px에서 손잡이 20px를 뺀 값이다. */}
           <div className="flex items-center justify-between gap-3">
             <span className="text-body-03 font-bold text-text-strong">물건 사진</span>
             <div className="flex items-center gap-2">
-              <span className="text-body-04 font-bold text-text-muted">{isPublic ? '공개' : '비공개'}</span>
-              {/* 스위치는 라벨이 가리키는 상태를 켜는 것으로 읽힌다.
-                  '공개로 설정'이라 적고 켜짐 = 공개로 맞춰야 헷갈리지 않는다 */}
+              <span className="text-body-04 font-bold text-text-muted">
+                {isPublic ? '공개' : '비공개'}
+              </span>
+              {/* 접근성 라벨과 켜짐 상태를 모두 공개 기준으로 맞춘다. */}
               <button
                 type="button"
                 role="switch"
@@ -149,15 +159,27 @@ export function CollectionForm({
               >
                 {shownImageUrl ? (
                   <>
-                    <img draggable={false} src={shownImageUrl} alt="물건 사진 미리보기" className="size-full object-cover" />
+                    <img
+                      draggable={false}
+                      src={shownImageUrl}
+                      alt="물건 사진 미리보기"
+                      className="size-full object-cover"
+                    />
                     <span className="absolute inset-x-0 bottom-0 bg-black/50 py-2 text-body-04 font-semibold text-white">
                       사진 바꾸기
                     </span>
                   </>
                 ) : (
                   <span className="flex flex-col items-center gap-2">
-                    <img draggable={false} src={MASCOTS.star} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
-                    <span className="text-body-04 font-semibold text-text-muted">눌러서 사진 선택</span>
+                    <img
+                      draggable={false}
+                      src={MASCOTS.star}
+                      alt=""
+                      className="h-16 object-contain [image-rendering:pixelated]"
+                    />
+                    <span className="text-body-04 font-semibold text-text-muted">
+                      눌러서 사진 선택
+                    </span>
                   </span>
                 )}
               </span>
@@ -205,11 +227,17 @@ export function CollectionForm({
               className={`h-12 disabled:opacity-60 ${pixelInputClass}`}
             />
           </PixelField>
-          {titleError && <p id={`${id}-title-error`} role="alert" className="mt-2 text-body-04 text-red-600">{titleError}</p>}
+          {titleError && (
+            <p id={`${id}-title-error`} role="alert" className="mt-2 text-body-04 text-red-600">
+              {titleError}
+            </p>
+          )}
         </div>
 
         <div>
-          <label htmlFor={`${id}-description`} className="text-body-03 font-bold text-text-strong">물건 설명</label>
+          <label htmlFor={`${id}-description`} className="text-body-03 font-bold text-text-strong">
+            물건 설명
+          </label>
           <PixelField className="mt-2">
             <textarea
               id={`${id}-description`}
@@ -223,7 +251,11 @@ export function CollectionForm({
           </PixelField>
         </div>
 
-        {error && <p role="alert" className="text-body-04 text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-body-04 text-red-600">
+            {error}
+          </p>
+        )}
 
         <div className="flex gap-3">
           <button

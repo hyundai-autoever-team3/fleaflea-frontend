@@ -17,13 +17,14 @@ import { MyTradeList } from '../../../widgets/my-trade-list'
 
 type OpenModal = 'profile' | 'account' | 'password' | 'withdraw' | null
 
-const FOCUS_RING = 'focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-text-strong'
+const FOCUS_RING =
+  'focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-text-strong'
+
 const SHORTCUTS = [
   { to: '/item-dex', label: '내 물건 도감', glyph: GLYPHS.book },
   { to: '/friends', label: '내 친구', glyph: GLYPHS.friends },
 ]
 
-// 글리프를 연보라 판에 얹은 작은 액자. 줄마다 같은 크기로 서서 목록이 가지런해진다
 function GlyphTile({ rows }: { rows: readonly string[] }) {
   return (
     <span
@@ -37,12 +38,15 @@ function GlyphTile({ rows }: { rows: readonly string[] }) {
 
 export function MyPage() {
   const profileQuery = useMyProfile()
+
   const [openModal, setOpenModal] = useState<OpenModal>(null)
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null)
   const profile = profileQuery.data
 
   function closeAccountSettingsFlow() {
     setOpenModal(null)
+
+    // 하위 모달이 닫힌 뒤 계정 설정을 열었던 버튼으로 키보드 초점을 돌린다.
     requestAnimationFrame(() => accountSettingsButtonRef.current?.focus())
   }
 
@@ -54,11 +58,23 @@ export function MyPage() {
         <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
 
         {profileQuery.isPending ? (
-          <div role="status" aria-label="내 정보를 불러오는 중이에요" className="mt-8 grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
+          <div
+            role="status"
+            aria-label="내 정보를 불러오는 중이에요"
+            className="mt-8 grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)]"
+          >
             <span className="sr-only">내 정보를 불러오는 중이에요...</span>
             {[0, 1].map((index) => (
-              <div key={index} aria-hidden="true" style={{ clipPath: pixelBox(6) }} className="bg-primary-tint/60 p-[2px]">
-                <div style={{ clipPath: pixelBox(6) }} className="min-h-80 bg-bg p-6 motion-safe:animate-pulse">
+              <div
+                key={index}
+                aria-hidden="true"
+                style={{ clipPath: pixelBox(6) }}
+                className="bg-primary-tint/60 p-[2px]"
+              >
+                <div
+                  style={{ clipPath: pixelBox(6) }}
+                  className="min-h-80 bg-bg p-6 motion-safe:animate-pulse"
+                >
                   <div className="h-16 w-16 bg-primary-subtle" />
                   <div className="mt-6 h-5 w-2/3 bg-primary-subtle" />
                   <div className="mt-3 h-4 w-1/2 bg-primary-subtle" />
@@ -69,9 +85,19 @@ export function MyPage() {
           </div>
         ) : profileQuery.isError || !profile ? (
           <div style={{ clipPath: pixelBox(6) }} className="mt-8 bg-primary-tint p-[2px]">
-            <div style={{ clipPath: pixelBox(6) }} className="flex flex-col items-center bg-bg px-6 py-20 text-center">
-              <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
-              <p role="alert" className="mt-5 text-body-02 font-bold text-text-strong">내 정보를 불러오지 못했어요</p>
+            <div
+              style={{ clipPath: pixelBox(6) }}
+              className="flex flex-col items-center bg-bg px-6 py-20 text-center"
+            >
+              <img
+                draggable={false}
+                src={MASCOTS.surprised}
+                alt=""
+                className="h-24 object-contain [image-rendering:pixelated]"
+              />
+              <p role="alert" className="mt-5 text-body-02 font-bold text-text-strong">
+                내 정보를 불러오지 못했어요
+              </p>
               <p className="mt-2 text-body-04 text-text-muted">잠시 후 다시 시도해 주세요.</p>
               <button
                 type="button"
@@ -87,17 +113,30 @@ export function MyPage() {
         ) : (
           <>
             <div className="mt-8 grid items-start gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
-              <section aria-labelledby="my-profile-title" style={{ clipPath: pixelBox(6) }} className="min-w-0 bg-primary-tint p-[2px]">
+              <section
+                aria-labelledby="my-profile-title"
+                style={{ clipPath: pixelBox(6) }}
+                className="min-w-0 bg-primary-tint p-[2px]"
+              >
                 <div style={{ clipPath: pixelBox(6) }} className="bg-bg">
                   <div className="p-4 sm:p-5">
-                    <h2 id="my-profile-title" className="text-body-04 font-bold text-text-muted">내 프로필</h2>
+                    <h2 id="my-profile-title" className="text-body-04 font-bold text-text-muted">
+                      내 프로필
+                    </h2>
                     <div className="mt-4 flex items-center gap-4 lg:flex-col lg:items-start">
-                      <span style={{ clipPath: pixelBox(4) }} className="shrink-0 bg-primary-tint p-[3px]">
+                      <span
+                        style={{ clipPath: pixelBox(4) }}
+                        className="shrink-0 bg-primary-tint p-[3px]"
+                      >
                         <Avatar profileImageUrl={profile.profileImageUrl} size="lg" />
                       </span>
                       <div className="min-w-0 flex-1 lg:w-full">
-                        <p className="break-words text-body-02 font-bold leading-relaxed text-text-strong">{profile.nickname}</p>
-                        <p className="mt-1 break-all text-body-04 leading-relaxed text-text-muted">{profile.email}</p>
+                        <p className="break-words text-body-02 font-bold leading-relaxed text-text-strong">
+                          {profile.nickname}
+                        </p>
+                        <p className="mt-1 break-all text-body-04 leading-relaxed text-text-muted">
+                          {profile.email}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -109,7 +148,10 @@ export function MyPage() {
                       프로필 수정
                     </button>
 
-                    <nav aria-label="내 활동 바로가기" className="mt-4 grid grid-cols-2 gap-1 border-t border-primary-subtle pt-3 lg:grid-cols-1">
+                    <nav
+                      aria-label="내 활동 바로가기"
+                      className="mt-4 grid grid-cols-2 gap-1 border-t border-primary-subtle pt-3 lg:grid-cols-1"
+                    >
                       {SHORTCUTS.map(({ to, label, glyph }) => (
                         <Link
                           key={to}
@@ -119,8 +161,13 @@ export function MyPage() {
                           className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
                         >
                           <GlyphTile rows={glyph} />
-                          <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">{label}</span>
-                          <Sprite rows={GLYPHS.arrowRight} className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block" />
+                          <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">
+                            {label}
+                          </span>
+                          <Sprite
+                            rows={GLYPHS.arrowRight}
+                            className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block"
+                          />
                         </Link>
                       ))}
                       <button
@@ -132,8 +179,13 @@ export function MyPage() {
                         className={`group col-span-full flex min-h-12 items-center gap-2.5 px-2 text-left transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
                       >
                         <GlyphTile rows={GLYPHS.gear} />
-                        <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">계정 설정</span>
-                        <Sprite rows={GLYPHS.arrowRight} className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5" />
+                        <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">
+                          계정 설정
+                        </span>
+                        <Sprite
+                          rows={GLYPHS.arrowRight}
+                          className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5"
+                        />
                       </button>
                     </nav>
                   </div>

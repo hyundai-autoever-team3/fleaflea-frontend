@@ -8,7 +8,7 @@ import { getImageErrorMessage } from '../../../shared/lib/image'
 export interface ProfileUpdatePayload {
   nickname: string
   image: File | null
-  // 사진을 지우는 것과 그대로 두는 것은 다르다. 서버가 이 값으로 구분한다
+  // 새 이미지가 없을 때 기존 사진을 유지할지 삭제할지 구분한다.
   deleteProfileImage: boolean
 }
 
@@ -20,10 +20,11 @@ export interface PasswordUpdatePayload {
 // PATCH /api/v1/members/me (multipart/form-data). 204를 돌려주므로 응답 본문이 없다
 export function updateMyProfile({ nickname, image, deleteProfileImage }: ProfileUpdatePayload) {
   const formData = new FormData()
+
   formData.append('nickname', nickname)
   if (image) formData.append('profileImage', image)
-  // 서버가 이 값을 원시 boolean으로 받아, 빠지면 채울 값이 없어 400으로 막힌다.
-  // 도감 등록의 isPublic처럼 거짓일 때도 실어 보낸다
+
+  // 필수 boolean 필드이므로 false도 생략하지 않고 전송한다.
   formData.append('deleteProfileImage', String(deleteProfileImage))
 
   return api.patch<void>('/api/v1/members/me', formData)
@@ -39,9 +40,10 @@ export function withdrawMe() {
 
 export function useUpdateMyProfile() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: updateMyProfile,
-    // 헤더·마이페이지가 함께 보는 내 정보라 수정 후 다시 받아온다
+    // 헤더와 마이페이지가 공유하는 프로필 캐시를 갱신한다.
     onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.me }),
   })
 }
@@ -56,7 +58,8 @@ export function useWithdrawMe() {
 
 export function getProfileUpdateErrorMessage(error: unknown) {
   const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
-  // 사진이 문제일 때 '입력을 확인하세요'라고만 하면 무엇을 고칠지 알 수 없다
+
+  // HTTP 상태보다 구체적인 이미지 오류 코드를 우선한다.
   const imageMessage = getImageErrorMessage(response?.data?.code)
   if (imageMessage) return imageMessage
 
@@ -76,8 +79,9 @@ export function getProfileUpdateErrorMessage(error: unknown) {
 
 export function getPasswordUpdateErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
-    // 서버가 현재 비밀번호 불일치와 형식 오류를 모두 400으로 내려, 더 흔한 쪽을 문구로 삼는다
+    // 현재 비밀번호 불일치와 형식 오류가 모두 400으로 반환된다.
     case 400:
       return '현재 비밀번호가 맞지 않아요. 다시 확인해 주세요.'
     case 401:
@@ -91,6 +95,7 @@ export function getPasswordUpdateErrorMessage(error: unknown) {
 
 export function getWithdrawErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'

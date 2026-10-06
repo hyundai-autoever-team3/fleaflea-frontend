@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios'
 import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 
-// 도감 거래는 대여와 교환 두 가지. 교환만 내 도감 물건을 하나 걸고, 대여는 상대 물건을 빌리기만 한다
+// 교환은 내 도감 물건을 제공하고, 대여는 상대 물건만 빌린다.
 export type CollectionTradeType = 'RENTAL' | 'EXCHANGE'
 
 export const TRADE_TYPE_LABEL: Record<CollectionTradeType, string> = {
@@ -37,23 +37,29 @@ export interface BegRequest {
   updatedAt: string
 }
 
-// 교환만 내 물건을 걸어 맞바꾼다. 대여는 상대 물건을 빌리는 것이라 거는 물건이 없다
-// (Swagger CollectionTradeRequestCreateRequest: required는 tradeType뿐)
+// offerCollectionItemId는 교환 요청에만 포함한다.
 export interface CollectionTradePayload {
   tradeType: CollectionTradeType
   offerCollectionItemId?: number
 }
 
-export function createCollectionTradeRequest(collectionItemId: number, payload: CollectionTradePayload) {
-  return api.post<CollectionTradeRequest>(`/api/v1/collection-items/${collectionItemId}/trade-requests`, payload)
+export function createCollectionTradeRequest(
+  collectionItemId: number,
+  payload: CollectionTradePayload,
+) {
+  return api.post<CollectionTradeRequest>(
+    `/api/v1/collection-items/${collectionItemId}/trade-requests`,
+    payload,
+  )
 }
 
 export function createBegRequest(collectionItemId: number, story: string) {
-  return api.post<BegRequest>(`/api/v1/collection-items/${collectionItemId}/beg-requests`, { story })
+  return api.post<BegRequest>(`/api/v1/collection-items/${collectionItemId}/beg-requests`, {
+    story,
+  })
 }
 
-// 보낸 요청은 마이페이지 거래 목록에 바로 보여야 한다. 받아둔 목록을 1분간
-// 그대로 쓰므로, 여기서 비워주지 않으면 방금 보낸 요청이 한동안 나타나지 않는다
+// 새 요청을 거래 목록에 반영한다. 조회 실패가 요청 성공을 취소하지는 않는다.
 function refreshMyTradeRequests(queryClient: ReturnType<typeof useQueryClient>) {
   return queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
 }
@@ -72,13 +78,15 @@ export function useCreateBegRequest(collectionItemId: number) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (story: string) => createBegRequest(collectionItemId, story).then((response) => response.data),
+    mutationFn: (story: string) =>
+      createBegRequest(collectionItemId, story).then((response) => response.data),
     onSuccess: () => refreshMyTradeRequests(queryClient),
   })
 }
 
 export function getTradeRequestErrorMessage(error: unknown, tradeType: CollectionTradeType) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '요청 내용을 다시 확인해 주세요.'
@@ -97,6 +105,7 @@ export function getTradeRequestErrorMessage(error: unknown, tradeType: Collectio
 
 export function getBegRequestErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '사연을 입력해 주세요.'
