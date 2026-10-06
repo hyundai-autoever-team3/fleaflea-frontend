@@ -10,6 +10,10 @@ import {
 } from '../../../entities/collection-item'
 import { useMyFriends } from '../../../entities/friend'
 import {
+  getSendFriendRequestErrorMessage,
+  useSendFriendRequest,
+} from '../../../features/friend-manage'
+import {
   DAILY_POKE_LIMIT,
   getPokeErrorMessage,
   isPokeLimitExceeded,
@@ -79,6 +83,24 @@ export function MemberItemDexPage() {
     })
   }
 
+  // 친구가 아니어서 볼 수 없는 경우에는 다시 불러와도 결과가 같으므로 친구 요청을 권한다.
+  const listStatus = isAxiosError(itemsQuery.error) ? itemsQuery.error.response?.status : undefined
+  const friendRequestMutation = useSendFriendRequest()
+  const [friendRequestSent, setFriendRequestSent] = useState(false)
+  const [friendRequestError, setFriendRequestError] = useState('')
+
+  function handleFriendRequest() {
+    setFriendRequestError('')
+
+    friendRequestMutation.mutate(memberId, {
+      onSuccess: () => {
+        setFriendRequestSent(true)
+        useToastStore.getState().showToast('친구 요청을 보냈어요')
+      },
+      onError: (error) => setFriendRequestError(getSendFriendRequestErrorMessage(error)),
+    })
+  }
+
   const pageCount = Math.max(1, Math.ceil(items.length / SLOTS_PER_PAGE))
 
   // 공개 물건 수가 줄어 현재 페이지가 사라지면 마지막 페이지로 보정한다.
@@ -143,14 +165,38 @@ export function MemberItemDexPage() {
             <p className="mt-4 text-body-03 text-text-muted">
               {getListErrorMessage(itemsQuery.error)}
             </p>
-            <button
-              type="button"
-              onClick={() => void itemsQuery.refetch()}
-              style={{ clipPath: pixelBox() }}
-              className="mt-4 bg-primary px-5 py-2.5 text-body-04 font-bold text-white hover:bg-primary/90"
-            >
-              다시 시도
-            </button>
+            {listStatus === 403 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleFriendRequest}
+                  disabled={friendRequestMutation.isPending || friendRequestSent}
+                  style={{ clipPath: pixelBox() }}
+                  className="mt-4 bg-primary px-5 py-2.5 text-body-04 font-bold text-white hover:bg-primary/90 disabled:bg-primary/50"
+                >
+                  {friendRequestSent
+                    ? '친구 요청을 보냈어요'
+                    : friendRequestMutation.isPending
+                      ? '요청하는 중...'
+                      : '친구 요청'}
+                </button>
+                {friendRequestError && (
+                  <p className="mt-2 text-body-04 text-red-600">{friendRequestError}</p>
+                )}
+              </>
+            ) : (
+              listStatus !== 401 &&
+              listStatus !== 404 && (
+                <button
+                  type="button"
+                  onClick={() => void itemsQuery.refetch()}
+                  style={{ clipPath: pixelBox() }}
+                  className="mt-4 bg-primary px-5 py-2.5 text-body-04 font-bold text-white hover:bg-primary/90"
+                >
+                  다시 시도
+                </button>
+              )
+            )}
           </div>
         ) : (
           <div className="relative mt-8">
