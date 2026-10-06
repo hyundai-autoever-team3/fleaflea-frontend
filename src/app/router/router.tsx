@@ -94,7 +94,7 @@ export const router = createBrowserRouter([
           </RequireGuest>
         ),
       },
-      // 비로그인 사용자도 초대를 확인할 수 있다. 로그인 안내와 참여 분기는 페이지가 처리한다.
+      // 비로그인 사용자를 로그인으로 보내는 처리와 참여 분기는 페이지가 맡는다.
       {
         path: '/invite/:code',
         lazy: async () => {
