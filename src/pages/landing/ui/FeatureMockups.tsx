@@ -46,8 +46,10 @@ function PreviewAction({ children, subtle = false }: { children: ReactNode; subt
   return (
     <span
       style={{ clipPath: pixelBox(2) }}
-      className={'inline-flex shrink-0 items-center justify-center gap-1 px-3 py-2 text-xs font-bold ' +
-        (subtle ? 'bg-primary-subtle text-status-brand' : 'bg-primary text-white')}
+      className={
+        'inline-flex shrink-0 items-center justify-center gap-1 px-3 py-2 text-xs font-bold ' +
+        (subtle ? 'bg-primary-subtle text-status-brand' : 'bg-primary text-white')
+      }
     >
       {children}
     </span>
@@ -67,8 +69,19 @@ function Badge({ children }: { children: ReactNode }) {
 
 function MiniAvatar({ src }: { src: string }) {
   return (
-    <span style={{ clipPath: pixelBox(2) }} className="grid size-8 shrink-0 place-items-center bg-primary-subtle">
-      <img draggable={false} src={src} alt="" loading="lazy" width={32} height={32} className="size-8 object-contain [image-rendering:pixelated]" />
+    <span
+      style={{ clipPath: pixelBox(2) }}
+      className="grid size-8 shrink-0 place-items-center bg-primary-subtle"
+    >
+      <img
+        draggable={false}
+        src={src}
+        alt=""
+        loading="lazy"
+        width={32}
+        height={32}
+        className="size-8 object-contain [image-rendering:pixelated]"
+      />
     </span>
   )
 }
@@ -135,21 +148,35 @@ export function InviteMockup() {
           <p className="mt-2 text-body-03 font-bold text-text-strong">우리들의 작은 플리마켓</p>
           <p className="mt-1 text-xs text-text-muted">좋아하던 물건에 새로운 주인을 찾아요.</p>
         </div>
-        <img draggable={false} src={MASCOTS.smile} alt="" loading="lazy" width={64} height={64} className="size-16 shrink-0 object-contain [image-rendering:pixelated]" />
+        <img
+          draggable={false}
+          src={MASCOTS.smile}
+          alt=""
+          loading="lazy"
+          width={64}
+          height={64}
+          className="size-16 shrink-0 object-contain [image-rendering:pixelated]"
+        />
       </div>
       <div style={{ clipPath: pixelBox(4) }} className="space-y-3 bg-primary-subtle p-4">
         <p className="flex items-center gap-2 text-body-04 font-bold text-text-strong">
           <LinkIcon className="size-4 text-status-brand" aria-hidden="true" /> 마켓 초대 링크
         </p>
         <div className="flex items-center gap-2 bg-bg p-2">
-          <span className="min-w-0 flex-1 truncate text-xs text-text-muted">fleaflea.app/invite/OURMARKET</span>
+          <span className="min-w-0 flex-1 truncate text-xs text-text-muted">
+            fleaflea.app/invite/OURMARKET
+          </span>
           <PreviewAction>복사</PreviewAction>
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 border-t border-primary-subtle pt-4">
-        <span className="text-body-04 font-bold text-text-strong">함께하는 이웃 <span className="text-status-brand">3</span></span>
+        <span className="text-body-04 font-bold text-text-strong">
+          함께하는 이웃 <span className="text-status-brand">3</span>
+        </span>
         <div className="flex gap-2">
-          {[MASCOTS.smile, MASCOTS.wink, MASCOTS.beret].map((src) => <MiniAvatar key={src} src={src} />)}
+          {[MASCOTS.smile, MASCOTS.wink, MASCOTS.beret].map((src) => (
+            <MiniAvatar key={src} src={src} />
+          ))}
         </div>
       </div>
     </PreviewFrame>
@@ -164,13 +191,26 @@ const PRODUCTS = [
 
 export function TradeWaysMockup() {
   return (
-    <PreviewFrame section="물건 둘러보기" caption="마켓에서는 판매·나눔·대여, 도감에서는 서로 교환해요.">
+    <PreviewFrame
+      section="물건 둘러보기"
+      caption="마켓에서는 판매·나눔·대여, 도감에서는 서로 교환해요."
+    >
       <p className="text-body-03 font-bold text-text-strong">마켓에서 발견한 물건</p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {PRODUCTS.map((product) => (
-          <div key={product.kind} style={{ clipPath: pixelBox(3) }} className="bg-primary-tint p-[2px]">
-            <div style={{ clipPath: pixelBox(3) }} className="flex h-full items-center gap-3 bg-bg p-2 sm:block">
-              <div style={{ clipPath: pixelBox(2) }} className="grid size-20 shrink-0 place-items-center bg-primary-subtle sm:aspect-square sm:h-auto sm:w-full">
+          <div
+            key={product.kind}
+            style={{ clipPath: pixelBox(3) }}
+            className="bg-primary-tint p-[2px]"
+          >
+            <div
+              style={{ clipPath: pixelBox(3) }}
+              className="flex h-full items-center gap-3 bg-bg p-2 sm:block"
+            >
+              <div
+                style={{ clipPath: pixelBox(2) }}
+                className="grid size-20 shrink-0 place-items-center bg-primary-subtle sm:aspect-square sm:h-auto sm:w-full"
+              >
                 <ItemArt kind={product.kind} />
               </div>
               <div className="min-w-0 sm:mt-2">
@@ -182,7 +222,10 @@ export function TradeWaysMockup() {
           </div>
         ))}
       </div>
-      <div style={{ clipPath: pixelBox(4) }} className="flex flex-wrap items-center gap-3 bg-primary-subtle p-3">
+      <div
+        style={{ clipPath: pixelBox(4) }}
+        className="flex flex-wrap items-center gap-3 bg-primary-subtle p-3"
+      >
         <ArrowPathIcon className="size-5 shrink-0 text-status-brand" aria-hidden="true" />
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold text-text-strong">친구의 도감에서는 교환도</p>
@@ -209,17 +252,28 @@ export function CollectionMockup() {
   return (
     <PreviewFrame section="물건 도감" caption="물건은 차곡차곡, 공개 여부는 내가 정해요.">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-body-03 font-bold text-text-strong">내 물건 도감 <span className="text-status-brand">5</span></p>
-        <PreviewAction><PlusIcon className="size-3" aria-hidden="true" /> 물건 등록</PreviewAction>
+        <p className="text-body-03 font-bold text-text-strong">
+          내 물건 도감 <span className="text-status-brand">5</span>
+        </p>
+        <PreviewAction>
+          <PlusIcon className="size-3" aria-hidden="true" /> 물건 등록
+        </PreviewAction>
       </div>
       <div style={{ clipPath: pixelBox(4) }} className="bg-primary-tint p-2">
         <div style={{ clipPath: pixelBox(3) }} className="grid grid-cols-3 gap-2 bg-bg p-2">
           {COLLECTION.map((item) => (
             <div key={item.title} className="min-w-0">
-              <div style={{ clipPath: pixelBox(2) }} className="relative grid aspect-square place-items-center bg-primary-subtle">
+              <div
+                style={{ clipPath: pixelBox(2) }}
+                className="relative grid aspect-square place-items-center bg-primary-subtle"
+              >
                 <ItemArt kind={item.kind} />
                 {!item.isPublic && (
-                  <span aria-label="비공개" className="absolute right-1 top-1 bg-text-strong/70 p-1 text-white" style={{ clipPath: pixelBox(1) }}>
+                  <span
+                    aria-label="비공개"
+                    className="absolute right-1 top-1 bg-text-strong/70 p-1 text-white"
+                    style={{ clipPath: pixelBox(1) }}
+                  >
                     <LockClosedIcon className="size-3" aria-hidden="true" />
                   </span>
                 )}
@@ -228,7 +282,10 @@ export function CollectionMockup() {
             </div>
           ))}
           <div className="min-w-0">
-            <div style={{ clipPath: pixelBox(2) }} className="grid aspect-square place-items-center bg-primary-subtle text-status-brand">
+            <div
+              style={{ clipPath: pixelBox(2) }}
+              className="grid aspect-square place-items-center bg-primary-subtle text-status-brand"
+            >
               <PlusIcon className="size-6" aria-hidden="true" />
             </div>
             <p className="mt-1 text-center text-[11px] text-text-muted">새 물건</p>
@@ -236,7 +293,8 @@ export function CollectionMockup() {
         </div>
       </div>
       <p className="flex items-center justify-center gap-1.5 text-xs text-text-muted">
-        <LockClosedIcon className="size-3.5 shrink-0" aria-hidden="true" /> 자물쇠가 있는 물건은 나만 볼 수 있어요.
+        <LockClosedIcon className="size-3.5 shrink-0" aria-hidden="true" /> 자물쇠가 있는 물건은
+        나만 볼 수 있어요.
       </p>
     </PreviewFrame>
   )
@@ -249,8 +307,13 @@ export function FriendsMockup() {
         <MagnifyingGlassIcon className="size-4 shrink-0" aria-hidden="true" /> 닉네임으로 친구 찾기
       </div>
       <div>
-        <p className="mb-2 text-xs font-bold text-text-muted">받은 친구 요청 <span className="text-status-brand">1</span></p>
-        <div style={{ clipPath: pixelBox(3) }} className="flex flex-wrap items-center gap-3 bg-primary-subtle p-3">
+        <p className="mb-2 text-xs font-bold text-text-muted">
+          받은 친구 요청 <span className="text-status-brand">1</span>
+        </p>
+        <div
+          style={{ clipPath: pixelBox(3) }}
+          className="flex flex-wrap items-center gap-3 bg-primary-subtle p-3"
+        >
           <MiniAvatar src={MASCOTS.beret} />
           <span className="flex-1 text-body-04 font-bold text-text-strong">지우</span>
           <PreviewAction>수락</PreviewAction>
@@ -258,7 +321,9 @@ export function FriendsMockup() {
         </div>
       </div>
       <div>
-        <p className="mb-2 text-xs font-bold text-text-muted">내 친구 <span className="text-status-brand">2</span></p>
+        <p className="mb-2 text-xs font-bold text-text-muted">
+          내 친구 <span className="text-status-brand">2</span>
+        </p>
         <div className="divide-y divide-primary-subtle">
           {[
             { nickname: '은지', src: MASCOTS.smile },
@@ -266,10 +331,14 @@ export function FriendsMockup() {
           ].map((friend) => (
             <div key={friend.nickname} className="flex flex-wrap items-center gap-2 py-3">
               <MiniAvatar src={friend.src} />
-              <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">{friend.nickname}</span>
+              <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">
+                {friend.nickname}
+              </span>
               <div className="flex gap-1">
                 <PreviewAction subtle>물건 도감</PreviewAction>
-                <PreviewAction subtle><HandRaisedIcon className="size-3" aria-hidden="true" /> 콕</PreviewAction>
+                <PreviewAction subtle>
+                  <HandRaisedIcon className="size-3" aria-hidden="true" /> 콕
+                </PreviewAction>
               </div>
             </div>
           ))}
@@ -290,29 +359,57 @@ export function TradeFlowMockup() {
         <span className="pb-2 text-text-muted">지난 거래</span>
       </div>
       <div className="flex items-center gap-4">
-        <div style={{ clipPath: pixelBox(3) }} className="grid size-24 shrink-0 place-items-center bg-primary-subtle">
+        <div
+          style={{ clipPath: pixelBox(3) }}
+          className="grid size-24 shrink-0 place-items-center bg-primary-subtle"
+        >
           <ItemArt kind="camera" />
         </div>
         <div className="min-w-0">
-          <Badge>도감 · 대여</Badge>
+          <Badge>물건 도감 · 대여</Badge>
           <p className="mt-2 text-body-04 font-bold text-text-strong">작은 디지털카메라</p>
           <p className="mt-1 text-xs text-text-muted">은지님과 거래 중이에요</p>
         </div>
       </div>
       <ol className="grid grid-cols-3 py-2">
         {TRADE_STEPS.map((step, index) => (
-          <li key={step} aria-current={index === 1 ? 'step' : undefined} className="relative flex flex-col items-center gap-2">
+          <li
+            key={step}
+            aria-current={index === 1 ? 'step' : undefined}
+            className="relative flex flex-col items-center gap-2"
+          >
             {index < TRADE_STEPS.length - 1 && (
-              <span aria-hidden="true" className={'absolute left-1/2 top-4 h-0.5 w-full ' + (index === 0 ? 'bg-primary' : 'bg-primary-tint')} />
+              <span
+                aria-hidden="true"
+                className={
+                  'absolute left-1/2 top-4 h-0.5 w-full ' +
+                  (index === 0 ? 'bg-primary' : 'bg-primary-tint')
+                }
+              />
             )}
-            <span style={{ clipPath: pixelBox(2) }} className={'relative grid size-8 place-items-center text-xs font-bold ' + (index < 2 ? 'bg-primary text-white' : 'bg-primary-subtle text-text-muted')}>
+            <span
+              style={{ clipPath: pixelBox(2) }}
+              className={
+                'relative grid size-8 place-items-center text-xs font-bold ' +
+                (index < 2 ? 'bg-primary text-white' : 'bg-primary-subtle text-text-muted')
+              }
+            >
               {index === 0 ? <CheckIcon className="size-4" aria-hidden="true" /> : index + 1}
             </span>
-            <span className={'text-xs ' + (index === 1 ? 'font-bold text-status-brand' : 'text-text-muted')}>{step}</span>
+            <span
+              className={
+                'text-xs ' + (index === 1 ? 'font-bold text-status-brand' : 'text-text-muted')
+              }
+            >
+              {step}
+            </span>
           </li>
         ))}
       </ol>
-      <div style={{ clipPath: pixelBox(3) }} className="flex items-start gap-3 bg-primary-subtle p-3">
+      <div
+        style={{ clipPath: pixelBox(3) }}
+        className="flex items-start gap-3 bg-primary-subtle p-3"
+      >
         <BellIcon className="mt-0.5 size-4 shrink-0 text-status-brand" aria-hidden="true" />
         <div>
           <p className="text-xs font-bold text-text-strong">은지님이 대여 요청을 수락했어요</p>

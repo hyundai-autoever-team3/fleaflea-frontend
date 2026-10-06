@@ -103,7 +103,7 @@ export function ProfileMenu({ open, onOpenChange }: ProfileMenuProps) {
             onClick={() => onOpenChange(false)}
             className={`${MENU_ITEM} ${FOCUS_RING}`}
           >
-            내 정보 보기
+            마이페이지
           </Link>
           <button
             type="button"
