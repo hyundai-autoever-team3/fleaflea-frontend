@@ -24,6 +24,7 @@
 - **클라이언트 상태**: Zustand
 - **실시간 알림**: `@microsoft/fetch-event-source` (SSE)
 - **린트**: oxlint
+- **포맷터**: Prettier
 - **Git hook**: husky + lint-staged + commitlint
 - **패키지 매니저**: pnpm
 
@@ -45,6 +46,8 @@ pnpm dev
 | `pnpm build` | 타입체크 + 프로덕션 빌드 |
 | `pnpm preview` | 빌드 결과 미리보기 |
 | `pnpm lint` | oxlint 실행 |
+| `pnpm format` | 소스 코드 간격·줄바꿈 정리 |
+| `pnpm format:check` | 소스 코드 포맷 검사 |
 
 ## 폴더 구조
 
