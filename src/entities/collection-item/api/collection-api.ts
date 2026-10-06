@@ -11,14 +11,17 @@ export const collectionKeys = {
   all: ['collection-items'] as const,
   mine: ['collection-items', 'mine'] as const,
   owner: (ownerId: number) => [...collectionKeys.all, 'owner', ownerId] as const,
-  detail: (collectionItemId: number) => [...collectionKeys.all, 'detail', collectionItemId] as const,
+  detail: (collectionItemId: number) =>
+    [...collectionKeys.all, 'detail', collectionItemId] as const,
 }
 
 const isValidId = (id: number) => Number.isInteger(id) && id > 0
 
 function retryUnlessClientError(failureCount: number, error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   if (status === 401 || status === 403 || status === 404) return false
+
   return failureCount < 3
 }
 
@@ -30,14 +33,19 @@ export function getMyCollectionItems(page = 0, signal?: AbortSignal) {
 }
 
 export function getOwnerCollectionItems(ownerId: number, page = 0, signal?: AbortSignal) {
-  return api.get<PageResponse<CollectionItemSummary>>(`/api/v1/members/${ownerId}/collection-items`, {
-    params: { page, size: LIST_SIZE },
-    signal,
-  })
+  return api.get<PageResponse<CollectionItemSummary>>(
+    `/api/v1/members/${ownerId}/collection-items`,
+    {
+      params: { page, size: LIST_SIZE },
+      signal,
+    },
+  )
 }
 
-// 첫 100개 이후의 항목도 가져와 목록이 중간에서 끊기지 않게 한다.
-async function getAllCollectionItems(getPage: (page: number) => Promise<PageResponse<CollectionItemSummary>>) {
+// 도감 화면은 전체 목록을 사용하므로 서버의 모든 페이지를 합친다.
+async function getAllCollectionItems(
+  getPage: (page: number) => Promise<PageResponse<CollectionItemSummary>>,
+) {
   const firstPage = await getPage(0)
   const items = [...firstPage.content]
 
@@ -51,7 +59,8 @@ async function getAllCollectionItems(getPage: (page: number) => Promise<PageResp
 export function useMyCollectionItems() {
   return useQuery({
     queryKey: collectionKeys.mine,
-    queryFn: ({ signal }) => getAllCollectionItems(async (page) => (await getMyCollectionItems(page, signal)).data),
+    queryFn: ({ signal }) =>
+      getAllCollectionItems(async (page) => (await getMyCollectionItems(page, signal)).data),
     retry: retryUnlessClientError,
   })
 }
@@ -59,7 +68,10 @@ export function useMyCollectionItems() {
 export function useOwnerCollectionItems(ownerId: number) {
   return useQuery({
     queryKey: collectionKeys.owner(ownerId),
-    queryFn: ({ signal }) => getAllCollectionItems(async (page) => (await getOwnerCollectionItems(ownerId, page, signal)).data),
+    queryFn: ({ signal }) =>
+      getAllCollectionItems(
+        async (page) => (await getOwnerCollectionItems(ownerId, page, signal)).data,
+      ),
     enabled: isValidId(ownerId),
     retry: retryUnlessClientError,
   })

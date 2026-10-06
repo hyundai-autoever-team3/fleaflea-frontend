@@ -2,9 +2,15 @@ import { useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { api } from '../../../shared/api/axios'
-import type { MarketDetail, MarketInvitation, MarketMember, MarketSummary, PageResponse } from '../model/types'
+import type {
+  MarketDetail,
+  MarketInvitation,
+  MarketMember,
+  MarketSummary,
+  PageResponse,
+} from '../model/types'
 
-// 검색을 프론트에서 하므로 한 번에 넉넉히 받아옴
+// 클라이언트 검색에 사용할 목록을 최대 100개 조회한다.
 const LIST_SIZE = 100
 
 export const marketKeys = {
@@ -14,7 +20,7 @@ export const marketKeys = {
   members: (marketId: number) => [...marketKeys.all, 'detail', marketId, 'members'] as const,
 }
 
-// 개설자도 자동으로 참여자로 등록되므로 scope=joined 한 번으로 내가 만든 마켓까지 함께 받음
+// 개설자도 참여자에 포함되므로 joined 조회에 직접 만든 마켓이 함께 반환된다.
 export function getMyMarkets() {
   return api.get<PageResponse<MarketSummary>>('/api/v1/markets', {
     params: { scope: 'joined', page: 0, size: LIST_SIZE },
@@ -33,10 +39,12 @@ export function getMarketMembers(marketId: number) {
 
 const isValidMarketId = (marketId: number) => Number.isInteger(marketId) && marketId > 0
 
-// 권한 없음·없는 마켓은 다시 시도해도 결과가 같으니 재시도하지 않음
+// 접근할 수 없거나 존재하지 않는 마켓은 자동 재시도하지 않는다.
 function retryUnlessForbiddenOrMissing(failureCount: number, error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   if (status === 403 || status === 404) return false
+
   return failureCount < 3
 }
 
@@ -69,7 +77,7 @@ export function getMarketInvitation(marketId: number) {
   return api.get<MarketInvitation>(`/api/v1/markets/${marketId}/invitation`)
 }
 
-// 호스트가 아니면 403이라 enabled로 호스트일 때만 조회
+// 초대 코드는 호스트 전용이므로 호출부에서 호스트 여부를 enabled로 전달한다.
 export function useMarketInvitation(marketId: number, enabled: boolean) {
   return useQuery({
     queryKey: [...marketKeys.detail(marketId), 'invitation'],

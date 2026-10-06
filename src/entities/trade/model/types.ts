@@ -1,4 +1,3 @@
-// Backend table: trade_requests
 export type TradeRequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED'
 
 export interface TradeRequest {
@@ -7,17 +6,14 @@ export interface TradeRequest {
   requesterId: number
   rentalStartDate: string | null
   rentalEndDate: string | null
-  // Set when the request is for an exchange (교환) against one of the requester's own items.
+  // 교환 요청에서 요청자가 제시한 물건 ID.
   swapItemId: number | null
   status: TradeRequestStatus
   createdAt: string
   updatedAt: string
 }
 
-// Backend table: trades — created once a trade_request is accepted and actually completed.
-// Distinguishing sale/giveaway/rental/exchange for a Trade still requires the related
-// Product.tradeType (via itemId) and TradeRequest.swapItemId (via tradeRequestId); neither
-// is duplicated onto this table.
+// 거래 종류는 관련 Product.tradeType과 TradeRequest.swapItemId에서 확인한다.
 export interface Trade {
   tradeId: number
   tradeRequestId: number

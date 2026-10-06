@@ -13,12 +13,13 @@ interface JoinMarketFormProps {
 export function JoinMarketForm({ onJoined }: JoinMarketFormProps) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
-  // 내 마켓 목록 새로고침은 useJoinMarket 안에서 한다
+  // 참여 훅에서 목록 갱신까지 완료한 뒤 onJoined를 호출한다.
   const joinMutation = useJoinMarket()
   const isSubmitting = joinMutation.isPending
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     const inviteCode = parseInviteCode(value)
     if (!inviteCode) {
       setError('이 서비스의 초대 링크나 초대 코드를 입력해 주세요.')

@@ -1,5 +1,3 @@
-// Swagger NotificationResponse와 같은 형태를 유지한다.
-// message는 백엔드가 알림 발생 상황에 맞춰 만들어 주는 최종 사용자 문구다.
 export type NotificationType =
   | 'TRADE_REQUESTED'
   | 'TRADE_ACCEPTED'
@@ -11,17 +9,14 @@ export type NotificationType =
   | 'POKE_RECEIVED'
 
 export type NotificationReferenceType =
-  | 'ITEM_TRADE_REQUEST'
-  | 'COLLECTION_TRADE_REQUEST'
-  | 'BEG_REQUEST'
-  | 'FRIENDSHIP'
-  | 'MEMBER_POKE'
+  'ITEM_TRADE_REQUEST' | 'COLLECTION_TRADE_REQUEST' | 'BEG_REQUEST' | 'FRIENDSHIP' | 'MEMBER_POKE'
 
 export interface NotificationItem {
   notificationId: number
   type: NotificationType
   referenceType: NotificationReferenceType
   referenceId: number
+  // 서버가 작성한 사용자용 문구를 가공 없이 표시한다.
   message: string
   isRead: boolean
   createdAt: string

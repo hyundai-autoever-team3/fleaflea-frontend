@@ -7,7 +7,7 @@ export interface CollectionItemSummary {
   createdAt: string
 }
 
-// 거래가 걸려 있는 물건에는 새 요청을 보낼 수 없다. 목록 응답에는 없고 상세에만 온다
+// 상세에만 포함되는 상태로, 진행 중인 물건에는 새 요청을 보낼 수 없다.
 export type CollectionItemStatus = 'AVAILABLE' | 'IN_PROGRESS'
 
 // CollectionItemResponse: GET /collection-items/{collectionItemId}

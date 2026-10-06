@@ -6,7 +6,7 @@ import { myTradeRequestKeys } from '../../../entities/trade'
 import { api } from '../../../shared/api/axios'
 import type { PageResponse } from '../../../shared/api/page-response'
 
-// 목록은 size 최대 100 (Swagger)
+// 상품별 요청 검색을 위해 한 번에 조회할 수 있는 최대 개수를 사용한다.
 const LIST_SIZE = 100
 
 export type TradeRequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED'
@@ -25,8 +25,7 @@ export interface TradeRequestMember {
   nickname: string
 }
 
-// Swagger TradeRequestSummaryResponse.
-// 주의: 목록은 tradeRequestStatus·isRequester를 쓰고 상세는 status·requestedByMe를 쓴다 (백엔드 확인 필요)
+// 거래 목록 응답은 tradeRequestStatus·isRequester 필드를 사용한다.
 export interface TradeRequestSummary {
   tradeRequestId: number
   tradeRequestStatus: TradeRequestStatus
@@ -64,7 +63,7 @@ export function getMyTradeRequests(page = 0, signal?: AbortSignal) {
   })
 }
 
-// 목록에 상품으로 거르는 조건이 없어, 이미 보낸 요청을 찾으려면 전부 받아야 한다
+// 상품별 필터가 없어 중복 요청 확인에 필요한 전체 페이지를 조회한다.
 async function getAllMyTradeRequests(signal?: AbortSignal) {
   const first = (await getMyTradeRequests(0, signal)).data
   const requests = [...first.content]
@@ -84,30 +83,34 @@ export function useMyTradeRequests() {
   })
 }
 
-// 아직 살아 있는 요청만 "이미 보냄"으로 본다. 거절·취소됐으면 다시 보낼 수 있어야 함
+// 대기·수락 상태의 요청만 중복으로 판단하고, 거절·취소 후에는 다시 요청할 수 있다.
 const OPEN_STATUSES: TradeRequestStatus[] = ['PENDING', 'ACCEPTED']
 
 export function findMyOpenRequest(requests: TradeRequestSummary[] | undefined, itemId: number) {
   return requests?.find(
     (request) =>
-      request.item.itemId === itemId && request.isRequester && OPEN_STATUSES.includes(request.tradeRequestStatus),
+      request.item.itemId === itemId &&
+      request.isRequester &&
+      OPEN_STATUSES.includes(request.tradeRequestStatus),
   )
 }
 
 export function useCreateTradeRequest(itemId: number) {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: (payload: TradeRequestPayload) => createTradeRequest(itemId, payload).then((response) => response.data),
-    // 보낸 요청은 마이페이지 거래 목록에 바로 보여야 한다. 받아둔 목록을 1분간
-    // 그대로 쓰므로, 여기서 비워주지 않으면 방금 보낸 요청이 한동안 나타나지 않는다
+    mutationFn: (payload: TradeRequestPayload) =>
+      createTradeRequest(itemId, payload).then((response) => response.data),
+    // 마이페이지 거래 목록에 새 요청을 반영한다. 조회 실패는 요청 실패로 처리하지 않는다.
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined)
+      await queryClient
+        .invalidateQueries({ queryKey: myTradeRequestKeys.all })
+        .catch(() => undefined)
     },
   })
 }
 
-// 거래 요청에 취할 수 있는 동작. 경로가 동작 이름과 1:1이라 문자열을 그대로 쓴다.
-// complete는 요청자만 부를 수 있고, 한 번 부르면 바로 COMPLETED가 된다 (백엔드 확인 완료)
+// 동작 이름은 API 경로에 사용한다. complete는 요청자가 거래를 완료할 때 호출한다.
 export type TradeRequestAction = 'accept' | 'reject' | 'cancel' | 'complete'
 
 export function actOnTradeRequest(requestId: number, action: TradeRequestAction) {
@@ -116,6 +119,7 @@ export function actOnTradeRequest(requestId: number, action: TradeRequestAction)
 
 export function useTradeRequestAction() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: ({ requestId, action }: { requestId: number; action: TradeRequestAction }) =>
       actOnTradeRequest(requestId, action),
@@ -135,6 +139,7 @@ const ACTION_LABEL: Record<TradeRequestAction, string> = {
 
 export function getTradeRequestActionErrorMessage(error: unknown, action: TradeRequestAction) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
@@ -152,6 +157,7 @@ export function getTradeRequestActionErrorMessage(error: unknown, action: TradeR
 
 export function getTradeRequestErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '요청 내용을 다시 확인해 주세요.'

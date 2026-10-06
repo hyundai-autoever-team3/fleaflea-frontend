@@ -15,7 +15,7 @@ export function joinMarket(inviteCode: string) {
   return api.post<JoinMarketResponse>('/api/v1/market-members', { inviteCode })
 }
 
-// 마켓에 들어가면 내 마켓 목록이 달라진다. 무효화를 화면마다 적지 않도록 여기에 모은다
+// 참여한 마켓을 내 마켓 목록에 반영한 뒤 성공 처리를 마친다.
 export function useJoinMarket() {
   const queryClient = useQueryClient()
 
@@ -33,6 +33,7 @@ export function isAlreadyJoinedError(error: unknown) {
 
 export function getJoinErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '초대 코드를 입력해 주세요.'

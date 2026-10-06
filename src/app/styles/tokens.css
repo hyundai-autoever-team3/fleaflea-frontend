@@ -15,7 +15,7 @@
 }
 
 :root {
-  /* ---- 1) PRIMITIVE ---- */
+  /* 기본 색상과 효과 값 */
 
   /* purple (Figma: MainColor01 / SubColor01 / SubColor02) */
   --purple-100: #f5f0fc;
@@ -26,19 +26,17 @@
   /* 보라 그라데이션 보더 — background-clip 트릭(padding-box + border-box)으로 쓰는 용도라 Tailwind 컬러 유틸이 아닌 순수 CSS 변수로 둠 */
   --gradient-primary-border: linear-gradient(135deg, var(--purple-100), var(--purple-300));
 
-  /* gray — 숫자가 클수록 어두움. 나머지는 Figma MCP 레이트리밋으로 아직 미확보 (TODO) */
+  /* gray: 숫자가 클수록 어두운 색상 */
   --gray-900: #14181d; /* Gray01 */
   --gray-800: #35393d; /* Gray02 */
   --gray-700: #53575c; /* Gray03 */
   --gray-600: #666b6f; /* Gray04 */
   --gray-500: #8e9397; /* Gray05 */
-  --gray-400: #AEB3B9; /* Gray06 */
-  --gray-300: #D2D7DD; /* Gray07 */
-  --gray-200: #E3E7ED; /* Gray08 */
-  --gray-100: #FEFEFE; /* Gray09*/
-  --gray-001: #FDFDFD; /* Gray10*/
-
-  /* --gray-400 ~ --gray-200 : TODO — Figma 레이트리밋 풀리면 나머지 3개 마저 확보 */
+  --gray-400: #aeb3b9; /* Gray06 */
+  --gray-300: #d2d7dd; /* Gray07 */
+  --gray-200: #e3e7ed; /* Gray08 */
+  --gray-100: #fefefe; /* Gray09*/
+  --gray-001: #fdfdfd; /* Gray10*/
 
   --white: #ffffff;
 
@@ -46,9 +44,7 @@
   --blue-100: #e5edf8;
   --blue-700: #365b88;
 
-  /* 알림 종류 타일 — 흰 아이콘을 얹어도 형태가 읽히는 중간 파스텔.
-   * 옅은 100번대는 흰 아이콘이 묻히고, 짙은 700번대는 파스텔 톤에서 벗어나
-   * 그 사이 한 단을 따로 둔다 */
+  /* 알림 종류 타일에서 흰 아이콘과 함께 사용하는 배경색 */
   --purple-400: #9b7fd4;
   --blue-400: #5e8fcd;
   --red-400: #cf6d84;
@@ -80,24 +76,20 @@
   /* 글래스모피즘 표면(반투명 흰 배경) 위에 올라가는 텍스트 전용 남색. 투명도는 Tailwind opacity modifier(/92, /58)로 조절. */
   --navy-900: #1c1e32;
 
-  /* 글래스 패널 — 반투명 흰 면 + 뒤 배경 블러. 랜딩의 알림 카드에서 쓰던 값을
-   * 토큰으로 올려 컴포넌트가 rgba를 직접 적지 않게 했다 (9장) */
+  /* 글래스 패널과 배지가 공유하는 반투명 표면과 그림자 */
   --glass-white: rgba(255, 255, 255, 0.7);
   --glass-white-strong: rgba(252, 252, 254, 0.92);
   --glass-white-faint: rgba(255, 255, 255, 0.35);
   --glass-line: rgba(0, 0, 0, 0.1);
   --shadow-glass-panel:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 20px 48px -10px rgba(20, 30, 60, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 20px 48px -10px rgba(20, 30, 60, 0.28);
   --shadow-glass-pill:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    0 8px 20px -6px rgba(20, 30, 60, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 20px -6px rgba(20, 30, 60, 0.22);
 
   /* 유리창 모달 — 패널보다 한 단 더 띄운다. 첫 줄의 0.5px 그림자가 hairline 테두리를
    * 대신하고(경계선을 따로 그리면 clip과 겹쳐 두꺼워짐), 마지막 줄이 위쪽 하이라이트다 */
   --shadow-glass-window:
-    0 0 0 0.5px rgba(0, 0, 0, 0.1),
-    0 40px 100px rgba(20, 30, 60, 0.28),
+    0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 40px 100px rgba(20, 30, 60, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
   /* 모달 뒤를 덮는 막. 검정을 그대로 깔면 탁해져 남색 쪽으로 기울였다 */
@@ -127,18 +119,22 @@
 
   /* 몽환적인 파스텔 구름 느낌 — 핑크 → 라벤더 → 하늘색 대각선 그라데이션. 배너/히어로 배경용. */
   --pink-100: #fbe1ef;
-  --gradient-dreamy: linear-gradient(135deg, var(--pink-100) 0%, var(--purple-500) 50%, var(--blue-100) 100%);
+  --gradient-dreamy: linear-gradient(
+    135deg,
+    var(--pink-100) 0%,
+    var(--purple-500) 50%,
+    var(--blue-100) 100%
+  );
 }
 
 @theme {
-  /* ---- 2) SEMANTIC — 컴포넌트는 여기서부터만 사용 ----
-   * 아직 실제로 붙는 컴포넌트가 없어서 "어디에 쓰이는지"는 확정이 아니라 1차 추정입니다.
-   * 컴포넌트 만들면서 실제 쓰임이 정해지면 이 주석을 갱신하세요.
-   */
+  /* 컴포넌트에서 사용하는 역할별 토큰 */
 
   /* Brand / Action */
-  --color-primary: var(--purple-300); /* 채도 높은 쪽을 액션 컬러로 1차 추정 (버튼 등) */
-  --color-primary-tint: var(--purple-500); /* 파스텔 카드/배경 강조 (design.md의 "라벤더 SaaS 카드") */
+  --color-primary: var(--purple-300); /* 버튼 등 주요 액션 */
+  --color-primary-tint: var(
+    --purple-500
+  ); /* 파스텔 카드/배경 강조 (design.md의 "라벤더 SaaS 카드") */
   --color-primary-subtle: var(--purple-100); /* 옅은 배경 틴트 */
 
   /* Notification status */
@@ -203,13 +199,12 @@
   --color-traffic-yellow: var(--traffic-yellow);
   --color-traffic-green: var(--traffic-green);
 
-  /* ---- 3) TYPOGRAPHY ---- */
+  /* 글꼴과 크기 */
   /* 전역 기본 폰트 — Tailwind의 font-sans + 기본 body 폰트를 덮어씀 (클래스 없이 전체 적용) */
   --font-sans: 'Moneygraphy Pixel', 'Apple SD Gothic Neo', sans-serif;
   --font-jua: 'BM JUA', 'Apple SD Gothic Neo', sans-serif;
 
-  /* 기본 사이즈 스케일 — Tailwind 기본값(rem 소수점)을 깔끔한 px 값으로 재정의.
-   * text-xs ~ text-5xl 그대로 사용하면 됨 (BM JUA 헤드라인 스케일처럼 별도 이름 안 외워도 됨). */
+  /* text-xs부터 text-5xl까지의 기본 크기를 px 단위로 정의한다. */
   --text-xs: 12px;
   --text-sm: 14px;
   --text-base: 16px;
@@ -229,7 +224,7 @@
   --text-body-03: 16px; /* Regular */
   --text-body-04: 14px; /* Regular */
 
-  /* ---- 4) RADIUS (출처: design.md) ---- */
+  /* 모서리 반경 (design.md 기준) */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;

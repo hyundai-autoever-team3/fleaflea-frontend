@@ -27,7 +27,7 @@ export function createMarket({ title, description, coverImage }: CreateMarketPay
   return api.post<CreateMarketResponse>('/api/v1/markets', formData)
 }
 
-// 마켓을 만들면 개설자도 참여자로 등록돼 내 마켓 목록이 달라진다
+// 개설자도 참여자로 등록되므로 생성 후 내 마켓 목록을 갱신한다.
 export function useCreateMarket() {
   const queryClient = useQueryClient()
 

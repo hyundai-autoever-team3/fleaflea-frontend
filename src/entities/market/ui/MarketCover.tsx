@@ -6,19 +6,28 @@ interface MarketCoverProps {
   coverImageUrl: string | null
   className?: string
   marketId?: number
-  // window = 픽셀 테두리 + 창틀 + 창턱 (목록 카드)
-  // bare  = 액자 없이 사진만 칸을 꽉 채움 (마켓 상세 — 커버 사진 자체를 크게 보여줄 때)
+  // window는 목록 카드의 창틀, bare는 상세 화면의 커버 이미지에 사용한다.
   variant?: 'window' | 'bare'
 }
 
-// 커버 이미지가 없으면 그라데이션 + 마켓마다 다른 마스코트
-export function MarketCover({ coverImageUrl, className = '', marketId, variant = 'window' }: MarketCoverProps) {
+// 커버가 없으면 마켓 ID로 고른 마스코트를 사용해 같은 마켓의 대체 이미지를 유지한다.
+export function MarketCover({
+  coverImageUrl,
+  className = '',
+  marketId,
+  variant = 'window',
+}: MarketCoverProps) {
   const fallbackMascot = marketId === undefined ? MASCOTS.default : pickMascot(marketId)
 
   if (variant === 'bare') {
     return (
       <div className={`overflow-hidden bg-[image:var(--gradient-dreamy)] ${className}`}>
-        <Photo src={coverImageUrl} fallback={fallbackMascot} className="size-full object-cover" fallbackClassName="size-full p-10" />
+        <Photo
+          src={coverImageUrl}
+          fallback={fallbackMascot}
+          className="size-full object-cover"
+          fallbackClassName="size-full p-10"
+        />
       </div>
     )
   }

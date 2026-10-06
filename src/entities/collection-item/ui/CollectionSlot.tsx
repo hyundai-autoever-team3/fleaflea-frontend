@@ -4,7 +4,7 @@ import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import type { CollectionItemSummary } from '../model/types'
 
-// 7x8 픽셀 자물쇠. 아이콘 폰트 대신 직접 그려 픽셀 톤을 맞춤 (PixelShops와 같은 방식)
+// '#'을 채워진 셀로 사용하는 7×8 자물쇠 도안.
 const LOCK_SPRITE = [
   '..###..',
   '.#...#.',
@@ -18,7 +18,13 @@ const LOCK_SPRITE = [
 
 function PixelLock({ className = '' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 7 8" shapeRendering="crispEdges" fill="currentColor" aria-hidden className={className}>
+    <svg
+      viewBox="0 0 7 8"
+      shapeRendering="crispEdges"
+      fill="currentColor"
+      aria-hidden
+      className={className}
+    >
       {LOCK_SPRITE.flatMap((row, y) =>
         [...row].map((cell, x) =>
           cell === '#' ? <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} /> : null,
@@ -28,8 +34,7 @@ function PixelLock({ className = '' }: { className?: string }) {
   )
 }
 
-// 아직 채우지 않은 칸. 내 도감에서는 눌러서 바로 등록할 수 있게 버튼으로 둔다.
-// 남의 도감처럼 내가 채울 수 없는 칸은 onClick 없이 써서 판의 모양만 유지한다
+// 등록 가능한 내 도감에서만 onClick을 전달해 빈 칸을 버튼으로 사용한다.
 export function EmptySlot({ onClick }: { onClick?: () => void }) {
   if (!onClick) {
     return (
@@ -76,14 +81,26 @@ export function CollectionSlot({ item, onClick }: CollectionSlotProps) {
       className="relative block aspect-square w-full overflow-hidden bg-primary-subtle transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transform-none motion-reduce:transition-none"
     >
       {imageUrl ? (
-        <img draggable={false} src={imageUrl} alt="" loading="lazy" onError={() => setFailedImageUrl(imageUrl)} className="size-full object-cover" />
+        <img
+          draggable={false}
+          src={imageUrl}
+          alt=""
+          loading="lazy"
+          onError={() => setFailedImageUrl(imageUrl)}
+          className="size-full object-cover"
+        />
       ) : (
         <span className="flex size-full items-center justify-center">
-          <img draggable={false} src={MASCOTS.default} alt="" className="h-2/3 object-contain [image-rendering:pixelated]" />
+          <img
+            draggable={false}
+            src={MASCOTS.default}
+            alt=""
+            className="h-2/3 object-contain [image-rendering:pixelated]"
+          />
         </span>
       )}
 
-      {/* 비공개는 사진을 죽이지 않고 자물쇠만 얹는다 — 내 물건은 내가 알아볼 수 있어야 함 */}
+      {/* 비공개 물건도 소유자가 사진으로 식별할 수 있도록 자물쇠만 표시한다. */}
       {!item.isPublic && (
         <span
           style={{ clipPath: pixelBox(2) }}
