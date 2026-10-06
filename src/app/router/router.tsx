@@ -94,6 +94,28 @@ export const router = createBrowserRouter([
           </RequireGuest>
         ),
       },
+      // 소셜 로그인 결과 화면. 백엔드가 기존 회원·신규 회원·실패에 따라 각 경로로 돌려보낸다.
+      {
+        path: '/oauth/success',
+        lazy: async () => {
+          const { OAuthSuccessPage } = await loadChunk(() => import('../../pages/oauth'))
+          return { element: <OAuthSuccessPage /> }
+        },
+      },
+      {
+        path: '/oauth/signup',
+        lazy: async () => {
+          const { OAuthSignupPage } = await loadChunk(() => import('../../pages/oauth'))
+          return { element: <OAuthSignupPage /> }
+        },
+      },
+      {
+        path: '/oauth/failure',
+        lazy: async () => {
+          const { OAuthFailurePage } = await loadChunk(() => import('../../pages/oauth'))
+          return { element: <OAuthFailurePage /> }
+        },
+      },
       // 비로그인 사용자를 로그인으로 보내는 처리와 참여 분기는 페이지가 맡는다.
       {
         path: '/invite/:code',

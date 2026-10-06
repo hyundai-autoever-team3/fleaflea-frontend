@@ -7,6 +7,7 @@ import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits
 import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { StarField } from '../../../shared/ui/star-field'
 import { login } from '../api/auth-api'
+import { SocialLoginButtons } from './SocialLoginButtons'
 import { useSessionStore } from '../../../entities/session'
 
 export function LoginForm() {
@@ -144,11 +145,7 @@ export function LoginForm() {
 
               {error && <p className="text-body-04 text-red-600">{error}</p>}
 
-              <div className="flex items-center gap-3">
-                <hr className="flex-1 border-border" />
-                <span className="text-body-04 text-text-muted">또는</span>
-                <hr className="flex-1 border-border" />
-              </div>
+              <SocialLoginButtons title="간편 로그인" redirectTo={redirectTo} />
 
               <p className="text-center text-body-04 text-text-muted">
                 계정이 없으신가요?{' '}

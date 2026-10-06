@@ -9,6 +9,7 @@ import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { StarField } from '../../../shared/ui/star-field'
 import { useToastStore } from '../../../shared/ui/toast'
 import { login, signup } from '../api/auth-api'
+import { SocialLoginButtons } from './SocialLoginButtons'
 import { useSessionStore } from '../../../entities/session'
 
 function getSignupErrorMessage(error: unknown) {
@@ -219,6 +220,8 @@ export function SignupForm() {
               </button>
 
               {error && <p className="text-body-04 text-red-600">{error}</p>}
+
+              <SocialLoginButtons title="간편 회원가입" redirectTo={redirectTo} />
 
               <p className="text-center text-body-04 text-text-muted">
                 이미 계정이 있으신가요?{' '}
