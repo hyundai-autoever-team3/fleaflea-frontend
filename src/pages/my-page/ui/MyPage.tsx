@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Link } from 'react-router'
 
 import { useMyProfile } from '../../../entities/user'
 import {
@@ -18,6 +19,11 @@ type OpenModal = 'profile' | 'account' | 'password' | 'withdraw' | null
 
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-text-strong'
+
+const SHORTCUTS = [
+  { to: '/item-dex', label: '내 물건 도감', glyph: GLYPHS.book },
+  { to: '/friends', label: '내 친구', glyph: GLYPHS.friends },
+]
 
 function GlyphTile({ rows }: { rows: readonly string[] }) {
   return (
@@ -46,7 +52,7 @@ export function MyPage() {
 
   return (
     <div className="min-h-dvh bg-primary-subtle/30">
-      <Header />
+      <Header showNav={false} />
 
       <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
@@ -142,14 +148,35 @@ export function MyPage() {
                       프로필 수정
                     </button>
 
-                    <div className="mt-4 border-t border-primary-subtle pt-3">
+                    <nav
+                      aria-label="내 활동 바로가기"
+                      className="mt-4 grid grid-cols-2 gap-1 border-t border-primary-subtle pt-3 lg:grid-cols-1"
+                    >
+                      {SHORTCUTS.map(({ to, label, glyph }) => (
+                        <Link
+                          key={to}
+                          to={to}
+                          viewTransition
+                          style={{ clipPath: pixelBox(2) }}
+                          className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
+                        >
+                          <GlyphTile rows={glyph} />
+                          <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">
+                            {label}
+                          </span>
+                          <Sprite
+                            rows={GLYPHS.arrowRight}
+                            className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block"
+                          />
+                        </Link>
+                      ))}
                       <button
                         ref={accountSettingsButtonRef}
                         type="button"
                         onClick={() => setOpenModal('account')}
                         aria-haspopup="dialog"
                         style={{ clipPath: pixelBox(2) }}
-                        className={`group flex min-h-12 w-full items-center gap-2.5 px-2 text-left transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
+                        className={`group col-span-full flex min-h-12 items-center gap-2.5 px-2 text-left transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
                       >
                         <GlyphTile rows={GLYPHS.gear} />
                         <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">
@@ -160,7 +187,7 @@ export function MyPage() {
                           className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5"
                         />
                       </button>
-                    </div>
+                    </nav>
                   </div>
                 </div>
               </section>
