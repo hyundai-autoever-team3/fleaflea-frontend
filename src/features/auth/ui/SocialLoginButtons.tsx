@@ -10,8 +10,8 @@ import { saveOAuthRedirect } from '../model/oauth'
 
 function NaverIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5">
-      <path fill="#fff" d="M6.5 5h3.7l4 5.9V5h3.3v14h-3.7l-4-5.9V19H6.5z" />
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-7">
+      <path fill="#fff" d="M6 5h4.2l3.8 5.6V5H18v14h-4.2L10 13.4V19H6z" />
     </svg>
   )
 }
