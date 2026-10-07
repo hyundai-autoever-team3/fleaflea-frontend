@@ -8,12 +8,10 @@ export function pokeMember(memberId: number) {
   return api.post<void>(`/api/v1/members/${memberId}/pokes`)
 }
 
-// 한 사람에게 하루에 보낼 수 있는 횟수. 서버가 같은 값으로 막는다(POKE_LIMIT_EXCEEDED).
-// 남은 횟수를 알려주는 API가 없어, 보낸 만큼 세어 두었다가 다 쓰면 버튼을 잠근다
+// 상대별 일일 한도. 클라이언트는 성공 횟수를 세고, 서버는 초과 시 429를 반환한다.
 export const DAILY_POKE_LIMIT = 5
 
-// 보낸 콕 찌르기는 어떤 목록에도 쌓이지 않는다. 받는 사람에게 알림만 가므로
-// 무효화할 캐시가 없고, 성공했다는 것만 화면에 알리면 된다
+// 수신자에게만 알림이 생성되므로 발신자의 목록 캐시는 갱신하지 않는다.
 export function usePokeMember() {
   return useMutation({ mutationFn: pokeMember })
 }
@@ -24,6 +22,7 @@ export function isPokeLimitExceeded(error: unknown) {
 
 export function getPokeErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '나를 콕 찌를 수는 없어요.'

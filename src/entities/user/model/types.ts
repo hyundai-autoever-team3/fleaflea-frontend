@@ -1,4 +1,4 @@
-// Backend table: users (member_id PK). Password intentionally omitted from the frontend type.
+// 비밀번호를 제외한 사용자 정보만 클라이언트에서 다룬다.
 export interface User {
   memberId: number
   email: string
@@ -7,4 +7,3 @@ export interface User {
   createdAt: string
   updatedAt: string
 }
-

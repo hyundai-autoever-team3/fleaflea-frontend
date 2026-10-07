@@ -6,6 +6,8 @@
 | API 문서 (Swagger) | https://api.fleaflea.app/swagger-ui/index.html |
 
 초대받은 사람들끼리 여는 플리마켓 서비스. 친구를 초대해 마켓을 열고, 물건을 팔거나 나누거나 빌려주고, 개인 물건 도감을 꾸미며 친구와 거래합니다.
+=======
+**배포 주소: https://fleaflea.app/**
 
 ## 주요 기능
 
@@ -24,6 +26,7 @@
 - **클라이언트 상태**: Zustand
 - **실시간 알림**: `@microsoft/fetch-event-source` (SSE)
 - **린트**: oxlint
+- **포맷터**: Prettier
 - **Git hook**: husky + lint-staged + commitlint
 - **패키지 매니저**: pnpm
 
@@ -37,6 +40,8 @@ pnpm dev
 
 `.env`의 `VITE_API_BASE_URL`은 **비워 두는 것이 기본값**입니다. 코드가 `/api/v1/...`을 그대로 요청하면 개발 서버(`vite.config.ts`)와 배포(`vercel.json`)의 프록시가 백엔드로 넘깁니다. 브라우저가 우리 도메인 하나만 상대하게 되어 리프레시 토큰 쿠키가 퍼스트파티로 남고, CORS 허용 목록을 관리할 필요도 없습니다.
 
+소셜 로그인은 백엔드가 로그인 쿠키를 백엔드 도메인에 설정하므로, 소셜 로그인을 쓰는 환경에서는 `VITE_API_BASE_URL`에 백엔드 주소(배포 `https://api.fleaflea.app`, 로컬 백엔드 `http://localhost:8080`)를 넣어야 합니다. 버튼 동작은 `VITE_SOCIAL_LOGIN_ENABLED=true`일 때만 켜지고, 그 전에는 준비 중 안내가 뜹니다.
+
 ## 스크립트
 
 | 명령어 | 설명 |
@@ -45,6 +50,8 @@ pnpm dev
 | `pnpm build` | 타입체크 + 프로덕션 빌드 |
 | `pnpm preview` | 빌드 결과 미리보기 |
 | `pnpm lint` | oxlint 실행 |
+| `pnpm format` | 소스 코드 간격·줄바꿈 정리 |
+| `pnpm format:check` | 소스 코드 포맷 검사 |
 
 ## 폴더 구조
 

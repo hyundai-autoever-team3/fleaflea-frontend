@@ -7,17 +7,23 @@ import { readRedirect, withRedirect } from '../../shared/lib/redirect'
 export function RequireAuth({ children }: { children: ReactNode }) {
   const accessToken = useSessionStore((state) => state.accessToken)
   const location = useLocation()
-  // 로그인을 마치면 원래 가려던 화면으로 돌려보낸다
+
+  // 쿼리 문자열까지 보존해 로그인 후 원래 화면으로 복귀한다.
   if (!accessToken) {
-    return <Navigate to={withRedirect('/login', `${location.pathname}${location.search}`)} replace />
+    return (
+      <Navigate to={withRedirect('/login', `${location.pathname}${location.search}`)} replace />
+    )
   }
+
   return children
 }
 
 export function RequireGuest({ children }: { children: ReactNode }) {
   const accessToken = useSessionStore((state) => state.accessToken)
   const redirectTo = readRedirect(useLocation().search)
-  // 이미 로그인한 사람이 초대 링크를 거쳐 왔다면 마켓 목록이 아니라 그 링크로 보낸다
+
+  // 로그인 상태로 인증 화면에 접근하면 전달받은 내부 경로를 우선한다.
   if (accessToken) return <Navigate to={redirectTo ?? '/market'} replace />
+
   return children
 }

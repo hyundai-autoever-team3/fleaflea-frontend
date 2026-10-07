@@ -4,14 +4,17 @@ import { useToastStore } from '../model/store'
 
 const AUTO_DISMISS_MS = 3000
 
-// AppProviders에 한 번만 마운트. useToastStore.getState().showToast(...)로 어디서든 띄울 수 있음.
+// AppProviders에서 한 번 마운트하고 전역 스토어의 메시지를 표시한다.
 export function Toast() {
   const message = useToastStore((state) => state.message)
   const hideToast = useToastStore((state) => state.hideToast)
 
   useEffect(() => {
     if (!message) return
+
+    // 메시지가 바뀌면 이전 타이머를 취소하고 표시 시간을 다시 계산한다.
     const timer = setTimeout(hideToast, AUTO_DISMISS_MS)
+
     return () => clearTimeout(timer)
   }, [message, hideToast])
 

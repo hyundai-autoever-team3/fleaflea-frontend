@@ -23,7 +23,7 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [titleError, setTitleError] = useState('')
   const [error, setError] = useState('')
-  // 내 마켓 목록 새로고침은 useCreateMarket 안에서 한다
+  // 생성 훅에서 목록 갱신까지 완료한 뒤 onCreated를 호출한다.
   const createMutation = useCreateMarket()
   const isSubmitting = createMutation.isPending
 
@@ -35,6 +35,7 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
   // 미리보기 URL이 바뀌거나 페이지를 떠날 때 이전 URL 메모리 해제
   useEffect(() => {
     if (!previewUrl) return
+
     return () => URL.revokeObjectURL(previewUrl)
   }, [previewUrl])
 
@@ -50,12 +51,13 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
       return
     }
     setError('')
-    // 올리기 전에 줄여서 업로드 실패(413)와 긴 대기를 막음. 커버를 지우는 경우(null)는 그대로 둠
+    // 선택한 이미지만 압축하며 선택 취소 시에는 미리보기를 비운다.
     selectCover(file ? await shrinkImage(file) : null)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     const trimmedTitle = title.trim()
     if (!trimmedTitle) {
       setTitleError('마켓 이름을 입력해 주세요.')
@@ -141,11 +143,23 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             className="group relative flex h-44 items-center justify-center overflow-hidden bg-[image:var(--gradient-dreamy)]"
           >
             {previewUrl ? (
-              <img draggable={false} src={previewUrl} alt="선택한 마켓 커버 미리보기" className="size-full object-cover" />
+              <img
+                draggable={false}
+                src={previewUrl}
+                alt="선택한 마켓 커버 미리보기"
+                className="size-full object-cover"
+              />
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <img draggable={false} src={MASCOTS.beret} alt="" className="h-20 object-contain [image-rendering:pixelated]" />
-                <span className="text-body-04 font-semibold text-text-muted">눌러서 커버 이미지 선택</span>
+                <img
+                  draggable={false}
+                  src={MASCOTS.beret}
+                  alt=""
+                  className="h-20 object-contain [image-rendering:pixelated]"
+                />
+                <span className="text-body-04 font-semibold text-text-muted">
+                  눌러서 커버 이미지 선택
+                </span>
               </div>
             )}
             {previewUrl && (
@@ -155,7 +169,13 @@ export function CreateMarketForm({ onCreated, onDirtyChange }: CreateMarketFormP
             )}
           </div>
         </label>
-        <input id="market-cover" type="file" accept="image/*" onChange={handleCoverChange} className="sr-only" />
+        <input
+          id="market-cover"
+          type="file"
+          accept="image/*"
+          onChange={handleCoverChange}
+          className="sr-only"
+        />
         {coverImage && (
           <button
             type="button"

@@ -2,7 +2,11 @@ import { Link, useNavigate, useParams } from 'react-router'
 
 import { useMarketProducts, useProduct } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
-import { getUpdateProductErrorMessage, ProductForm, useUpdateProduct } from '../../../features/product-manage'
+import {
+  getUpdateProductErrorMessage,
+  ProductForm,
+  useUpdateProduct,
+} from '../../../features/product-manage'
 import type { CreateProductPayload } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
@@ -19,18 +23,20 @@ export function ProductEditPage() {
   const meQuery = useMyProfile()
   const product = productQuery.data
 
-  // 상세 응답에는 사진 주소가 없어서 목록 응답의 imageUrl을 초기값으로 사용
+  // 상세 응답에 사진 URL이 없어 목록 응답으로 폼의 초기 이미지를 보완한다.
   const productsQuery = useMarketProducts(product?.marketId ?? 0)
   const imageUrl = productsQuery.data?.find((item) => item.itemId === itemId)?.imageUrl ?? null
 
   const isOwner = product !== undefined && product.seller.id === meQuery.data?.memberId
-  // 상세를 받기 전에는 마켓을 몰라 0으로 두지만, 폼은 상품이 있어야 보이므로 그때만 쓰인다
+
+  // marketId는 상세 조회 후 확정되며, 상품이 있어야 수정 폼을 제출할 수 있다.
   const updateMutation = useUpdateProduct(itemId, product?.marketId ?? 0)
 
   async function handleSubmit(payload: CreateProductPayload) {
     if (!product) return
-    // 목록·상세 새로고침은 useUpdateProduct 안에서 한다
+
     await updateMutation.mutateAsync(payload)
+
     useToastStore.getState().showToast('상품 정보를 수정했어요')
     navigate(`/items/${product.itemId}`, { replace: true, viewTransition: true })
   }
@@ -51,16 +57,31 @@ export function ProductEditPage() {
 
         {!isValidId || productQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img
+              draggable={false}
+              src={MASCOTS.surprised}
+              alt=""
+              className="h-24 object-contain [image-rendering:pixelated]"
+            />
             <p className="mt-4 text-body-03 text-text-muted">상품을 찾을 수 없어요.</p>
           </div>
         ) : !product ? (
-          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">
+            상품을 불러오는 중이에요...
+          </p>
         ) : !isOwner ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img
+              draggable={false}
+              src={MASCOTS.surprised}
+              alt=""
+              className="h-24 object-contain [image-rendering:pixelated]"
+            />
             <p className="mt-4 text-body-03 text-text-muted">내가 올린 상품만 수정할 수 있어요.</p>
-            <Link to={`/items/${itemId}`} className="mt-4 text-body-04 font-bold text-primary underline">
+            <Link
+              to={`/items/${itemId}`}
+              className="mt-4 text-body-04 font-bold text-primary underline"
+            >
               상품 상세로 돌아가기
             </Link>
           </div>

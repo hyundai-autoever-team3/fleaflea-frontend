@@ -17,8 +17,12 @@ export interface CreateProductPayload {
 }
 
 // POST /api/v1/markets/{marketId}/items (multipart/form-data)
-export function createProduct(marketId: number, { collectionItemId, title, description, tradeType, price, image }: CreateProductPayload) {
+export function createProduct(
+  marketId: number,
+  { collectionItemId, title, description, tradeType, price, image }: CreateProductPayload,
+) {
   const formData = new FormData()
+
   if (collectionItemId !== undefined) formData.append('collectionItemId', String(collectionItemId))
   formData.append('title', title)
   formData.append('description', description)
@@ -30,8 +34,12 @@ export function createProduct(marketId: number, { collectionItemId, title, descr
 }
 
 // PATCH /api/v1/items/{itemId} (multipart/form-data). 보내지 않은 필드는 그대로 유지됨
-export function updateProduct(itemId: number, { title, description, tradeType, price, image }: CreateProductPayload) {
+export function updateProduct(
+  itemId: number,
+  { title, description, tradeType, price, image }: CreateProductPayload,
+) {
   const formData = new FormData()
+
   formData.append('title', title)
   formData.append('description', description)
   formData.append('tradeType', tradeType)
@@ -45,16 +53,16 @@ export function deleteProduct(itemId: number) {
   return api.delete(`/api/v1/items/${itemId}`)
 }
 
-// 상품을 올리고 고치고 지우면 그 마켓의 상품 목록과 상세가 같이 달라진다.
-// 무효화를 화면마다 적어 두면 한 곳만 빠뜨려도 낡은 목록이 남으므로 여기에 모은다.
-// 새 목록이 도착할 때까지 기다렸다 끝내야 화면을 옮긴 뒤에도 바뀐 내용이 보인다
+// 화면 이동 전에 목록과 상세를 갱신한다. 조회 실패는 저장 실패로 처리하지 않는다.
 async function refreshMarketProducts(
   queryClient: ReturnType<typeof useQueryClient>,
   marketId: number,
   itemId?: number,
 ) {
   const refreshing = [queryClient.invalidateQueries({ queryKey: productKeys.market(marketId) })]
-  if (itemId !== undefined) refreshing.push(queryClient.invalidateQueries({ queryKey: productKeys.detail(itemId) }))
+  if (itemId !== undefined)
+    refreshing.push(queryClient.invalidateQueries({ queryKey: productKeys.detail(itemId) }))
+
   await Promise.all(refreshing.map((task) => task.catch(() => undefined)))
 }
 
@@ -62,7 +70,8 @@ export function useCreateProduct(marketId: number) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (payload: CreateProductPayload) => (await createProduct(marketId, payload)).data,
+    mutationFn: async (payload: CreateProductPayload) =>
+      (await createProduct(marketId, payload)).data,
     onSuccess: () => refreshMarketProducts(queryClient, marketId),
   })
 }
@@ -83,8 +92,8 @@ export function useDeleteProduct(itemId: number, marketId: number) {
     mutationFn: () => deleteProduct(itemId),
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: productKeys.detail(itemId), exact: true })
-      // 상품을 지우면 그 상품에 오간 거래 요청과 알림도 서버에서 함께 사라진다.
-      // 내 거래 목록과 알림을 그대로 두면 없어진 상품의 줄이 남는다
+
+      // 상품과 함께 삭제된 거래 요청·알림이 화면에 남지 않도록 관련 캐시도 갱신한다.
       await Promise.all([
         refreshMarketProducts(queryClient, marketId),
         queryClient.invalidateQueries({ queryKey: myTradeRequestKeys.all }).catch(() => undefined),
@@ -97,6 +106,7 @@ export function useDeleteProduct(itemId: number, marketId: number) {
 
 export function getUpdateProductErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '입력한 상품 정보를 다시 확인해 주세요.'
@@ -113,10 +123,10 @@ export function getUpdateProductErrorMessage(error: unknown) {
   }
 }
 
-// 지난 요청이 남아 있어도 이제는 지울 수 있고, 막히는 건 상품의 상태뿐이다.
-// 진행 중과 완료는 막히는 이유가 달라 코드로 갈라 안내한다
+// 삭제 제한 사유는 같은 409 응답 안에서 서버 오류 코드로 구분한다.
 export function getDeleteProductErrorMessage(error: unknown) {
   const response = isAxiosError<{ code?: string }>(error) ? error.response : undefined
+
   switch (response?.status) {
     case 401:
       return '로그인이 필요해요. 다시 로그인해 주세요.'
@@ -135,6 +145,7 @@ export function getDeleteProductErrorMessage(error: unknown) {
 
 export function getCreateProductErrorMessage(error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   switch (status) {
     case 400:
       return '입력한 상품 정보를 다시 확인해 주세요.'

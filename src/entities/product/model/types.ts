@@ -1,11 +1,9 @@
-// Backend table: items (플리마켓에 등록된 상품). Named `product` on the frontend to avoid
-// clashing with entities/collection-item (backend: collection_items, 개인 도감).
-// trade_type 값은 ERD에 확정 표기됨 (판매=SALE, 나눔=GIVEAWAY, 대여=RENTAL). 교환(exchange)은
-// trade_type 값이 아니라 trade_requests.swap_item_id로 요청 시점에 표현됨.
+// 마켓 상품(items)은 개인 도감(collection_items)과 구분해 Product로 이름 붙인다.
+// 교환은 상품의 거래 종류가 아니라 요청의 swapItemId로 표현한다.
 export type TradeType = 'SALE' | 'GIVEAWAY' | 'RENTAL'
 export type ProductStatus = 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED'
 
-// GET/POST /api/v1/markets/{marketId}/items 응답 (Swagger ItemSummaryResponse). API에서 price는 숫자
+// GET/POST /api/v1/markets/{marketId}/items 응답 (ItemSummaryResponse).
 export interface ProductSummary {
   itemId: number
   title: string
@@ -24,7 +22,7 @@ export interface ProductSeller {
 }
 
 // GET /api/v1/items/{itemId} 응답 (Swagger ItemDetailResponse).
-// 목록과 달리 사진 주소 대신 저장 키(imageKey)만 내려줌 — 사진은 목록의 imageUrl을 사용
+// 상세 응답은 imageKey만 제공하므로 사진 주소는 목록의 imageUrl을 사용한다.
 export interface ProductDetail {
   itemId: number
   marketId: number

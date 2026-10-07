@@ -21,7 +21,6 @@ export function ProductCard({ product, backTarget }: ProductCardProps) {
       viewTransition
       className="block drop-shadow-[0_6px_14px_rgba(0,0,0,0.08)]"
     >
-      {/* 픽셀 테두리: 바깥 연보라 판 + 안쪽 카드 면 */}
       <div style={{ clipPath: pixelBox(4) }} className="bg-primary-tint p-[2px]">
         <div style={{ clipPath: pixelBox(4) }} className="bg-bg p-3">
           <div
@@ -41,10 +40,15 @@ export function ProductCard({ product, backTarget }: ProductCardProps) {
             )}
           </div>
 
-          <span className="mt-3 inline-block bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary" style={{ clipPath: pixelBox(2) }}>
+          <span
+            className="mt-3 inline-block bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary"
+            style={{ clipPath: pixelBox(2) }}
+          >
             {TRADE_TYPE_LABEL[product.tradeType]}
           </span>
-          <h3 className="mt-1.5 truncate text-body-03 font-bold text-text-strong">{product.title}</h3>
+          <h3 className="mt-1.5 truncate text-body-03 font-bold text-text-strong">
+            {product.title}
+          </h3>
           <p className="mt-0.5 text-body-04 text-text-muted">{formatProductPrice(product)}</p>
         </div>
       </div>

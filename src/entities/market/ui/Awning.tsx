@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 
 import { pixelCorners } from '../../../shared/lib/pixel'
 
-// 반지름을 타일 비율(%)로 잡아 round 반복으로 타일이 늘어나도 줄무늬 폭과 반원이 같이 늘어나게 함
+// round 반복으로 타일 폭이 바뀌어도 반원이 줄무늬에 맞도록 상대 반지름을 사용한다.
 const valanceMask =
   'radial-gradient(25% 100% at 25% 0, black 98%, transparent 100%), radial-gradient(25% 100% at 75% 0, black 98%, transparent 100%)'
 
@@ -11,15 +11,14 @@ interface AwningProps {
   stripeColor: string
 }
 
-// 줄무늬 2칸(120px) 타일을 round로 반복해 폭이 달라도 끝에서 줄무늬·물결이 잘리지 않게 맞춤.
-// 물결(30px) 아래로 본체가 파고들도록 -mb-[30px]을 갖고 있으니, 본체 쪽에서 pt로 그만큼 비워야
-// 페이지 배경이 틈으로 비치지 않음
+// 차양이 카드 본문과 30px 겹치므로 본문에는 그만큼의 상단 여백이 필요하다.
 export function Awning({ color, stripeColor }: AwningProps) {
   const tile: CSSProperties = {
     backgroundImage: `linear-gradient(90deg, ${color} 50%, ${stripeColor} 50%)`,
     backgroundSize: '120px 100%',
     backgroundRepeat: 'round',
   }
+
   return (
     <div className="relative z-10 -mb-[30px] drop-shadow-sm">
       <div className="h-8" style={{ ...tile, clipPath: pixelCorners('top') }} />

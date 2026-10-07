@@ -28,6 +28,7 @@ export function PasswordChangeModal({ onClose }: { onClose: () => void }) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     if (mutation.isPending) return
 
     const nextErrors: FieldErrors = {}
@@ -42,6 +43,7 @@ export function PasswordChangeModal({ onClose }: { onClose: () => void }) {
     if (Object.keys(nextErrors).length > 0) return
 
     setError('')
+
     try {
       await mutation.mutateAsync({ currentPassword, newPassword })
       useToastStore.getState().showToast('비밀번호를 바꿨어요')
@@ -53,7 +55,9 @@ export function PasswordChangeModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal open onRequestClose={onClose} labelledBy={titleId} size="md">
-      <h2 id={titleId} className="pr-5 text-head-03 font-bold text-text-strong">비밀번호 변경</h2>
+      <h2 id={titleId} className="pr-5 text-head-03 font-bold text-text-strong">
+        비밀번호 변경
+      </h2>
       <p className="mt-2 text-body-04 text-text-muted">바꾼 뒤에도 로그인은 그대로 유지돼요.</p>
 
       <form onSubmit={handleSubmit} noValidate className="mt-6 flex flex-col gap-6">
@@ -104,12 +108,18 @@ export function PasswordChangeModal({ onClose }: { onClose: () => void }) {
                   className={`h-12 ${pixelInputClass}`}
                 />
               </PixelField>
-              {fieldErrors[field] && <p className="mt-2 text-body-04 text-red-600">{fieldErrors[field]}</p>}
+              {fieldErrors[field] && (
+                <p className="mt-2 text-body-04 text-red-600">{fieldErrors[field]}</p>
+              )}
             </div>
           ))}
         </fieldset>
 
-        {error && <p role="alert" className="text-body-04 text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-body-04 text-red-600">
+            {error}
+          </p>
+        )}
 
         <div className="flex gap-3">
           <button

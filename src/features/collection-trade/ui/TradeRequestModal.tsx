@@ -30,8 +30,7 @@ interface TradeRequestModalProps {
   onClose: () => void
 }
 
-// 교환은 내 물건 하나를 걸어 맞바꾸고, 대여는 상대 물건을 빌리기만 한다.
-// 그래서 대여에는 고르기 화면이 없고 보낼 때도 offerCollectionItemId를 넣지 않는다
+// 교환에만 내 물건 선택이 필요하며 대여 요청에는 offerCollectionItemId를 보내지 않는다.
 export function TradeRequestModal({
   open,
   collectionItemId,
@@ -52,10 +51,9 @@ export function TradeRequestModal({
   const label = TRADE_TYPE_LABEL[tradeType]
   const offered = myItems.find((item) => item.collectionItemId === offerId)
   const visibleItems = showAll ? myItems : myItems.slice(0, VISIBLE_COUNT)
-  // 비공개 물건은 거래 대상이 될 수 없다. 목록에서 빼면 "내 물건이 왜 없지" 하게 되므로
-  // 보여주되 고를 수 없게 하고, 개수도 고를 수 있는 것만 센다
+  // 비공개 물건도 목록에는 표시하되 교환 가능한 개수에서는 제외한다.
   const tradableCount = myItems.filter((item) => item.isPublic).length
-  // 고른 뒤 목록이 갱신돼 그 물건이 사라지거나 비공개로 바뀌었을 수 있어 공개 여부까지 본다
+  // 선택 이후 삭제되거나 비공개로 바뀐 물건은 제출할 수 없다.
   const needsPick = isExchange && (offered === undefined || !offered.isPublic)
 
   function close() {
@@ -66,10 +64,12 @@ export function TradeRequestModal({
 
   async function handleSubmit() {
     if (needsPick) return
+
     setError('')
     // 대여는 거는 물건이 없어 tradeType만 보낸다
     const payload: CollectionTradePayload =
       isExchange && offerId !== null ? { tradeType, offerCollectionItemId: offerId } : { tradeType }
+
     try {
       await mutation.mutateAsync(payload)
       useToastStore.getState().showToast(`${label} 요청을 보냈어요`)
@@ -95,7 +95,7 @@ export function TradeRequestModal({
       </p>
 
       {isExchange ? (
-        /* 교환판 — 무엇과 무엇이 오가는지 */
+        /* 교환할 두 물건을 나란히 표시한다. */
         <div style={{ clipPath: pixelBox(4) }} className="mt-4 bg-primary-subtle p-3">
           <div className="mx-auto flex max-w-[360px] items-center gap-3">
             <PreviewSlot label="내 물건" title={offered?.title} imageUrl={offered?.imageUrl} />
@@ -110,7 +110,7 @@ export function TradeRequestModal({
           </MascotTip>
         </div>
       ) : (
-        /* 대여 — 교환판과 같은 판·같은 칸 문법을 쓰되, 내 물건을 걸지 않으므로 상대 물건 한 칸만 둔다 */
+        /* 대여는 빌릴 상대 물건만 표시한다. */
         <div style={{ clipPath: pixelBox(4) }} className="mt-4 bg-primary-subtle p-3">
           <div className="mx-auto w-[min(180px,60%)]">
             <PreviewSlot label="빌릴 물건" title={itemTitle} imageUrl={itemImageUrl} />
@@ -124,13 +124,22 @@ export function TradeRequestModal({
       {/* 고르기는 교환에만 있다 */}
       {isExchange &&
         (myItemsQuery.isPending ? (
-          <p className="py-12 text-center text-body-03 text-text-muted">내 도감을 불러오는 중이에요...</p>
+          <p className="py-12 text-center text-body-03 text-text-muted">
+            내 도감을 불러오는 중이에요...
+          </p>
         ) : myItemsQuery.isError ? (
-          <p className="py-12 text-center text-body-03 text-text-muted">내 도감을 불러오지 못했어요.</p>
+          <p className="py-12 text-center text-body-03 text-text-muted">
+            내 도감을 불러오지 못했어요.
+          </p>
         ) : tradableCount === 0 ? (
-          // 물건이 아예 없는 것과 전부 비공개인 것은 다음에 할 일이 달라 문구를 가른다
+          // 빈 도감과 모두 비공개인 도감에 각각 등록·공개 설정을 안내한다.
           <div className="flex flex-col items-center py-10 text-center">
-            <img draggable={false} src={MASCOTS.basket} alt="" className="h-16 object-contain [image-rendering:pixelated]" />
+            <img
+              draggable={false}
+              src={MASCOTS.basket}
+              alt=""
+              className="h-16 object-contain [image-rendering:pixelated]"
+            />
             <p className="mt-3 text-body-03 font-bold text-text-strong">
               {myItems.length === 0 ? '바꿀 물건이 없어요' : '바꿀 수 있는 물건이 없어요'}
             </p>
@@ -164,8 +173,14 @@ export function TradeRequestModal({
                 </button>
               )}
             </div>
-            {/* 접힌 상태는 네 칸 한 줄, 전체 보기는 같은 칸 크기로 아래로 쌓고 스크롤 */}
-            <ul className={showAll ? 'mt-2 grid max-h-64 grid-cols-4 gap-2 overflow-y-auto' : 'mt-2 grid grid-cols-4 gap-2'}>
+            {/* 전체 보기에서도 카드 크기를 유지하고 목록만 스크롤한다. */}
+            <ul
+              className={
+                showAll
+                  ? 'mt-2 grid max-h-64 grid-cols-4 gap-2 overflow-y-auto'
+                  : 'mt-2 grid grid-cols-4 gap-2'
+              }
+            >
               {visibleItems.map((item) => {
                 const selected = offerId === item.collectionItemId
                 return (
@@ -175,8 +190,12 @@ export function TradeRequestModal({
                       disabled={!item.isPublic}
                       onClick={() => setOfferId(item.collectionItemId)}
                       aria-pressed={selected}
-                      title={item.isPublic ? item.title : `${item.title} — 비공개라 교환할 수 없어요`}
-                      aria-label={item.isPublic ? item.title : `${item.title}, 비공개라 고를 수 없음`}
+                      title={
+                        item.isPublic ? item.title : `${item.title} — 비공개라 교환할 수 없어요`
+                      }
+                      aria-label={
+                        item.isPublic ? item.title : `${item.title}, 비공개라 고를 수 없음`
+                      }
                       style={{ clipPath: pixelBox(3) }}
                       className={
                         selected
@@ -202,7 +221,7 @@ export function TradeRequestModal({
                             <Sprite rows={GLYPHS.check} className="w-2.5" />
                           </span>
                         )}
-                        {/* 왜 고를 수 없는지 칸 위에서 바로 보이게 */}
+                        {/* 선택할 수 없는 이유를 카드에 표시한다. */}
                         {!item.isPublic && (
                           <span className="absolute inset-x-0 bottom-0 bg-black/60 py-0.5 text-center text-xs font-bold text-white">
                             비공개
@@ -231,7 +250,11 @@ export function TradeRequestModal({
           style={{ clipPath: pixelBox(4) }}
           className="flex-1 bg-primary py-3 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
         >
-          {mutation.isPending ? '보내는 중...' : needsPick ? '바꿀 물건을 골라 주세요' : `${label} 요청 보내기`}
+          {mutation.isPending
+            ? '보내는 중...'
+            : needsPick
+              ? '바꿀 물건을 골라 주세요'
+              : `${label} 요청 보내기`}
         </button>
         <button
           type="button"

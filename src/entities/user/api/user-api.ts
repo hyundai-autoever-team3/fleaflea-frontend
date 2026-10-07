@@ -23,10 +23,12 @@ export function useMyProfile() {
   return useQuery({
     queryKey: userKeys.me,
     queryFn: async () => (await getMyProfile()).data,
-    // 토큰이 유효하지 않으면(401/403) 재시도해도 같으니 바로 실패시켜 로그인으로 보냄
+    // 인증·권한 오류는 재시도 없이 호출부에 전달한다.
     retry: (failureCount, error) => {
       const status = isAxiosError(error) ? error.response?.status : undefined
+
       if (status === 401 || status === 403) return false
+
       return failureCount < 3
     },
   })

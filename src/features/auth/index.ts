@@ -1,3 +1,6 @@
 export { logout } from './api/auth-api'
+export { consumeOAuthRedirect, getOAuthFailureMessage } from './model/oauth'
+export { AuthCard } from './ui/AuthCard'
 export { LoginForm } from './ui/LoginForm'
+export { OAuthSignupForm } from './ui/OAuthSignupForm'
 export { SignupForm } from './ui/SignupForm'

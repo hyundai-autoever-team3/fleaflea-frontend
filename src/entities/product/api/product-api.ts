@@ -5,7 +5,7 @@ import { api } from '../../../shared/api/axios'
 import type { PageResponse } from '../../../shared/api/page-response'
 import type { ProductDetail, ProductSummary } from '../model/types'
 
-// 백엔드 최대 size가 100
+// 서버가 허용하는 페이지당 최대 조회 개수.
 const LIST_SIZE = 100
 
 export const productKeys = {
@@ -16,34 +16,42 @@ export const productKeys = {
 
 const isValidId = (id: number) => Number.isInteger(id) && id > 0
 
-// 권한 없음·없는 상품은 다시 시도해도 결과가 같으니 재시도하지 않음
+// 인증·권한·대상 오류는 자동 재시도로 해결되지 않는다.
 function retryUnlessClientError(failureCount: number, error: unknown) {
   const status = isAxiosError(error) ? error.response?.status : undefined
+
   if (status === 401 || status === 403 || status === 404) return false
+
   return failureCount < 3
 }
 
-export function getMarketProducts(marketId: number, page = 0, size = LIST_SIZE, signal?: AbortSignal) {
+export function getMarketProducts(
+  marketId: number,
+  page = 0,
+  size = LIST_SIZE,
+  signal?: AbortSignal,
+) {
   return api.get<PageResponse<ProductSummary>>(`/api/v1/markets/${marketId}/items`, {
     params: { page, size },
     signal,
   })
 }
 
-// 서버 페이지 사이에서 상품이 추가되거나 상태가 바뀌어도 같은 상품이 두 번 보이지 않도록
-// 전체 응답을 itemId 기준으로 합친 뒤 화면에서 12개씩 나눈다.
+// 페이지 조회 도중 상품 순서가 바뀔 수 있어 itemId로 중복을 제거한 뒤 정렬한다.
 async function getAllMarketProducts(marketId: number, signal?: AbortSignal) {
   const firstPage = (await getMarketProducts(marketId, 0, LIST_SIZE, signal)).data
   const remainingPages = await Promise.all(
-    Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, index) => (
-      getMarketProducts(marketId, index + 1, LIST_SIZE, signal).then((response) => response.data.content)
-    )),
+    Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, index) =>
+      getMarketProducts(marketId, index + 1, LIST_SIZE, signal).then(
+        (response) => response.data.content,
+      ),
+    ),
   )
   const products = [firstPage.content, ...remainingPages].flat()
-  return [...new Map(products.map((product) => [product.itemId, product])).values()]
-    .sort((left, right) => (
-      right.createdAt.localeCompare(left.createdAt) || right.itemId - left.itemId
-    ))
+
+  return [...new Map(products.map((product) => [product.itemId, product])).values()].sort(
+    (left, right) => right.createdAt.localeCompare(left.createdAt) || right.itemId - left.itemId,
+  )
 }
 
 export function useMarketProducts(marketId: number) {

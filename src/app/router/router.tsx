@@ -8,10 +8,8 @@ import { RequireAuth, RequireGuest } from './guards'
 import { RootLayout } from './RootLayout'
 import { RouteFallback } from './RouteFallback'
 
-// 배포가 바뀌면 조각 파일 이름의 해시도 함께 바뀐다. 탭을 열어둔 채 배포가 넘어가면
-// 그 탭은 사라진 이름을 부르게 되어 화면 이동이 통째로 실패한다.
-// 한 번만 새로고침해 새 index.html을 받으면 풀리므로, 그렇게 되살린다.
-// 새로고침하고도 실패하면 진짜 문제이므로 되풀이하지 않는다
+// 배포 후 이전 청크 주소를 요청한 경우 새로고침으로 복구한다.
+// sessionStorage가 사용 가능하면 재시도를 기록해 연속 새로고침을 막고, 로딩 성공 시 해제한다.
 const RELOAD_FLAG = 'chunk-reloaded'
 
 function readFlag() {
@@ -27,7 +25,7 @@ function writeFlag(value: string | null) {
     if (value === null) sessionStorage.removeItem(RELOAD_FLAG)
     else sessionStorage.setItem(RELOAD_FLAG, value)
   } catch {
-    // 저장소를 막아둔 브라우저에서는 되살리기를 포기한다
+    // 저장소 접근이 차단돼도 예외가 라우트 로딩을 중단하지 않도록 한다.
   }
 }
 
@@ -35,22 +33,27 @@ async function loadChunk<T>(load: () => Promise<T>): Promise<T> {
   try {
     const module = await load()
     writeFlag(null)
+
     return module
   } catch (error) {
     if (!readFlag()) {
       writeFlag('1')
       window.location.reload()
     }
+
     throw error
   }
 }
 
-// 첫 진입 화면(랜딩·로그인·가입·마켓)만 함께 받고, 나머지는 그 화면으로 갈 때 받는다.
-// 전부 정적으로 두면 랜딩만 보려는 사람도 도감·마이페이지 코드를 모두 내려받게 된다
-function lazyAuthed(load: () => Promise<{ default?: unknown } & Record<string, unknown>>, name: string) {
+// 초기 진입에 필요한 화면 외에는 경로에 접근할 때 로딩하고 인증 가드를 적용한다.
+function lazyAuthed(
+  load: () => Promise<{ default?: unknown } & Record<string, unknown>>,
+  name: string,
+) {
   return async () => {
     const module = await loadChunk(load)
     const Page = module[name] as () => ReactNode
+
     return {
       element: (
         <RequireAuth>
@@ -63,82 +66,112 @@ function lazyAuthed(load: () => Promise<{ default?: unknown } & Record<string, u
 
 export const router = createBrowserRouter([
   {
-    // 경로 없는 감싸는 라우트 — 아래 화면들이 전부 이 대기 화면과 스크롤 기록을 함께 쓴다
+    // 모든 경로에서 초기 대기 화면과 스크롤 복원을 공유한다.
     element: <RootLayout />,
     HydrateFallback: RouteFallback,
     children: [
-  {
-    path: '/',
-    element: (
-      <RequireGuest>
-        <LandingPage />
-      </RequireGuest>
-    ),
-  },
-  {
-    path: '/login',
-    element: (
-      <RequireGuest>
-        <LoginPage />
-      </RequireGuest>
-    ),
-  },
-  {
-    path: '/signup',
-    element: (
-      <RequireGuest>
-        <SignupPage />
-      </RequireGuest>
-    ),
-  },
-  // Semi-public: reachable while logged out. MarketJoinPage itself branches on session
-  // state (preview + login prompt vs. join confirmation), so no guard here.
-  {
-    path: '/invite/:code',
-    lazy: async () => {
-      const { MarketJoinPage } = await loadChunk(() => import('../../pages/market-join'))
-      return { element: <MarketJoinPage /> }
-    },
-  },
-  { path: '/home', lazy: lazyAuthed(() => import('../../pages/home'), 'HomePage') },
-  {
-    path: '/market/:marketId/items/new',
-    lazy: lazyAuthed(() => import('../../pages/product-create'), 'ProductCreatePage'),
-  },
-  {
-    path: '/market/:marketId',
-    lazy: lazyAuthed(() => import('../../pages/market-detail'), 'MarketDetailPage'),
-  },
-  {
-    path: '/market/*',
-    element: (
-      <RequireAuth>
-        <MarketPage />
-      </RequireAuth>
-    ),
-  },
-  { path: '/items/:itemId/edit', lazy: lazyAuthed(() => import('../../pages/product-edit'), 'ProductEditPage') },
-  { path: '/items/:itemId', lazy: lazyAuthed(() => import('../../pages/product-detail'), 'ProductDetailPage') },
-  { path: '/product/*', lazy: lazyAuthed(() => import('../../pages/product'), 'ProductPage') },
-  { path: '/item-dex', lazy: lazyAuthed(() => import('../../pages/item-dex'), 'ItemDexPage') },
-  // 도감 물건 상세. 남의 물건이면 대여·교환·구걸 요청을 여기서 보냄
-  {
-    path: '/collection-items/:collectionItemId',
-    lazy: lazyAuthed(() => import('../../pages/collection-item-detail'), 'CollectionItemDetailPage'),
-  },
-  // 남의 도감. 내 도감(/item-dex)과 화면은 닮았지만 공개 물건만 보이고 등록·수정이 없음
-  {
-    path: '/members/:memberId/item-dex',
-    lazy: lazyAuthed(() => import('../../pages/member-item-dex'), 'MemberItemDexPage'),
-  },
-  // 지난 거래는 물건 상세가 아니라 요청 당시의 모습을 본다.
-  // 물건이 지워지거나 마켓을 나간 뒤에도 당사자면 열 수 있다
-  {
-    path: '/trade-requests/:requestType/:requestId',
-    lazy: lazyAuthed(() => import('../../pages/trade-request-detail'), 'TradeRequestDetailPage'),
-  },
-  { path: '/friends', lazy: lazyAuthed(() => import('../../pages/friends'), 'FriendsPage') },
-  { path: '/my-page', lazy: lazyAuthed(() => import('../../pages/my-page'), 'MyPage') },
+      {
+        path: '/',
+        element: (
+          <RequireGuest>
+            <LandingPage />
+          </RequireGuest>
+        ),
+      },
+      {
+        path: '/login',
+        element: (
+          <RequireGuest>
+            <LoginPage />
+          </RequireGuest>
+        ),
+      },
+      {
+        path: '/signup',
+        element: (
+          <RequireGuest>
+            <SignupPage />
+          </RequireGuest>
+        ),
+      },
+      // 소셜 로그인 결과 화면. 백엔드가 기존 회원·신규 회원·실패에 따라 각 경로로 돌려보낸다.
+      {
+        path: '/oauth/success',
+        lazy: async () => {
+          const { OAuthSuccessPage } = await loadChunk(() => import('../../pages/oauth'))
+          return { element: <OAuthSuccessPage /> }
+        },
+      },
+      {
+        path: '/oauth/signup',
+        lazy: async () => {
+          const { OAuthSignupPage } = await loadChunk(() => import('../../pages/oauth'))
+          return { element: <OAuthSignupPage /> }
+        },
+      },
+      {
+        path: '/oauth/failure',
+        lazy: async () => {
+          const { OAuthFailurePage } = await loadChunk(() => import('../../pages/oauth'))
+          return { element: <OAuthFailurePage /> }
+        },
+      },
+      // 비로그인 사용자를 로그인으로 보내는 처리와 참여 분기는 페이지가 맡는다.
+      {
+        path: '/invite/:code',
+        lazy: async () => {
+          const { MarketJoinPage } = await loadChunk(() => import('../../pages/market-join'))
+          return { element: <MarketJoinPage /> }
+        },
+      },
+      { path: '/home', lazy: lazyAuthed(() => import('../../pages/home'), 'HomePage') },
+      {
+        path: '/market/:marketId/items/new',
+        lazy: lazyAuthed(() => import('../../pages/product-create'), 'ProductCreatePage'),
+      },
+      {
+        path: '/market/:marketId',
+        lazy: lazyAuthed(() => import('../../pages/market-detail'), 'MarketDetailPage'),
+      },
+      {
+        path: '/market/*',
+        element: (
+          <RequireAuth>
+            <MarketPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/items/:itemId/edit',
+        lazy: lazyAuthed(() => import('../../pages/product-edit'), 'ProductEditPage'),
+      },
+      {
+        path: '/items/:itemId',
+        lazy: lazyAuthed(() => import('../../pages/product-detail'), 'ProductDetailPage'),
+      },
+      { path: '/product/*', lazy: lazyAuthed(() => import('../../pages/product'), 'ProductPage') },
+      { path: '/item-dex', lazy: lazyAuthed(() => import('../../pages/item-dex'), 'ItemDexPage') },
+      {
+        path: '/collection-items/:collectionItemId',
+        lazy: lazyAuthed(
+          () => import('../../pages/collection-item-detail'),
+          'CollectionItemDetailPage',
+        ),
+      },
+      {
+        path: '/members/:memberId/item-dex',
+        lazy: lazyAuthed(() => import('../../pages/member-item-dex'), 'MemberItemDexPage'),
+      },
+      // 거래 기록은 현재 물건 상태와 분리해 요청 당시 정보를 조회한다.
+      {
+        path: '/trade-requests/:requestType/:requestId',
+        lazy: lazyAuthed(
+          () => import('../../pages/trade-request-detail'),
+          'TradeRequestDetailPage',
+        ),
+      },
+      { path: '/friends', lazy: lazyAuthed(() => import('../../pages/friends'), 'FriendsPage') },
+      { path: '/my-page', lazy: lazyAuthed(() => import('../../pages/my-page'), 'MyPage') },
     ],
   },
 ])
