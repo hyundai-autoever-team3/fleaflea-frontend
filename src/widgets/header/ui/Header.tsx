@@ -19,9 +19,15 @@ export function Header() {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
 
   return (
-    // 스크롤할 때 본문이 헤더 밑에서 딱 잘려 보이지 않도록 반투명 흰 면 뒤로 흐리게 비치게 한다.
-    // backdrop-filter를 지원하지 않는 브라우저는 기존처럼 불투명한 흰 배경을 쓴다.
-    <header className="sticky top-0 z-30 bg-bg supports-[backdrop-filter]:bg-bg/80 supports-[backdrop-filter]:backdrop-blur-md">
+    <header className="sticky top-0 z-30">
+      {/* 스크롤할 때 본문이 헤더 밑에서 딱 잘려 보이지 않도록 반투명 흰 면 뒤로 흐리게 비치게 한다.
+          header 자체에 backdrop-filter를 주면 그 안의 알림·프로필 메뉴(glass-panel)가 페이지를
+          흐리게 하지 못해 비쳐 보이므로, 배경만 별도 층으로 둔다.
+          backdrop-filter를 지원하지 않는 브라우저는 기존처럼 불투명한 흰 배경을 쓴다. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-bg supports-[backdrop-filter]:bg-bg/80 supports-[backdrop-filter]:backdrop-blur-md"
+      />
       <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-6 py-2 md:grid-cols-[1fr_auto_1fr] md:py-3 lg:px-8">
         <Link
           to="/market"
