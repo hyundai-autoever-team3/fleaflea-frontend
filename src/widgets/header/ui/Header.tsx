@@ -15,7 +15,8 @@ const navItems = [
 const focusStyle =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
 
-export function Header() {
+// 마이페이지는 본문에 물건 도감·친구 바로가기가 있어 상단 메뉴를 숨긴다.
+export function Header({ showNav = true }: { showNav?: boolean }) {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
 
   return (
@@ -37,22 +38,24 @@ export function Header() {
           <BrandMark />
         </Link>
 
-        <nav
-          aria-label="주 메뉴"
-          className="col-span-2 row-start-2 flex items-center justify-between gap-1 border-t border-border/60 pt-1 md:col-span-1 md:col-start-2 md:row-start-1 md:justify-center md:gap-6 md:border-0 md:pt-0"
-        >
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        {showNav && (
+          <nav
+            aria-label="주 메뉴"
+            className="col-span-2 row-start-2 flex items-center justify-between gap-1 border-t border-border/60 pt-1 md:col-span-1 md:col-start-2 md:row-start-1 md:justify-center md:gap-6 md:border-0 md:pt-0"
+          >
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
 
         <div className="col-start-2 row-start-1 flex items-center justify-end gap-1 md:col-start-3">
           <NotificationCenter
