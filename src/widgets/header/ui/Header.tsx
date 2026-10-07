@@ -12,13 +12,16 @@ const navItems = [
   { to: '/my-page', label: '마이페이지' },
 ]
 
-const focusStyle = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
+const focusStyle =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
 
 export function Header() {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
 
   return (
-    <header className="sticky top-0 z-30 bg-bg">
+    // 스크롤할 때 본문이 헤더 밑에서 딱 잘려 보이지 않도록 반투명 흰 면 뒤로 흐리게 비치게 한다.
+    // backdrop-filter를 지원하지 않는 브라우저는 기존처럼 불투명한 흰 배경을 쓴다.
+    <header className="sticky top-0 z-30 bg-bg supports-[backdrop-filter]:bg-bg/80 supports-[backdrop-filter]:backdrop-blur-md">
       <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-6 py-2 md:grid-cols-[1fr_auto_1fr] md:py-3 lg:px-8">
         <Link
           to="/market"
@@ -36,7 +39,9 @@ export function Header() {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) => `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`}
+              className={({ isActive }) =>
+                `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`
+              }
             >
               {item.label}
             </NavLink>
