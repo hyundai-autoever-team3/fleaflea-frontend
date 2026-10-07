@@ -1,6 +1,10 @@
+import { useId, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { useToastStore } from '../../../shared/ui/toast'
+import { env } from '../../../shared/config/env'
+import { MASCOTS } from '../../../shared/config/mascots'
+import { pixelBox } from '../../../shared/lib/pixel'
+import { Modal } from '../../../shared/ui/modal'
 import { getOAuthStartUrl, type SocialProvider } from '../api/oauth-api'
 import { saveOAuthRedirect } from '../model/oauth'
 
@@ -65,14 +69,14 @@ const PROVIDERS: {
     label: '카카오',
     icon: <KakaoIcon />,
     className: 'bg-[#FEE500]',
-    ready: true,
+    ready: env.socialLoginEnabled,
   },
   {
     provider: 'google',
     label: '구글',
     icon: <GoogleIcon />,
     className: 'border border-border bg-white',
-    ready: true,
+    ready: env.socialLoginEnabled,
   },
 ]
 
@@ -83,9 +87,12 @@ export function SocialLoginButtons({
   title: string
   redirectTo: string | null
 }) {
+  const pendingTitleId = useId()
+  const [pendingLabel, setPendingLabel] = useState<string | null>(null)
+
   function start(provider: SocialProvider, label: string, ready: boolean) {
     if (!ready) {
-      useToastStore.getState().showToast(`${label} 로그인은 준비 중이에요.`)
+      setPendingLabel(label)
       return
     }
 
@@ -115,6 +122,39 @@ export function SocialLoginButtons({
           </button>
         ))}
       </div>
+
+      <Modal
+        open={pendingLabel !== null}
+        onRequestClose={() => setPendingLabel(null)}
+        labelledBy={pendingTitleId}
+        size="sm"
+        showClose={false}
+      >
+        <div className="py-6 text-center">
+          <img
+            draggable={false}
+            src={MASCOTS.smile}
+            alt=""
+            className="mx-auto h-20 object-contain [image-rendering:pixelated]"
+          />
+
+          <h2 id={pendingTitleId} className="mt-6 text-head-03 font-bold text-text-strong">
+            {pendingLabel} 로그인은 준비 중이에요
+          </h2>
+          <p className="mt-2 text-body-04 text-text-muted">
+            조금만 기다려 주세요. 지금은 이메일로 로그인할 수 있어요.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => setPendingLabel(null)}
+            style={{ clipPath: pixelBox(4) }}
+            className="mt-8 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90"
+          >
+            확인
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

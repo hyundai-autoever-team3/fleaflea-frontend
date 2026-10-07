@@ -3,4 +3,6 @@
 // 배포에서도 비워 두면 vercel.json의 rewrite가 같은 경로를 백엔드로 넘긴다
 export const env = {
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? '',
+  // 백엔드 소셜 로그인이 배포되기 전에는 버튼을 눌러도 준비 중 안내만 띄운다.
+  socialLoginEnabled: import.meta.env.VITE_SOCIAL_LOGIN_ENABLED === 'true',
 }
