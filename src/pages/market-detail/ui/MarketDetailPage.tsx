@@ -100,7 +100,7 @@ function MarketDescription({ description }: { description: string | null }) {
     <div>
       <p
         ref={textRef}
-        className={`max-w-2xl whitespace-pre-wrap text-body-02 leading-relaxed text-text-muted ${
+        className={`max-w-2xl whitespace-pre-wrap text-body-04 leading-relaxed text-text-muted sm:text-body-02 ${
           isExpanded ? '' : DESCRIPTION_CLAMP_CLASS
         }`}
       >
@@ -295,7 +295,7 @@ export function MarketDetailPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-8 md:px-14 lg:px-24">
         <Link
           to="/market"
           viewTransition
@@ -322,9 +322,11 @@ export function MarketDetailPage() {
           </p>
         ) : (
           <>
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4 sm:gap-4">
               <div className="flex min-w-0 items-center gap-2">
-                <h1 className="truncate text-head-02 font-bold text-text-strong">{market.title}</h1>
+                <h1 className="truncate text-head-03 font-bold text-text-strong sm:text-head-02">
+                  {market.title}
+                </h1>
                 {isHost && (
                   <span
                     style={{ clipPath: pixelBox(2) }}
@@ -341,11 +343,11 @@ export function MarketDetailPage() {
                     onClick={() => setIsInviteOpen(true)}
                     disabled={!invitationQuery.data}
                     style={{ clipPath: pixelBox(4) }}
-                    className="group h-11 bg-primary-tint p-[2px] disabled:opacity-50"
+                    className="group h-10 bg-primary-tint p-[2px] disabled:opacity-50 sm:h-11"
                   >
                     <span
                       style={{ clipPath: pixelBox(4) }}
-                      className="flex h-full items-center bg-primary-subtle px-5 text-body-04 font-bold text-text-muted transition-colors duration-200 group-enabled:group-hover:bg-white"
+                      className="flex h-full items-center bg-primary-subtle px-4 text-body-04 font-bold text-text-muted sm:px-5 transition-colors duration-200 group-enabled:group-hover:bg-white"
                     >
                       초대 링크
                     </span>
@@ -355,7 +357,7 @@ export function MarketDetailPage() {
                   to={newProductPath}
                   viewTransition
                   style={{ clipPath: pixelBox(4) }}
-                  className="flex h-11 items-center bg-primary px-5 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                  className="flex h-10 items-center bg-primary px-4 text-body-04 font-bold text-white sm:h-11 sm:px-5 transition-colors duration-200 hover:bg-primary/90"
                 >
                   + 상품 등록
                 </Link>
@@ -372,12 +374,12 @@ export function MarketDetailPage() {
             </section>
 
             {/* MarketCover가 style을 받지 않아 바깥 요소에 모서리 클리핑을 적용한다. */}
-            <div className="mt-6" style={{ clipPath: pixelBox(6) }}>
+            <div className="mt-4 sm:mt-6" style={{ clipPath: pixelBox(6) }}>
               <MarketCover
                 coverImageUrl={market.coverImageUrl}
                 marketId={market.marketId}
                 variant="bare"
-                className="h-56 w-full md:h-72"
+                className="h-32 w-full sm:h-56 md:h-72"
               />
             </div>
 
@@ -394,8 +396,8 @@ export function MarketDetailPage() {
               ))}
             </dl>
 
-            <section className="mt-14">
-              <h2 className="text-head-03 font-bold text-text-strong">
+            <section className="mt-8 sm:mt-14">
+              <h2 className="text-body-01 font-bold text-text-strong sm:text-head-03">
                 상품{' '}
                 {productsQuery.data && <span className="text-primary">{allProducts.length}</span>}
               </h2>
@@ -500,7 +502,7 @@ export function MarketDetailPage() {
                 </p>
               ) : (
                 <>
-                  <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+                  <ul className="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
                     {pageProducts.map((product) => (
                       <li key={product.itemId}>
                         <ProductCard
@@ -539,9 +541,9 @@ export function MarketDetailPage() {
               )}
             </section>
 
-            <section className="mt-14">
+            <section className="mt-8 sm:mt-14">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-head-03 font-bold text-text-strong">
+                <h2 className="text-body-01 font-bold text-text-strong sm:text-head-03">
                   참여자 <span className="text-primary">{market.memberCount}</span>
                 </h2>
                 {hasMoreMembers && (
