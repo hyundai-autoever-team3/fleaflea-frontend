@@ -226,7 +226,7 @@ export function MarketPage() {
             })}
 
             {!isHostTab && tabMarkets.length > 0 && (
-              <label className="mt-3 flex w-full max-w-md items-center gap-2 rounded-full bg-primary-subtle px-3.5 py-2 sm:mt-5 sm:px-5 sm:py-3 focus-within:ring-2 focus-within:ring-primary-tint">
+              <label className="mt-3 flex w-3/4 max-w-md items-center gap-2 rounded-full bg-primary-subtle px-3.5 py-2 sm:mt-5 sm:w-full sm:px-5 sm:py-3 focus-within:ring-2 focus-within:ring-primary-tint">
                 <svg
                   viewBox="0 0 24 24"
                   className="size-4 shrink-0 text-text-muted sm:size-5"
@@ -258,7 +258,7 @@ export function MarketPage() {
                       : '참여 중인 마켓 이름이나 설명으로 검색'
                   }
                   aria-label={isHostTab ? '내가 만든 마켓 검색' : '참여 중인 마켓 검색'}
-                  className="w-full bg-transparent text-body-03 text-text-strong outline-none placeholder:text-body-04 placeholder:text-text-muted/50 sm:placeholder:text-body-03"
+                  className="w-full text-ellipsis bg-transparent text-body-03 text-text-strong outline-none placeholder:text-body-04 placeholder:text-text-muted/50 sm:placeholder:text-body-03"
                 />
               </label>
             )}

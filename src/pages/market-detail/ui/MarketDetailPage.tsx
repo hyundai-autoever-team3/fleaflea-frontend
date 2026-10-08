@@ -423,10 +423,10 @@ export function MarketDetailPage() {
                     ))}
                   </div>
 
-                  <label className="flex w-full items-center gap-2 rounded-full bg-primary-subtle px-5 py-2.5 focus-within:ring-2 focus-within:ring-primary-tint md:max-w-xs">
+                  <label className="flex w-3/4 items-center gap-2 rounded-full bg-primary-subtle px-3.5 py-2 focus-within:ring-2 focus-within:ring-primary-tint sm:w-full sm:px-5 sm:py-2.5 md:max-w-xs">
                     <svg
                       viewBox="0 0 24 24"
-                      className="size-5 shrink-0 text-text-muted"
+                      className="size-4 shrink-0 text-text-muted sm:size-5"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
@@ -452,7 +452,7 @@ export function MarketDetailPage() {
                       }}
                       placeholder="상품 이름으로 검색"
                       aria-label="상품 검색"
-                      className="w-full bg-transparent text-body-04 text-text-strong outline-none placeholder:text-text-muted/50"
+                      className="w-full bg-transparent text-body-03 text-text-strong outline-none placeholder:text-body-04 placeholder:text-text-muted/50 sm:text-body-04"
                     />
                   </label>
                 </div>
