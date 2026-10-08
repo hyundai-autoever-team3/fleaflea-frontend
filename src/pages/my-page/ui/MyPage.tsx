@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
+import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
 
 import { useMyProfile } from '../../../entities/user'
+import { useLogout } from '../../../features/auth'
 import {
   AccountSettingsModal,
   PasswordChangeModal,
@@ -10,6 +12,7 @@ import {
 } from '../../../features/profile-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Header } from '../../../widgets/header'
@@ -38,6 +41,7 @@ function GlyphTile({ rows }: { rows: readonly string[] }) {
 
 export function MyPage() {
   const profileQuery = useMyProfile()
+  const { isLoggingOut, handleLogout } = useLogout()
 
   const [openModal, setOpenModal] = useState<OpenModal>(null)
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null)
@@ -187,6 +191,26 @@ export function MyPage() {
                           className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5"
                         />
                       </button>
+                      {/* 설치한 앱에서는 헤더에 프로필 메뉴가 없어 로그아웃을 여기에 둔다 */}
+                      {isStandalone() && (
+                        <button
+                          type="button"
+                          onClick={() => void handleLogout()}
+                          disabled={isLoggingOut}
+                          style={{ clipPath: pixelBox(2) }}
+                          className={`group col-span-full flex min-h-12 items-center gap-2.5 px-2 text-left transition-colors hover:bg-primary-subtle disabled:opacity-50 ${FOCUS_RING}`}
+                        >
+                          <span
+                            style={{ clipPath: pixelBox(2) }}
+                            className="grid size-8 shrink-0 place-items-center bg-primary-subtle text-primary transition-colors group-hover:bg-bg"
+                          >
+                            <ArrowRightStartOnRectangleIcon className="size-4" />
+                          </span>
+                          <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">
+                            {isLoggingOut ? '로그아웃하는 중...' : '로그아웃'}
+                          </span>
+                        </button>
+                      )}
                     </nav>
                   </div>
                 </div>

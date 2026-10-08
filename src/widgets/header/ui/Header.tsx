@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 
+import { isStandalone } from '../../../shared/lib/pwa'
 import { BrandMark } from '../../../shared/ui/brand'
 import { NotificationCenter } from './NotificationCenter'
 import { ProfileMenu } from './ProfileMenu'
@@ -12,10 +13,13 @@ const navItems = [
   { to: '/my-page', label: '마이페이지' },
 ]
 
-const focusStyle = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
+const focusStyle =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
 
 export function Header() {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
+  // 설치한 앱에서는 하단 탭(widgets/bottom-nav)이 메뉴와 마이페이지를 맡으므로 헤더에는 알림만 남긴다
+  const inApp = isStandalone()
 
   return (
     <header className="sticky top-0 z-30 bg-bg">
@@ -28,30 +32,36 @@ export function Header() {
           <BrandMark />
         </Link>
 
-        <nav
-          aria-label="주 메뉴"
-          className="col-span-2 row-start-2 flex items-center justify-between gap-1 border-t border-border/60 pt-1 md:col-span-1 md:col-start-2 md:row-start-1 md:justify-center md:gap-6 md:border-0 md:pt-0"
-        >
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`}
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+        {!inApp && (
+          <nav
+            aria-label="주 메뉴"
+            className="col-span-2 row-start-2 flex items-center justify-between gap-1 border-t border-border/60 pt-1 md:col-span-1 md:col-start-2 md:row-start-1 md:justify-center md:gap-6 md:border-0 md:pt-0"
+          >
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `flex min-h-11 min-w-11 items-center justify-center whitespace-nowrap px-1 text-body-04 transition-colors hover:text-primary sm:text-body-03 md:px-0 ${focusStyle} ${isActive ? 'font-bold text-primary' : 'text-text'}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
 
         <div className="col-start-2 row-start-1 flex items-center justify-end gap-1 md:col-start-3">
           <NotificationCenter
             open={activePopover === 'notifications'}
             onOpenChange={(open) => setActivePopover(open ? 'notifications' : null)}
           />
-          <ProfileMenu
-            open={activePopover === 'profile'}
-            onOpenChange={(open) => setActivePopover(open ? 'profile' : null)}
-          />
+          {!inApp && (
+            <ProfileMenu
+              open={activePopover === 'profile'}
+              onOpenChange={(open) => setActivePopover(open ? 'profile' : null)}
+            />
+          )}
         </div>
       </div>
     </header>
