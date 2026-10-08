@@ -50,7 +50,10 @@ function FriendRow({
 }) {
   return (
     <li style={{ clipPath: pixelBox(4) }} className="bg-primary-tint p-[2px]">
-      <div style={{ clipPath: pixelBox(4) }} className="flex items-center gap-3 bg-bg px-4 py-3">
+      <div
+        style={{ clipPath: pixelBox(4) }}
+        className="flex items-center gap-3 bg-bg px-3 py-2.5 sm:px-4 sm:py-3"
+      >
         <Avatar profileImageUrl={friend.profileImageUrl} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-body-03 font-bold text-text-strong">{friend.nickname}</p>
@@ -64,7 +67,7 @@ function FriendRow({
 
 function SectionTitle({ label, count }: { label: string; count?: number }) {
   return (
-    <h2 className="text-head-03 font-bold text-text-strong">
+    <h2 className="text-body-01 font-bold text-text-strong sm:text-head-03">
       {label}
       {count !== undefined && <span className="ml-1 text-primary">{count}</span>}
     </h2>
@@ -176,12 +179,12 @@ export function FriendsPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
-        <h1 className="text-head-02 font-bold text-text-strong">친구</h1>
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-8 md:px-14 lg:px-24">
+        <h1 className="text-head-03 font-bold text-text-strong sm:text-head-02">친구</h1>
 
         <div
           style={{ clipPath: pixelBox(6) }}
-          className="mt-4 flex items-start gap-3 bg-primary-subtle px-5 py-4"
+          className="mt-3 flex items-start gap-3 bg-primary-subtle px-4 py-3 sm:mt-4 sm:px-5 sm:py-4"
         >
           <img
             draggable={false}
@@ -207,9 +210,9 @@ export function FriendsPage() {
         ) : (
           <>
             {received.length > 0 && (
-              <section className="mt-8">
+              <section className="mt-6 sm:mt-8">
                 <SectionTitle label="받은 친구 요청" count={received.length} />
-                <ul className="mt-4 flex flex-col gap-3">
+                <ul className="mt-4 flex flex-col gap-2 sm:gap-3">
                   {received.map((friend) => (
                     <FriendRow
                       key={friend.memberId}
@@ -245,9 +248,9 @@ export function FriendsPage() {
             )}
 
             {sent.length > 0 && (
-              <section className="mt-10">
+              <section className="mt-7 sm:mt-10">
                 <SectionTitle label="보낸 친구 요청" count={sent.length} />
-                <ul className="mt-4 flex flex-col gap-3">
+                <ul className="mt-4 flex flex-col gap-2 sm:gap-3">
                   {sent.map((friend) => (
                     <FriendRow
                       key={friend.memberId}
@@ -271,7 +274,7 @@ export function FriendsPage() {
               </section>
             )}
 
-            <section className="mt-10">
+            <section className="mt-7 sm:mt-10">
               <SectionTitle label="내 친구" count={friends.length} />
 
               <form
@@ -281,7 +284,7 @@ export function FriendsPage() {
                 }}
                 className="mt-4 w-full max-w-md"
               >
-                <label className="flex items-center gap-2 rounded-full bg-primary-subtle px-5 py-3 focus-within:ring-2 focus-within:ring-primary-tint">
+                <label className="flex items-center gap-2 rounded-full bg-primary-subtle px-4 py-2.5 sm:px-5 sm:py-3 focus-within:ring-2 focus-within:ring-primary-tint">
                   <svg
                     viewBox="0 0 24 24"
                     className="size-5 shrink-0 text-text-muted"
@@ -317,7 +320,7 @@ export function FriendsPage() {
                       '{submittedKeyword}'로 찾은 사람이 없어요
                     </p>
                   ) : (
-                    <ul className="flex flex-col gap-3">
+                    <ul className="flex flex-col gap-2 sm:gap-3">
                       {searchResults.map((person) => (
                         <FriendRow
                           key={person.memberId}
@@ -378,7 +381,7 @@ export function FriendsPage() {
                   </p>
                 </div>
               ) : (
-                <ul className="mt-4 flex flex-col gap-3">
+                <ul className="mt-4 flex flex-col gap-2 sm:gap-3">
                   {friends.map((friend) => (
                     <FriendRow key={friend.memberId} friend={friend} caption="친구">
                       {/* 도감 응답에는 소유자 이름이 없어 제목에 사용할 닉네임을 전달한다. */}
