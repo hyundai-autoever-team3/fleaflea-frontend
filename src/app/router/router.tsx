@@ -4,7 +4,7 @@ import { createBrowserRouter } from 'react-router'
 import { LoginPage, SignupPage } from '../../pages/auth'
 import { LandingPage } from '../../pages/landing'
 import { MarketPage } from '../../pages/market'
-import { RequireAuth, RequireGuest } from './guards'
+import { RequireAuth, RequireGuest, RequireOnboarded } from './guards'
 import { RootLayout } from './RootLayout'
 import { RouteFallback } from './RouteFallback'
 
@@ -82,9 +82,25 @@ export const router = createBrowserRouter([
         path: '/login',
         element: (
           <RequireGuest>
-            <LoginPage />
+            <RequireOnboarded>
+              <LoginPage />
+            </RequireOnboarded>
           </RequireGuest>
         ),
+      },
+      // 설치한 앱의 첫 실행 소개. 한 번만 보는 화면이라 필요할 때 받아 온다.
+      {
+        path: '/onboarding',
+        lazy: async () => {
+          const { OnboardingPage } = await loadChunk(() => import('../../pages/onboarding'))
+          return {
+            element: (
+              <RequireGuest>
+                <OnboardingPage />
+              </RequireGuest>
+            ),
+          }
+        },
       },
       {
         path: '/signup',
