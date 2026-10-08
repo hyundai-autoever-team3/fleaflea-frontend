@@ -5,6 +5,9 @@ import { AppProviders } from './app/provider'
 import './app/styles/index.css'
 import { router } from './app/router/router'
 import { hideSplash } from './app/pwa/splash'
+import { fitViewportInApp } from './app/pwa/viewport'
+
+fitViewportInApp()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
