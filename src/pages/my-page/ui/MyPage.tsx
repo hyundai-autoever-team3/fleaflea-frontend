@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
-import { ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
+import { Cog6ToothIcon } from '@heroicons/react/24/outline'
 
 import { useMyProfile } from '../../../entities/user'
 import { useLogout } from '../../../features/auth'
@@ -17,6 +17,7 @@ import { GLYPHS, Sprite } from '../../../shared/ui/sprite'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Header } from '../../../widgets/header'
 import { MyTradeList } from '../../../widgets/my-trade-list'
+import { MyPageAppView } from './MyPageAppView'
 
 type OpenModal = 'profile' | 'account' | 'password' | 'withdraw' | null
 
@@ -46,6 +47,8 @@ export function MyPage() {
   const [openModal, setOpenModal] = useState<OpenModal>(null)
   const accountSettingsButtonRef = useRef<HTMLButtonElement>(null)
   const profile = profileQuery.data
+  // 설치한 앱에서는 카드형 웹 배치 대신 앱 전용 배치(MyPageAppView)를 쓴다
+  const inApp = isStandalone()
 
   function closeAccountSettingsFlow() {
     setOpenModal(null)
@@ -59,7 +62,23 @@ export function MyPage() {
       <Header showNav={false} />
 
       <main className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-8 md:px-14 lg:px-24">
-        <h1 className="text-head-03 font-bold text-text-strong sm:text-head-02">마이페이지</h1>
+        {inApp ? (
+          <div className="relative flex h-11 items-center justify-center">
+            <h1 className="text-body-02 font-bold text-text-strong">마이페이지</h1>
+            <button
+              ref={accountSettingsButtonRef}
+              type="button"
+              onClick={() => setOpenModal('account')}
+              aria-label="계정 설정"
+              aria-haspopup="dialog"
+              className={`absolute right-0 top-0 grid size-11 place-items-center text-text-strong ${FOCUS_RING}`}
+            >
+              <Cog6ToothIcon className="size-6" />
+            </button>
+          </div>
+        ) : (
+          <h1 className="text-head-03 font-bold text-text-strong sm:text-head-02">마이페이지</h1>
+        )}
 
         {profileQuery.isPending ? (
           <div
@@ -114,6 +133,13 @@ export function MyPage() {
               </button>
             </div>
           </div>
+        ) : inApp ? (
+          <MyPageAppView
+            profile={profile}
+            onEditProfile={() => setOpenModal('profile')}
+            isLoggingOut={isLoggingOut}
+            onLogout={() => void handleLogout()}
+          />
         ) : (
           <>
             <div className="mt-4 grid items-start gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
@@ -156,26 +182,24 @@ export function MyPage() {
                       aria-label="내 활동 바로가기"
                       className="mt-4 grid grid-cols-2 gap-1 border-t border-primary-subtle pt-3 lg:grid-cols-1"
                     >
-                      {/* 설치한 앱에서는 하단 탭에 물건 도감·친구가 있어 같은 바로가기를 다시 두지 않는다 */}
-                      {!isStandalone() &&
-                        SHORTCUTS.map(({ to, label, glyph }) => (
-                          <Link
-                            key={to}
-                            to={to}
-                            viewTransition
-                            style={{ clipPath: pixelBox(2) }}
-                            className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
-                          >
-                            <GlyphTile rows={glyph} />
-                            <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">
-                              {label}
-                            </span>
-                            <Sprite
-                              rows={GLYPHS.arrowRight}
-                              className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block"
-                            />
-                          </Link>
-                        ))}
+                      {SHORTCUTS.map(({ to, label, glyph }) => (
+                        <Link
+                          key={to}
+                          to={to}
+                          viewTransition
+                          style={{ clipPath: pixelBox(2) }}
+                          className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
+                        >
+                          <GlyphTile rows={glyph} />
+                          <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">
+                            {label}
+                          </span>
+                          <Sprite
+                            rows={GLYPHS.arrowRight}
+                            className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block"
+                          />
+                        </Link>
+                      ))}
                       <button
                         ref={accountSettingsButtonRef}
                         type="button"
@@ -193,26 +217,6 @@ export function MyPage() {
                           className="w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5"
                         />
                       </button>
-                      {/* 설치한 앱에서는 헤더에 프로필 메뉴가 없어 로그아웃을 여기에 둔다 */}
-                      {isStandalone() && (
-                        <button
-                          type="button"
-                          onClick={() => void handleLogout()}
-                          disabled={isLoggingOut}
-                          style={{ clipPath: pixelBox(2) }}
-                          className={`group col-span-full flex min-h-12 items-center gap-2.5 px-2 text-left transition-colors hover:bg-primary-subtle disabled:opacity-50 ${FOCUS_RING}`}
-                        >
-                          <span
-                            style={{ clipPath: pixelBox(2) }}
-                            className="grid size-8 shrink-0 place-items-center bg-primary-subtle text-primary transition-colors group-hover:bg-bg"
-                          >
-                            <ArrowRightStartOnRectangleIcon className="size-4" />
-                          </span>
-                          <span className="min-w-0 flex-1 text-body-04 font-bold text-text-strong">
-                            {isLoggingOut ? '로그아웃하는 중...' : '로그아웃'}
-                          </span>
-                        </button>
-                      )}
                     </nav>
                   </div>
                 </div>
