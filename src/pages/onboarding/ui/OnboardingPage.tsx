@@ -86,7 +86,7 @@ export function OnboardingPage() {
         ))}
       </div>
 
-      <div className="mx-auto w-full max-w-sm px-6 pb-8">
+      <div className="mx-auto w-full max-w-sm px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
         {/* 지금 몇 번째 장인지 보여주는 점. 누르면 그 장으로 간다 */}
         <div className="flex justify-center gap-2">
           {SLIDES.map((slide, slideIndex) => (
