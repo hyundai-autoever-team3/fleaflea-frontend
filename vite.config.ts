@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// https://vite.dev/config/
+// 설정 문서: https://vite.dev/config/
 // 개발 서버와 미리보기가 같은 규칙을 쓰도록 한곳에 둔다.
 // vite preview는 server.proxy를 읽지 않으므로 따로 넘겨야 한다.
 //

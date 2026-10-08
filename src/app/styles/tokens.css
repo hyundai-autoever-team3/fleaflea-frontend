@@ -17,7 +17,7 @@
 :root {
   /* 기본 색상과 효과 값 */
 
-  /* purple (Figma: MainColor01 / SubColor01 / SubColor02) */
+  /* 보라 (Figma: MainColor01 / SubColor01 / SubColor02) */
   --purple-100: #f5f0fc;
   --purple-300: #b196dc;
   --purple-500: #e0d3f6;
@@ -130,14 +130,14 @@
 @theme {
   /* 컴포넌트에서 사용하는 역할별 토큰 */
 
-  /* Brand / Action */
+  /* 브랜드·주요 동작 */
   --color-primary: var(--purple-300); /* 버튼 등 주요 액션 */
   --color-primary-tint: var(
     --purple-500
   ); /* 파스텔 카드/배경 강조 (design.md의 "라벤더 SaaS 카드") */
   --color-primary-subtle: var(--purple-100); /* 옅은 배경 틴트 */
 
-  /* Notification status */
+  /* 알림 상태 */
   --color-status-brand: var(--purple-700);
   --color-status-info: var(--blue-700);
   --color-status-info-subtle: var(--blue-100);
@@ -166,12 +166,12 @@
   --color-status-nudge-tile: var(--coral-400);
   --color-status-muted-tile: var(--gray-500);
 
-  /* Text */
+  /* 글자 */
   --color-text-strong: var(--gray-900);
   --color-text: var(--gray-800);
   --color-text-muted: var(--gray-700);
 
-  /* Surface */
+  /* 바탕 */
   --color-bg: var(--white);
   --color-bg-subtle: var(--gray-200);
 
