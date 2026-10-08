@@ -208,7 +208,7 @@ export function MemberItemDexPage() {
               className="bg-primary-tint p-2 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
             >
               <div style={{ clipPath: pixelBox(6) }} className="bg-bg p-3 md:p-4">
-                <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                <ul className="grid grid-cols-3 gap-1.5 sm:gap-3 lg:grid-cols-4">
                   {Array.from({ length: SLOTS_PER_PAGE }, (_, index) => {
                     const item = pageItems[index]
 

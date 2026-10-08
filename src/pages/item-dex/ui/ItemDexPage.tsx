@@ -94,10 +94,10 @@ export function ItemDexPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 pb-8 pt-12 md:px-14 lg:px-24">
+      <div className="mx-auto w-full max-w-7xl px-4 pb-5 pt-5 sm:px-6 sm:pb-8 sm:pt-12 md:px-14 lg:px-24">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-head-02 font-bold text-text-strong">물건 도감</h1>
+            <h1 className="text-head-03 font-bold text-text-strong sm:text-head-02">물건 도감</h1>
             {!itemsQuery.isPending && !itemsQuery.isError && <SummaryLine total={items.length} />}
           </div>
           {/* 빈 도감에서는 아래의 첫 물건 등록 버튼을 사용한다. */}
@@ -106,7 +106,7 @@ export function ItemDexPage() {
               type="button"
               onClick={() => setModal('create')}
               style={{ clipPath: pixelBox(4) }}
-              className="flex h-11 items-center bg-primary px-5 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+              className="flex h-10 items-center bg-primary px-4 text-body-04 font-bold text-white sm:h-11 sm:px-5 transition-colors duration-200 hover:bg-primary/90"
             >
               + 물건 등록
             </button>
@@ -136,13 +136,13 @@ export function ItemDexPage() {
             </button>
           </div>
         ) : (
-          <div className="relative mt-8">
+          <div className="relative mt-4 sm:mt-8">
             <div
               style={{ clipPath: pixelBox(6) }}
-              className="bg-primary-tint p-2 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
+              className="bg-primary-tint p-1 drop-shadow-[0_10px_20px_rgba(0,0,0,0.08)] sm:p-2"
             >
-              <div style={{ clipPath: pixelBox(6) }} className="bg-bg p-3 md:p-4">
-                <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+              <div style={{ clipPath: pixelBox(6) }} className="bg-bg p-2 sm:p-3 md:p-4">
+                <ul className="grid grid-cols-3 gap-1.5 sm:gap-3 lg:grid-cols-4">
                   {Array.from({ length: SLOTS_PER_PAGE }, (_, index) => {
                     const item = pageItems[index]
 
