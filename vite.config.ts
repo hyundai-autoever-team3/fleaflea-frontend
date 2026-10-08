@@ -1,6 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 // 개발 서버와 미리보기가 같은 규칙을 쓰도록 한곳에 둔다.
@@ -20,7 +21,50 @@ const apiProxy = {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      //새 버전이 오면 바로 변경 하지 않고 사용자에게 물어본 후 진행
+      registerType: 'prompt',
+
+      // manifest는 3번에서 만든 public/manifest.webmanifest를 그대로 쓴다
+      manifest: false,
+
+      // 등록은 UpdatePrompt의 useRegisterSW가 하므로 플러그인이 등록 코드를 따로 넣지 않게 한다
+      injectRegister: false,
+
+      workbox: {
+        // 사전 저장: 설치할 때 미리 받아 둘 파일
+        globPatterns: ['**/*.{js,css,html}', 'fonts/*', 'icons/*.png', 'mascot/flea4.png'],
+        // MSW(API 목업)용 파일은 앱에서 쓰지 않으므로 저장하지 않는다
+        globIgnores: ['mockServiceWorker.js'],
+        // SPA 기본 동작(모든 주소에 index.html)을 끄고, 아래에서 오프라인 화면으로 대신한다
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            // 페이지 이동: 항상 서버에서 받고, 끊기면 오프라인 화면
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkOnly',
+            options: {
+              precacheFallback: {
+                fallbackURL: '/offline.html',
+              },
+            },
+          },
+          {
+            // 마스코트 이미지: 한 번 받으면 저장해 두고 다음부터 바로 사용한다
+            urlPattern: ({ url }) => url.pathname.startsWith('/mascot/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'fleaflea-mascots',
+              expiration: { maxEntries: 20 },
+            },
+          },
+        ],
+      },
+    }),
+  ],
   server: {
     host: true,
     port: 5175,
