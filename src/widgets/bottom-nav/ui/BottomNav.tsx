@@ -1,14 +1,14 @@
 import {
   BookOpenIcon,
+  BuildingStorefrontIcon,
   ChatBubbleLeftRightIcon,
-  HomeIcon,
   UserCircleIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline'
 import {
   BookOpenIcon as BookOpenSolidIcon,
+  BuildingStorefrontIcon as BuildingStorefrontSolidIcon,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightSolidIcon,
-  HomeIcon as HomeSolidIcon,
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from '@heroicons/react/24/solid'
@@ -16,7 +16,12 @@ import { NavLink } from 'react-router'
 
 // 지금 있는 탭은 채운 아이콘, 나머지는 선 아이콘으로 그려 색을 못 봐도 구분되게 한다
 const tabs = [
-  { to: '/market', label: '홈', Icon: HomeIcon, ActiveIcon: HomeSolidIcon },
+  {
+    to: '/market',
+    label: '마켓',
+    Icon: BuildingStorefrontIcon,
+    ActiveIcon: BuildingStorefrontSolidIcon,
+  },
   { to: '/friends', label: '친구', Icon: UsersIcon, ActiveIcon: UsersSolidIcon },
   { to: '/item-dex', label: '물건 도감', Icon: BookOpenIcon, ActiveIcon: BookOpenSolidIcon },
   {
