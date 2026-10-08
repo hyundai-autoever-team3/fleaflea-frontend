@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 
+import { isStandalone } from '../../../shared/lib/pwa'
 import { BrandMark } from '../../../shared/ui/brand'
 import { NotificationCenter } from './NotificationCenter'
 import { ProfileMenu } from './ProfileMenu'
@@ -18,6 +19,8 @@ const focusStyle =
 // 마이페이지는 본문에 물건 도감·친구 바로가기가 있어 상단 메뉴를 숨긴다.
 export function Header({ showNav = true }: { showNav?: boolean }) {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
+  // 설치한 앱에서는 하단 탭(widgets/bottom-nav)이 메뉴와 마이페이지를 맡으므로 헤더에는 알림만 남긴다
+  const inApp = isStandalone()
 
   return (
     <header className="sticky top-0 z-30">
@@ -38,7 +41,7 @@ export function Header({ showNav = true }: { showNav?: boolean }) {
           <BrandMark />
         </Link>
 
-        {showNav && (
+        {showNav && !inApp && (
           <nav
             aria-label="주 메뉴"
             className="col-span-2 row-start-2 flex items-center justify-between gap-1 border-t border-border/60 pt-1 md:col-span-1 md:col-start-2 md:row-start-1 md:justify-center md:gap-6 md:border-0 md:pt-0"
@@ -62,10 +65,12 @@ export function Header({ showNav = true }: { showNav?: boolean }) {
             open={activePopover === 'notifications'}
             onOpenChange={(open) => setActivePopover(open ? 'notifications' : null)}
           />
-          <ProfileMenu
-            open={activePopover === 'profile'}
-            onOpenChange={(open) => setActivePopover(open ? 'profile' : null)}
-          />
+          {!inApp && (
+            <ProfileMenu
+              open={activePopover === 'profile'}
+              onOpenChange={(open) => setActivePopover(open ? 'profile' : null)}
+            />
+          )}
         </div>
       </div>
     </header>

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 
+import { isStandalone } from '../../../lib/pwa'
 import { useToastStore } from '../model/store'
 
 const AUTO_DISMISS_MS = 3000
@@ -24,7 +25,10 @@ export function Toast() {
     <div
       role="status"
       data-reveal
-      className="is-visible fixed inset-x-0 bottom-6 z-50 mx-auto w-fit max-w-[calc(100%-2rem)] rounded-lg bg-text-strong px-5 py-3 text-body-03 font-bold text-white shadow-lg"
+      // 설치한 앱에서는 하단 탭에 가려지지 않게 그 위로 올린다
+      className={`is-visible fixed inset-x-0 z-50 mx-auto w-fit max-w-[calc(100%-2rem)] rounded-lg bg-text-strong px-5 py-3 text-body-03 font-bold text-white shadow-lg ${
+        isStandalone() ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))]' : 'bottom-6'
+      }`}
     >
       {message}
     </div>

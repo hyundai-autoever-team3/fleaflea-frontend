@@ -4,7 +4,8 @@ import { createBrowserRouter } from 'react-router'
 import { LoginPage, SignupPage } from '../../pages/auth'
 import { LandingPage } from '../../pages/landing'
 import { MarketPage } from '../../pages/market'
-import { RequireAuth, RequireGuest } from './guards'
+import { AppLayout } from './AppLayout'
+import { RequireAuth, RequireGuest, RequireOnboarded } from './guards'
 import { RootLayout } from './RootLayout'
 import { RouteFallback } from './RouteFallback'
 
@@ -82,9 +83,25 @@ export const router = createBrowserRouter([
         path: '/login',
         element: (
           <RequireGuest>
-            <LoginPage />
+            <RequireOnboarded>
+              <LoginPage />
+            </RequireOnboarded>
           </RequireGuest>
         ),
+      },
+      // 설치한 앱의 첫 실행 소개. 한 번만 보는 화면이라 필요할 때 받아 온다.
+      {
+        path: '/onboarding',
+        lazy: async () => {
+          const { OnboardingPage } = await loadChunk(() => import('../../pages/onboarding'))
+          return {
+            element: (
+              <RequireGuest>
+                <OnboardingPage />
+              </RequireGuest>
+            ),
+          }
+        },
       },
       {
         path: '/signup',
@@ -124,54 +141,70 @@ export const router = createBrowserRouter([
           return { element: <MarketJoinPage /> }
         },
       },
-      { path: '/home', lazy: lazyAuthed(() => import('../../pages/home'), 'HomePage') },
+      // 로그인한 뒤의 화면. 좁은 화면에서는 하단 탭이 함께 붙는다.
       {
-        path: '/market/:marketId/items/new',
-        lazy: lazyAuthed(() => import('../../pages/product-create'), 'ProductCreatePage'),
+        element: <AppLayout />,
+        children: [
+          { path: '/home', lazy: lazyAuthed(() => import('../../pages/home'), 'HomePage') },
+          {
+            path: '/market/:marketId/items/new',
+            lazy: lazyAuthed(() => import('../../pages/product-create'), 'ProductCreatePage'),
+          },
+          {
+            path: '/market/:marketId',
+            lazy: lazyAuthed(() => import('../../pages/market-detail'), 'MarketDetailPage'),
+          },
+          {
+            path: '/market/*',
+            element: (
+              <RequireAuth>
+                <MarketPage />
+              </RequireAuth>
+            ),
+          },
+          {
+            path: '/items/:itemId/edit',
+            lazy: lazyAuthed(() => import('../../pages/product-edit'), 'ProductEditPage'),
+          },
+          {
+            path: '/items/:itemId',
+            lazy: lazyAuthed(() => import('../../pages/product-detail'), 'ProductDetailPage'),
+          },
+          {
+            path: '/product/*',
+            lazy: lazyAuthed(() => import('../../pages/product'), 'ProductPage'),
+          },
+          {
+            path: '/item-dex',
+            lazy: lazyAuthed(() => import('../../pages/item-dex'), 'ItemDexPage'),
+          },
+          {
+            path: '/collection-items/:collectionItemId',
+            lazy: lazyAuthed(
+              () => import('../../pages/collection-item-detail'),
+              'CollectionItemDetailPage',
+            ),
+          },
+          {
+            path: '/members/:memberId/item-dex',
+            lazy: lazyAuthed(() => import('../../pages/member-item-dex'), 'MemberItemDexPage'),
+          },
+          // 거래 기록은 현재 물건 상태와 분리해 요청 당시 정보를 조회한다.
+          {
+            path: '/trade-requests/:requestType/:requestId',
+            lazy: lazyAuthed(
+              () => import('../../pages/trade-request-detail'),
+              'TradeRequestDetailPage',
+            ),
+          },
+          { path: '/chat', lazy: lazyAuthed(() => import('../../pages/chat'), 'ChatPage') },
+          {
+            path: '/friends',
+            lazy: lazyAuthed(() => import('../../pages/friends'), 'FriendsPage'),
+          },
+          { path: '/my-page', lazy: lazyAuthed(() => import('../../pages/my-page'), 'MyPage') },
+        ],
       },
-      {
-        path: '/market/:marketId',
-        lazy: lazyAuthed(() => import('../../pages/market-detail'), 'MarketDetailPage'),
-      },
-      {
-        path: '/market/*',
-        element: (
-          <RequireAuth>
-            <MarketPage />
-          </RequireAuth>
-        ),
-      },
-      {
-        path: '/items/:itemId/edit',
-        lazy: lazyAuthed(() => import('../../pages/product-edit'), 'ProductEditPage'),
-      },
-      {
-        path: '/items/:itemId',
-        lazy: lazyAuthed(() => import('../../pages/product-detail'), 'ProductDetailPage'),
-      },
-      { path: '/product/*', lazy: lazyAuthed(() => import('../../pages/product'), 'ProductPage') },
-      { path: '/item-dex', lazy: lazyAuthed(() => import('../../pages/item-dex'), 'ItemDexPage') },
-      {
-        path: '/collection-items/:collectionItemId',
-        lazy: lazyAuthed(
-          () => import('../../pages/collection-item-detail'),
-          'CollectionItemDetailPage',
-        ),
-      },
-      {
-        path: '/members/:memberId/item-dex',
-        lazy: lazyAuthed(() => import('../../pages/member-item-dex'), 'MemberItemDexPage'),
-      },
-      // 거래 기록은 현재 물건 상태와 분리해 요청 당시 정보를 조회한다.
-      {
-        path: '/trade-requests/:requestType/:requestId',
-        lazy: lazyAuthed(
-          () => import('../../pages/trade-request-detail'),
-          'TradeRequestDetailPage',
-        ),
-      },
-      { path: '/friends', lazy: lazyAuthed(() => import('../../pages/friends'), 'FriendsPage') },
-      { path: '/my-page', lazy: lazyAuthed(() => import('../../pages/my-page'), 'MyPage') },
     ],
   },
 ])
