@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { StarField } from '../../../shared/ui/star-field'
 import { login } from '../api/auth-api'
@@ -17,6 +18,8 @@ export function LoginForm() {
   const [rememberMe, setRememberMe] = useState(true)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [error, setError] = useState('')
+  // 설치한 앱에서는 카드와 옆 그림 없이 흰 화면 가운데에 로고와 폼만 둔다
+  const inApp = isStandalone()
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -45,11 +48,23 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-primary-subtle p-6">
-      <div className="grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10">
+    <div
+      className={
+        inApp
+          ? 'flex min-h-dvh items-center justify-center bg-bg'
+          : 'flex min-h-screen items-center justify-center bg-primary-subtle p-6'
+      }
+    >
+      <div
+        className={
+          inApp
+            ? 'w-full max-w-sm'
+            : 'grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10'
+        }
+      >
         {/* 왼쪽: 폼 */}
-        <div className="flex h-full flex-col p-6 md:p-10">
-          <div className="flex items-center gap-2">
+        <div className={`flex h-full flex-col ${inApp ? 'px-8 py-10' : 'p-6 md:p-10'}`}>
+          <div className={inApp ? 'hidden' : 'flex items-center gap-2'}>
             <div className="size-8 overflow-hidden rounded-full">
               <img
                 draggable={false}
@@ -62,8 +77,26 @@ export function LoginForm() {
           </div>
 
           <div className="flex flex-1 flex-col justify-center">
-            <h1 className="text-head-02 text-gray-800 font-bold text-text-strong">로그인</h1>
-            <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
+            {inApp ? (
+              // 제목 글자 대신 로고를 가운데에 크게 둔다. 제목은 화면 낭독기용으로만 남긴다
+              <>
+                <div className="flex flex-col items-center gap-3">
+                  <img
+                    draggable={false}
+                    src="/mascot/flea.png"
+                    alt=""
+                    className="h-20 object-contain [image-rendering:pixelated]"
+                  />
+                  <span className="font-jua text-head-01 text-text-strong">FleaFlea</span>
+                </div>
+                <h1 className="sr-only">로그인</h1>
+              </>
+            ) : (
+              <>
+                <h1 className="text-head-02 text-gray-800 font-bold text-text-strong">로그인</h1>
+                <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
+              </>
+            )}
 
             <form onSubmit={handleSubmit} noValidate className="mt-8 flex flex-col gap-6">
               <div>
@@ -164,7 +197,9 @@ export function LoginForm() {
         </div>
 
         {/* 오른쪽: 큰 카드 안에 여백을 두고 떠있는 별도 비주얼 카드 */}
-        <div className="relative hidden overflow-hidden rounded-2xl bg-cosmic-bg md:block">
+        <div
+          className={`relative hidden overflow-hidden rounded-2xl bg-cosmic-bg ${inApp ? '' : 'md:block'}`}
+        >
           <div
             className="absolute inset-0"
             style={{
