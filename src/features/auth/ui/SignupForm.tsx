@@ -5,6 +5,7 @@ import { isAxiosError } from 'axios'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { StarField } from '../../../shared/ui/star-field'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -89,12 +90,27 @@ export function SignupForm() {
     }
   }
 
+  // 설치한 앱에서는 로그인 화면과 같이 카드와 옆 그림 없이 흰 화면 가운데에 로고와 폼만 둔다
+  const inApp = isStandalone()
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-primary-subtle p-6">
-      <div className="grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10">
+    <div
+      className={
+        inApp
+          ? 'flex min-h-dvh items-center justify-center bg-bg'
+          : 'flex min-h-screen items-center justify-center bg-primary-subtle p-6'
+      }
+    >
+      <div
+        className={
+          inApp
+            ? 'w-full max-w-sm'
+            : 'grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10'
+        }
+      >
         {/* 왼쪽: 폼 */}
-        <div className="flex h-full flex-col p-6 md:p-10">
-          <div className="flex items-center gap-2">
+        <div className={`flex h-full flex-col ${inApp ? 'px-8 py-10' : 'p-6 md:p-10'}`}>
+          <div className={inApp ? 'hidden' : 'flex items-center gap-2'}>
             <div className="size-8 overflow-hidden rounded-full">
               <img
                 draggable={false}
@@ -107,10 +123,29 @@ export function SignupForm() {
           </div>
 
           <div className="flex flex-1 flex-col justify-center">
-            <h1 className="text-head-02 font-bold text-text-strong">회원가입</h1>
-            <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정을 만들어보세요</p>
+            {inApp ? (
+              // 로그인 화면과 같은 자리에 로고를 두고, 어느 화면인지 알 수 있게 제목을 작게 붙인다
+              <div className="flex flex-col items-center">
+                <img
+                  draggable={false}
+                  src="/mascot/flea.png"
+                  alt=""
+                  className="h-16 object-contain [image-rendering:pixelated]"
+                />
+                <span className="mt-2 font-jua text-head-03 text-text-strong">FleaFlea</span>
+                <h1 className="mt-3 text-body-03 font-bold text-text-muted">회원가입</h1>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-head-02 font-bold text-text-strong">회원가입</h1>
+                <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정을 만들어보세요</p>
+              </>
+            )}
 
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
+            <form
+              onSubmit={handleSubmit}
+              className={`flex flex-col ${inApp ? 'mt-6 gap-5' : 'mt-8 gap-6'}`}
+            >
               <div className="relative">
                 <label
                   htmlFor="nickname"
@@ -238,7 +273,9 @@ export function SignupForm() {
         </div>
 
         {/* 오른쪽: 큰 카드 안에 여백을 두고 떠있는 별도 비주얼 카드 */}
-        <div className="relative hidden overflow-hidden rounded-2xl bg-cosmic-bg md:block">
+        <div
+          className={`relative hidden overflow-hidden rounded-2xl bg-cosmic-bg ${inApp ? '' : 'md:block'}`}
+        >
           <div
             className="absolute inset-0"
             style={{
