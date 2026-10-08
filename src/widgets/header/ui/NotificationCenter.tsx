@@ -33,6 +33,7 @@ import {
 import { MASCOTS } from '../../../shared/config/mascots'
 import { isStandalone } from '../../../shared/lib/pwa'
 import { useToastStore } from '../../../shared/ui/toast'
+import { NotificationPermissionBanner } from './NotificationPermissionBanner'
 
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
@@ -539,6 +540,8 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
               </>
             )}
           </div>
+
+          <NotificationPermissionBanner />
 
           <div
             ref={scrollAreaRef}
