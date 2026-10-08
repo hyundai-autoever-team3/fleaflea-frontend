@@ -12,8 +12,62 @@
     <meta name="apple-mobile-web-app-title" content="FleaFlea" />
 
     <title>FleaFlea</title>
+
+    <!-- 스플래시: 설치한 앱으로 열었을 때 자바스크립트가 준비되기 전까지 보이는 시작 화면.
+         앱 코드보다 먼저 그려져야 해서 스타일을 이 파일에 직접 적는다 -->
+    <style>
+      /* 브라우저 탭에서는 보이지 않는다 */
+      #splash {
+        display: none;
+      }
+
+      /* 설치한 앱(주소창 없는 창)에서만 화면 전체를 덮는다 */
+      @media (display-mode: standalone) {
+        #splash {
+          position: fixed;
+          inset: 0;
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          /* manifest의 background_color와 같은 색이라 기기가 띄우는 시작 화면에서 끊김 없이 이어진다 */
+          background: #ffffff;
+          transition: opacity 0.3s ease;
+        }
+
+        /* 앱이 준비되면 src/app/pwa/splash.ts가 이 클래스를 붙여 서서히 지운다 */
+        #splash.is-leaving {
+          opacity: 0;
+          pointer-events: none;
+        }
+      }
+
+      #splash img {
+        width: 96px;
+        image-rendering: pixelated;
+      }
+
+      #splash span {
+        font-family: 'BM JUA', 'Apple SD Gothic Neo', sans-serif;
+        font-size: 28px;
+        color: #14181d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #splash {
+          transition: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="splash" aria-hidden="true">
+      <img src="/mascot/flea.png" alt="" />
+      <span>FleaFlea</span>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
