@@ -139,20 +139,20 @@ export function MarketPage() {
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
-        <div className="relative overflow-hidden rounded-3xl bg-[image:var(--gradient-dreamy)] p-6 sm:min-h-72 sm:p-8 lg:min-h-80 lg:p-10">
-          <h1 className="mt-2 max-w-full text-head-01 font-bold text-text-strong sm:mt-6 sm:max-w-[60%] lg:mt-8 lg:text-4xl">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-8 md:px-14 lg:px-24">
+        <div className="relative overflow-hidden rounded-2xl bg-[image:var(--gradient-dreamy)] p-4 sm:min-h-72 sm:rounded-3xl sm:p-8 lg:min-h-80 lg:p-10">
+          <h1 className="max-w-[calc(100%-4rem)] text-body-01 font-bold leading-snug text-text-strong sm:mt-6 sm:max-w-[60%] sm:text-head-01 sm:leading-normal lg:mt-8 lg:text-4xl">
             친구들과 여는
             <br />
             우리들만의 비밀 마켓
           </h1>
 
-          <div className="relative z-10 mt-5 flex w-[calc(100%-5rem)] flex-wrap gap-2 sm:mt-6 sm:w-auto sm:gap-3">
+          <div className="relative z-10 mt-3 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:flex-wrap sm:gap-3">
             <button
               type="button"
               onClick={() => setModal('create')}
               style={{ clipPath: pixelBox(4) }}
-              className="h-11 bg-primary px-5 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+              className="h-10 bg-primary px-2 text-[13px] font-bold text-white transition-colors duration-200 hover:bg-primary/90 sm:h-11 sm:px-5 sm:text-body-04"
             >
               + 플리마켓 만들기
             </button>
@@ -160,11 +160,11 @@ export function MarketPage() {
               type="button"
               onClick={() => setModal('join')}
               style={{ clipPath: pixelBox(4) }}
-              className="group h-11 bg-primary-tint p-[2px]"
+              className="group h-10 bg-primary-tint p-[2px] sm:h-11"
             >
               <span
                 style={{ clipPath: pixelBox(4) }}
-                className="flex h-full items-center bg-primary-subtle px-5 text-body-04 font-bold text-text-strong transition-colors duration-200 group-hover:bg-white"
+                className="flex h-full items-center justify-center bg-primary-subtle px-2 text-[13px] font-bold text-text-strong transition-colors duration-200 group-hover:bg-white sm:px-5 sm:text-body-04"
               >
                 초대 링크로 참여하기
               </span>
@@ -180,7 +180,7 @@ export function MarketPage() {
             draggable={false}
             src="/mascot/flea.png"
             alt=""
-            className="absolute -bottom-1 right-2 size-20 object-contain [image-rendering:pixelated] sm:bottom-4 sm:right-6 sm:size-28 lg:right-10 lg:size-32"
+            className="absolute right-3 top-3 size-14 object-contain [image-rendering:pixelated] sm:bottom-4 sm:right-6 sm:top-auto sm:size-28 lg:right-10 lg:size-32"
           />
         </div>
 
@@ -214,7 +214,7 @@ export function MarketPage() {
                     setAppliedKeyword('')
                   }}
                   style={{ clipPath: pixelBox() }}
-                  className={`mr-2 mt-8 h-10 px-4 text-body-04 font-semibold transition-colors duration-200 ${
+                  className={`mr-2 mt-5 h-9 px-3 text-body-04 font-semibold sm:mt-8 sm:h-10 sm:px-4 transition-colors duration-200 ${
                     active
                       ? 'bg-primary text-white hover:bg-primary/90'
                       : 'bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong'
@@ -226,7 +226,7 @@ export function MarketPage() {
             })}
 
             {!isHostTab && tabMarkets.length > 0 && (
-              <label className="mt-5 flex w-full max-w-md items-center gap-2 rounded-full bg-primary-subtle px-5 py-3 focus-within:ring-2 focus-within:ring-primary-tint">
+              <label className="mt-3 flex w-full max-w-md items-center gap-2 rounded-full bg-primary-subtle px-4 py-2.5 sm:mt-5 sm:px-5 sm:py-3 focus-within:ring-2 focus-within:ring-primary-tint">
                 <svg
                   viewBox="0 0 24 24"
                   className="size-5 shrink-0 text-text-muted"
