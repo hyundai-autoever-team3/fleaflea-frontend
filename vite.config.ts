@@ -25,10 +25,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      //새 버전이 오면 바로 변경 하지 않고 사용자에게 물어본 후 진행
+      registerType: 'prompt',
+
       // manifest는 3번에서 만든 public/manifest.webmanifest를 그대로 쓴다
       manifest: false,
-      // 등록은 main.tsx에서 직접 하므로 플러그인이 등록 코드를 넣지 않게 한다
+
+      // 등록은 UpdatePrompt의 useRegisterSW가 하므로 플러그인이 등록 코드를 따로 넣지 않게 한다
       injectRegister: false,
+
       workbox: {
         // 사전 저장: 설치할 때 미리 받아 둘 파일
         globPatterns: ['**/*.{js,css,html}', 'fonts/*', 'icons/*.png', 'mascot/flea4.png'],
