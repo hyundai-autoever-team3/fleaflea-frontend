@@ -374,7 +374,10 @@ export function MyTradeList() {
       <div style={{ clipPath: pixelBox(6) }} className="bg-bg p-4 sm:p-6">
         <div className="mb-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 id={`${tabsId}-heading`} className="text-head-03 font-bold text-text-strong">
+            <h2
+              id={`${tabsId}-heading`}
+              className="text-body-01 font-bold text-text-strong sm:text-head-03"
+            >
               내 거래
             </h2>
             {!requestsQuery.isPending && !requestsQuery.isError && (

@@ -58,14 +58,14 @@ export function MyPage() {
     <div className="min-h-dvh bg-primary-subtle/30">
       <Header showNav={false} />
 
-      <main className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
-        <h1 className="text-head-02 font-bold text-text-strong">마이페이지</h1>
+      <main className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-8 md:px-14 lg:px-24">
+        <h1 className="text-head-03 font-bold text-text-strong sm:text-head-02">마이페이지</h1>
 
         {profileQuery.isPending ? (
           <div
             role="status"
             aria-label="내 정보를 불러오는 중이에요"
-            className="mt-8 grid gap-6 lg:grid-cols-[272px_minmax(0,1fr)]"
+            className="mt-4 grid gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-[272px_minmax(0,1fr)]"
           >
             <span className="sr-only">내 정보를 불러오는 중이에요...</span>
             {[0, 1].map((index) => (
@@ -116,7 +116,7 @@ export function MyPage() {
           </div>
         ) : (
           <>
-            <div className="mt-8 grid items-start gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
+            <div className="mt-4 grid items-start gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-[272px_minmax(0,1fr)]">
               <section
                 aria-labelledby="my-profile-title"
                 style={{ clipPath: pixelBox(6) }}
@@ -156,24 +156,26 @@ export function MyPage() {
                       aria-label="내 활동 바로가기"
                       className="mt-4 grid grid-cols-2 gap-1 border-t border-primary-subtle pt-3 lg:grid-cols-1"
                     >
-                      {SHORTCUTS.map(({ to, label, glyph }) => (
-                        <Link
-                          key={to}
-                          to={to}
-                          viewTransition
-                          style={{ clipPath: pixelBox(2) }}
-                          className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
-                        >
-                          <GlyphTile rows={glyph} />
-                          <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">
-                            {label}
-                          </span>
-                          <Sprite
-                            rows={GLYPHS.arrowRight}
-                            className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block"
-                          />
-                        </Link>
-                      ))}
+                      {/* 설치한 앱에서는 하단 탭에 물건 도감·친구가 있어 같은 바로가기를 다시 두지 않는다 */}
+                      {!isStandalone() &&
+                        SHORTCUTS.map(({ to, label, glyph }) => (
+                          <Link
+                            key={to}
+                            to={to}
+                            viewTransition
+                            style={{ clipPath: pixelBox(2) }}
+                            className={`group flex min-h-12 items-center gap-2.5 px-2 transition-colors hover:bg-primary-subtle ${FOCUS_RING}`}
+                          >
+                            <GlyphTile rows={glyph} />
+                            <span className="min-w-0 flex-1 truncate text-body-04 font-bold text-text-strong">
+                              {label}
+                            </span>
+                            <Sprite
+                              rows={GLYPHS.arrowRight}
+                              className="hidden w-3 shrink-0 text-text-muted transition-transform motion-safe:group-hover:translate-x-0.5 lg:block"
+                            />
+                          </Link>
+                        ))}
                       <button
                         ref={accountSettingsButtonRef}
                         type="button"
