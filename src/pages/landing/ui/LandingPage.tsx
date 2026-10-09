@@ -7,13 +7,7 @@ import { withRedirect } from '../../../shared/lib/redirect'
 import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
-import {
-  CollectionMockup,
-  FriendsMockup,
-  InviteMockup,
-  TradeFlowMockup,
-  TradeWaysMockup,
-} from './FeatureMockups'
+import { FeaturePhoto, FriendsMockup } from './FeatureMockups'
 import { LandingHeader } from './LandingHeader'
 
 // 알약 배지용 가벼운 글래스 — 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임
@@ -219,7 +213,13 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <InviteMockup />
+          <FeaturePhoto
+            src="/landing/intro2.png"
+            width={596}
+            height={522}
+            alt="마켓 초대 링크 창. 초대 링크와 복사 버튼이 보인다."
+            caption="초대 링크를 나누고, 로그인해서 함께 참여해요."
+          />
         </div>
       </section>
 
@@ -248,7 +248,13 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <TradeWaysMockup />
+          <FeaturePhoto
+            src="/landing/intro3.png"
+            width={902}
+            height={765}
+            alt="마켓 상세 화면. 커버 사진 아래에 등록된 상품이 보인다."
+            caption="마켓에서는 판매·나눔·대여, 도감에서는 서로 교환해요."
+          />
         </div>
       </section>
 
@@ -276,7 +282,13 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <CollectionMockup />
+          <FeaturePhoto
+            src="/landing/intro4.png"
+            width={919}
+            height={787}
+            alt="물건 도감 화면. 등록한 물건 사진이 칸마다 놓여 있다."
+            caption="물건은 차곡차곡, 공개 여부는 내가 정해요."
+          />
         </div>
       </section>
 
@@ -331,7 +343,13 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <TradeFlowMockup />
+          <FeaturePhoto
+            src="/landing/intro5.png"
+            width={1641}
+            height={1217}
+            alt="진행 중인 거래 화면. 요청, 수락, 완료 단계와 수락 알림이 보인다."
+            caption="요청부터 완료까지, 거래 상태를 한눈에 확인해요."
+          />
         </div>
       </section>
 
