@@ -34,7 +34,7 @@ const tabs = [
 ]
 
 // 설치한 앱에서 헤더의 메뉴 줄을 대신하는 하단 탭. 브라우저 탭에서는 헤더 메뉴를 쓴다(AppLayout이 가른다).
-// 높이를 바꾸면 AppLayout의 아래 여백과 Toast·UpdatePrompt·알림 패널의 위치도 함께 맞춘다
+// 높이를 바꾸면 AppLayout의 아래 여백과 Toast·알림 패널의 위치도 함께 맞춘다
 export function BottomNav() {
   return (
     <nav
