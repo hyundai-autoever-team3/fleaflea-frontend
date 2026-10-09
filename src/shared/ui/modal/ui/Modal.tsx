@@ -75,6 +75,10 @@ export function Modal({
       ref={dialogRef}
       aria-labelledby={labelledBy}
       onCancel={(event) => {
+        // 사진 고르는 창을 취소해도 파일 입력칸에서 cancel 이벤트가 나와 여기까지 올라온다.
+        // dialog 자신이 받은 취소(ESC)만 닫기로 처리한다
+        if (event.target !== event.currentTarget) return
+
         event.preventDefault()
         onRequestClose()
       }}
