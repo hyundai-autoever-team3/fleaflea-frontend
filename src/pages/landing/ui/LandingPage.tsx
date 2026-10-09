@@ -1,16 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, MouseEvent, PointerEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
-import {
-  CheckCircleIcon,
-  HeartIcon,
-  LockClosedIcon,
-  SparklesIcon,
-  UserGroupIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
+import { HeartIcon, LockClosedIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
-import { MASCOTS } from '../../../shared/config/mascots'
 import { withRedirect } from '../../../shared/lib/redirect'
 import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
@@ -27,7 +19,7 @@ import { LandingHeader } from './LandingHeader'
 // 알약 배지용 가벼운 글래스 — 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임
 const glassPill = 'glass-pill rounded-full'
 
-// 로그인 후 실제 앱 화면을 미리 보여주는 브라우저 창 목업. 실제 캡처가 아니라 우리 컴포넌트/토큰으로 재구성한 것.
+// 로그인 후 실제 앱 화면을 미리 보여주는 브라우저 창 목업. 창 틀은 코드로 그리고 안쪽은 실제 화면 캡처(public/landing)를 넣는다.
 function BrowserMockup() {
   return (
     <div className="mx-auto w-full max-w-2xl text-left">
@@ -43,57 +35,16 @@ function BrowserMockup() {
             <span className="truncate">FleaFlea · 서비스 미리보기</span>
           </span>
         </div>
-        <div className="p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-jua text-body-03 text-text-strong">FleaFlea</span>
-            <div className="flex items-center gap-3 text-xs text-text-muted">
-              <span className="font-bold text-status-brand">마켓</span>
-              <span>물건 도감</span>
-              <span>친구</span>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-primary-subtle p-3">
-            <div className="min-w-0">
-              <p className="text-body-03 font-bold text-text-strong">우리들의 플리마켓</p>
-              <p className="mt-1 text-xs text-text-muted">
-                작은 취향을 나누고, 새로운 이야기를 시작해요.
-              </p>
-            </div>
-            <img
-              draggable={false}
-              src={MASCOTS.smile}
-              alt=""
-              loading="lazy"
-              width={48}
-              height={48}
-              className="size-12 shrink-0 object-contain [image-rendering:pixelated]"
-            />
-          </div>
-
-          {/* 알림을 화면 안의 흐름에 넣어 본문을 가리거나 바깥으로 넘치지 않게 한다. */}
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="flex items-start gap-2 rounded-xl border border-primary-tint p-2">
-              <UserGroupIcon
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-status-brand"
-              />
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-text-strong">새로운 친구 요청</p>
-                <p className="mt-1 text-[11px] text-text-muted">은지님이 친구 요청을 보냈어요.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 rounded-xl border border-primary-tint p-2">
-              <CheckCircleIcon
-                aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-status-brand"
-              />
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-text-strong">기분 좋은 거래 완료</p>
-                <p className="mt-1 text-[11px] text-text-muted">물건에 새로운 이야기가 생겼어요.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* 캡처 원본 크기를 적어 두어 사진이 뜨기 전에도 자리가 잡혀 화면이 밀리지 않게 한다 */}
+        <img
+          draggable={false}
+          src="/landing/intro.png"
+          alt="FleaFlea 마켓 화면. 위쪽 배너 아래에 참여 중인 마켓 목록이 보인다."
+          loading="lazy"
+          width={1243}
+          height={860}
+          className="block h-auto w-full"
+        />
       </div>
     </div>
   )
