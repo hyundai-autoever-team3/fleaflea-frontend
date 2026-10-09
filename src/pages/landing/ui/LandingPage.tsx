@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import type { FormEvent, MouseEvent, PointerEvent } from 'react'
-import { Link, useNavigate } from 'react-router'
-import { HeartIcon, LockClosedIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
+import { HeartIcon, LockClosedIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
-import { withRedirect } from '../../../shared/lib/redirect'
-import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
 import { FeaturePhoto, FriendsMockup } from './FeatureMockups'
@@ -53,12 +50,6 @@ const navItems = [
 ]
 
 export function LandingPage() {
-  const navigate = useNavigate()
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  // 입력칸에서 글자를 끌다 바깥에서 손을 떼도 닫히지 않도록, 누른 자리도 바깥이었는지 기억한다
-  const pressedOutsideRef = useRef(false)
-  const [invite, setInvite] = useState('')
-  const [inviteError, setInviteError] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const heroRevealRef = useScrollReveal<HTMLDivElement>()
@@ -84,33 +75,6 @@ export function LandingPage() {
     sections.forEach((section) => observer.observe(section))
     return () => observer.disconnect()
   }, [])
-
-  function joinMarket(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const value = invite.trim()
-    let code = value
-    if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-      try {
-        const url = new URL(value, window.location.origin)
-        const match = url.pathname.match(/^\/invite\/([a-zA-Z0-9_-]+)\/?$/)
-        if (url.origin !== window.location.origin || !match) throw new Error('Invalid invitation')
-        code = match[1]
-      } catch {
-        setInviteError('이 서비스의 초대 링크나 초대 코드를 입력해 주세요.')
-        return
-      }
-    }
-    if (!code || code.length > 128) {
-      setInviteError('올바른 초대 코드를 입력해 주세요.')
-      return
-    }
-    // 비로그인 상태에서 넣은 링크이므로 안내 단계 없이 로그인으로 보내고, 로그인 후 바로 참여시킨다
-    dialogRef.current?.close()
-
-    navigate(withRedirect('/login', `/invite/${encodeURIComponent(code)}?join=1`), {
-      viewTransition: true,
-    })
-  }
 
   return (
     <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -147,14 +111,15 @@ export function LandingPage() {
             필요한 물건을 주고받는 가장 쉬운 방법
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => dialogRef.current?.showModal()}
+            {/* 로그인 화면에서 가입과 소셜 로그인으로도 갈 수 있어 시작점을 하나로 둔다 */}
+            <Link
+              to="/login"
+              viewTransition
               data-hover-lift
               className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-body-03 font-bold text-white"
             >
-              초대 링크로 참여하기
-            </button>
+              시작하기
+            </Link>
           </div>
         </div>
       </section>
@@ -362,101 +327,6 @@ export function LandingPage() {
         </span>
         <span>© 2026 FleaFlea</span>
       </footer>
-
-      <dialog
-        ref={dialogRef}
-        // macOS 창처럼 띄운다. 안쪽 여백은 본문 칸이 맡으므로 창 자체에는 주지 않는다
-        className="glass-window m-auto w-[min(440px,calc(100vw-36px))] overflow-hidden rounded-2xl text-center outline-none"
-        // <dialog>는 바깥을 눌러도 저절로 닫히지 않는다. 공용 모달과 같은 판정을 쓴다
-        onPointerDown={(event: PointerEvent<HTMLDialogElement>) => {
-          pressedOutsideRef.current = event.target === event.currentTarget && isOutsideDialog(event)
-        }}
-        onClick={(event: MouseEvent<HTMLDialogElement>) => {
-          const pressedOutside = pressedOutsideRef.current
-          pressedOutsideRef.current = false
-          if (pressedOutside && event.target === event.currentTarget && isOutsideDialog(event)) {
-            dialogRef.current?.close()
-          }
-        }}
-        onClose={() => {
-          setInvite('')
-          setInviteError('')
-        }}
-      >
-        {/* 창을 열자마자 X에 초점이 잡혀 검은 테두리가 그려지던 것을 여기로 받아낸다 */}
-        {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
-        <div tabIndex={-1} autoFocus className="outline-none" aria-hidden="true" />
-        <button
-          type="button"
-          onClick={() => dialogRef.current?.close()}
-          aria-label="닫기"
-          className="absolute right-2 top-2 flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-strong"
-        >
-          <XMarkIcon className="size-6" />
-        </button>
-
-        <div className="max-h-[90dvh] overflow-y-auto px-7 pb-11 pt-7 sm:px-10">
-          <>
-            <h2 className="text-center text-gray-800 text-head-03 font-bold">
-              이웃의 초대를 받으셨나요?
-            </h2>
-            <p className="mt-2 text-gray-800 text-center text-body-03">
-              받은 초대 링크나 코드를 붙여 넣어 주세요.
-            </p>
-
-            <img draggable={false} src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
-
-            <form onSubmit={joinMarket} noValidate className="text-left">
-              <label htmlFor="flea-invite-input" className="text-gray-800 text-body-04 font-bold ">
-                초대 링크 또는 코드
-              </label>
-              <input
-                id="flea-invite-input"
-                name="invite"
-                value={invite}
-                onChange={(event) => {
-                  setInvite(event.target.value)
-                  setInviteError('')
-                }}
-                placeholder="초대 링크 또는 코드 붙여넣기"
-                required
-                maxLength={2048}
-                autoComplete="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                aria-invalid={Boolean(inviteError)}
-                className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03 outline-none transition-colors focus:border-primary-tint focus:bg-white focus:ring-2 focus:ring-primary-tint"
-              />
-              {inviteError && <p className="mt-2 text-body-04 text-red-600">{inviteError}</p>}
-              <button
-                type="submit"
-                data-hover-lift
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-body-03 font-bold text-white"
-              >
-                마켓 참여하기
-              </button>
-            </form>
-
-            <div className="mt-6 flex items-center gap-3">
-              <hr className="flex-1 border-border" />
-              <span className="text-body-04 text-text-muted">또는</span>
-              <hr className="flex-1 border-border" />
-            </div>
-
-            <p className="mt-6 text-center text-body-04 text-text-muted">
-              아직 계정이 없으신가요?{' '}
-              <Link
-                to="/signup"
-                viewTransition
-                onClick={() => dialogRef.current?.close()}
-                className="font-bold text-primary"
-              >
-                회원가입
-              </Link>
-            </p>
-          </>
-        </div>
-      </dialog>
     </div>
   )
 }
