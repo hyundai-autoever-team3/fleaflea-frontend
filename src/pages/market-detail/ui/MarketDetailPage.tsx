@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { MouseEvent } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
@@ -20,8 +21,10 @@ import {
   useSendFriendRequest,
 } from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
+import { ProductCreateModal } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -144,6 +147,7 @@ export function MarketDetailPage() {
   const invitationQuery = useMarketInvitation(marketId, isHost)
 
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false)
   const membersListRef = useRef<HTMLUListElement>(null)
   const [areMembersExpanded, setAreMembersExpanded] = useState(false)
   const [memberColumnCount, setMemberColumnCount] = useState(2)
@@ -291,6 +295,17 @@ export function MarketDetailPage() {
 
   const newProductPath = `/market/${marketId}/items/new`
 
+  // 넓은 화면의 웹에서는 마켓 화면 위에 모달로 등록 폼을 띄운다.
+  // 설치한 앱과 좁은 화면은 폼이 길어 모달에 맞지 않으므로 링크대로 등록 페이지로 간다
+  function openProductForm(event: MouseEvent<HTMLAnchorElement>) {
+    // 새 탭·새 창으로 여는 클릭은 건드리지 않는다
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+    if (isStandalone() || !window.matchMedia('(min-width: 768px)').matches) return
+
+    event.preventDefault()
+    setIsProductFormOpen(true)
+  }
+
   return (
     <div>
       <Header />
@@ -355,6 +370,7 @@ export function MarketDetailPage() {
                 )}
                 <Link
                   to={newProductPath}
+                  onClick={openProductForm}
                   viewTransition
                   style={{ clipPath: pixelBox(4) }}
                   className="flex h-10 items-center bg-primary px-4 text-body-04 font-bold text-white sm:h-11 sm:px-5 transition-colors duration-200 hover:bg-primary/90"
@@ -489,6 +505,7 @@ export function MarketDetailPage() {
                   </p>
                   <Link
                     to={newProductPath}
+                    onClick={openProductForm}
                     viewTransition
                     style={{ clipPath: pixelBox(4) }}
                     className="mt-5 bg-primary px-5 py-2.5 text-body-04 font-bold text-white hover:bg-primary/90"
@@ -682,6 +699,12 @@ export function MarketDetailPage() {
                 </div>
               )}
             </Modal>
+
+            <ProductCreateModal
+              marketId={marketId}
+              open={isProductFormOpen}
+              onClose={() => setIsProductFormOpen(false)}
+            />
 
             {invitationQuery.data && (
               <InviteLinkModal
