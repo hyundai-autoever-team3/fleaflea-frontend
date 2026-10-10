@@ -1,11 +1,9 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useEffect, useId, useRef } from 'react'
+import { Link } from 'react-router'
 
-import { useSessionStore } from '../../../entities/session'
 import { useMyProfile } from '../../../entities/user'
-import { logout } from '../../../features/auth'
+import { useLogout } from '../../../features/auth'
 import { Avatar } from '../../../shared/ui/avatar'
-import { useToastStore } from '../../../shared/ui/toast'
 
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
@@ -19,8 +17,7 @@ interface ProfileMenuProps {
 
 export function ProfileMenu({ open, onOpenChange }: ProfileMenuProps) {
   const menuId = useId()
-  const navigate = useNavigate()
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { isLoggingOut, handleLogout } = useLogout()
 
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -50,22 +47,6 @@ export function ProfileMenu({ open, onOpenChange }: ProfileMenuProps) {
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [onOpenChange, open])
-
-  async function handleLogout() {
-    if (isLoggingOut) return
-
-    setIsLoggingOut(true)
-
-    try {
-      await logout()
-    } catch {
-      // 서버 로그아웃에 실패해도 로컬 세션은 아래에서 삭제한다.
-    }
-
-    useSessionStore.getState().clearSession()
-    useToastStore.getState().showToast('로그아웃했어요')
-    void navigate('/login', { replace: true, viewTransition: true })
-  }
 
   return (
     <div ref={containerRef} className="relative">
@@ -103,7 +84,7 @@ export function ProfileMenu({ open, onOpenChange }: ProfileMenuProps) {
             onClick={() => onOpenChange(false)}
             className={`${MENU_ITEM} ${FOCUS_RING}`}
           >
-            내 정보 보기
+            마이페이지
           </Link>
           <button
             type="button"

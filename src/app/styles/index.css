@@ -6,6 +6,9 @@
 /* 스크롤바 유무가 바뀌어도 콘텐츠의 가로 위치를 유지한다. */
 html {
   scrollbar-gutter: stable;
+  /* 다크 모드 화면을 따로 만들지 않았다. 브라우저의 자동 다크 모드(삼성 인터넷·크롬)가
+     색을 임의로 뒤집지 않도록 밝은 화면만 쓴다고 알린다. index.html의 meta와 짝이다 */
+  color-scheme: only light;
 }
 
 /* 이미지 드래그 방지를 위해 draggable={false}와 함께 적용한다. */

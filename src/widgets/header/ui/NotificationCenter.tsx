@@ -31,7 +31,9 @@ import {
   useReadNotification,
 } from '../../../features/notification-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { useToastStore } from '../../../shared/ui/toast'
+import { NotificationPermissionBanner } from './NotificationPermissionBanner'
 
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
@@ -469,7 +471,12 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
           role="dialog"
           aria-labelledby={titleId}
           aria-busy={notificationsQuery.isPending}
-          className="glass-panel fixed inset-x-4 top-[6.75rem] z-50 flex max-h-[calc(100dvh-7.75rem)] flex-col overflow-hidden rounded-2xl md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:max-h-[calc(100dvh-5rem)] md:w-96"
+          // 설치한 앱에서는 헤더가 한 줄로 낮고 아래에 하단 탭이 있어, 시작 위치와 최대 높이가 다르다
+          className={`glass-panel fixed inset-x-4 z-50 flex flex-col overflow-hidden rounded-2xl md:absolute md:inset-x-auto md:right-0 md:top-full md:mt-2 md:w-96 ${
+            isStandalone()
+              ? 'top-[4.25rem] max-h-[calc(100dvh-8.75rem-env(safe-area-inset-bottom))] md:max-h-[calc(100dvh-9rem)]'
+              : 'top-[6.75rem] max-h-[calc(100dvh-7.75rem)] md:max-h-[calc(100dvh-5rem)]'
+          }`}
         >
           <div className="flex min-h-[4.5rem] shrink-0 items-center justify-between gap-3 px-4 py-3.5">
             {confirmingClear ? (
@@ -533,6 +540,8 @@ export function NotificationCenter({ open, onOpenChange }: NotificationCenterPro
               </>
             )}
           </div>
+
+          <NotificationPermissionBanner />
 
           <div
             ref={scrollAreaRef}

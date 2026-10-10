@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { MouseEvent } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { isAxiosError } from 'axios'
 
@@ -10,7 +11,8 @@ import {
 } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
 import type { RelationshipStatus } from '../../../entities/friend'
-import { ProductCard, useMarketProducts } from '../../../entities/product'
+import { ProductCard, STATUS_LABEL, useMarketProducts } from '../../../entities/product'
+import type { ProductStatus } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import {
   getFriendRequestActionErrorMessage,
@@ -19,8 +21,10 @@ import {
   useSendFriendRequest,
 } from '../../../features/friend-manage'
 import { InviteLinkModal } from '../../../features/market-invite'
+import { ProductCreateModal } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -60,6 +64,20 @@ function readProductPage(value: string | null) {
   return value !== null && /^\d+$/.test(value) ? Number(value) : 0
 }
 
+type StatusFilter = 'ALL' | ProductStatus
+
+const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
+  { key: 'ALL', label: '전체' },
+  ...(Object.keys(STATUS_LABEL) as ProductStatus[]).map((key) => ({
+    key,
+    label: STATUS_LABEL[key],
+  })),
+]
+
+function readStatusFilter(value: string | null): StatusFilter {
+  return STATUS_FILTERS.some(({ key }) => key === value) ? (value as StatusFilter) : 'ALL'
+}
+
 // line-clamp로 내용이 잘렸는지 측정하고, 너비가 바뀌면 다시 확인한다.
 function MarketDescription({ description }: { description: string | null }) {
   const textRef = useRef<HTMLParagraphElement>(null)
@@ -85,7 +103,7 @@ function MarketDescription({ description }: { description: string | null }) {
     <div>
       <p
         ref={textRef}
-        className={`max-w-2xl whitespace-pre-wrap text-body-02 leading-relaxed text-text-muted ${
+        className={`max-w-2xl whitespace-pre-wrap text-body-04 leading-relaxed text-text-muted sm:text-body-02 ${
           isExpanded ? '' : DESCRIPTION_CLAMP_CLASS
         }`}
       >
@@ -112,6 +130,12 @@ export function MarketDetailPage() {
   // URL에 페이지를 저장해 상품 상세에서 돌아와도 같은 목록을 표시한다.
   const [searchParams, setSearchParams] = useSearchParams()
   const productPage = readProductPage(searchParams.get('productPage'))
+  // 상품 상세에서 돌아와도 같은 조건으로 보이도록 검색어와 상태도 URL에 둔다.
+  const statusFilter = readStatusFilter(searchParams.get('status'))
+  const appliedKeyword = searchParams.get('q') ?? ''
+
+  const [keyword, setKeyword] = useState(appliedKeyword)
+  const isComposingRef = useRef(false)
 
   const marketQuery = useMarket(marketId)
   const membersQuery = useMarketMembers(marketId)
@@ -123,11 +147,19 @@ export function MarketDetailPage() {
   const invitationQuery = useMarketInvitation(marketId, isHost)
 
   const [isInviteOpen, setIsInviteOpen] = useState(false)
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false)
   const membersListRef = useRef<HTMLUListElement>(null)
   const [areMembersExpanded, setAreMembersExpanded] = useState(false)
   const [memberColumnCount, setMemberColumnCount] = useState(2)
 
-  const products = productsQuery.data ?? []
+  const allProducts = productsQuery.data ?? []
+  const normalizedKeyword = appliedKeyword.trim().toLowerCase()
+
+  const products = allProducts.filter(
+    (product) =>
+      (statusFilter === 'ALL' || product.status === statusFilter) &&
+      product.title.toLowerCase().includes(normalizedKeyword),
+  )
   const productPageCount = Math.ceil(products.length / PRODUCTS_PER_PAGE)
   const pageProducts = products.slice(
     productPage * PRODUCTS_PER_PAGE,
@@ -196,6 +228,23 @@ export function MarketDetailPage() {
     if (!hasMoreMembers) setAreMembersExpanded(false)
   }, [hasMoreMembers])
 
+  // 조건이 바뀌면 결과 수가 달라지므로 첫 페이지부터 보여준다.
+  function updateProductFilter(next: { status?: StatusFilter; q?: string }) {
+    const params = new URLSearchParams(searchParams)
+    const status = next.status ?? statusFilter
+    const q = (next.q ?? appliedKeyword).trim()
+
+    if (status === 'ALL') params.delete('status')
+    else params.set('status', status)
+
+    if (q) params.set('q', q)
+    else params.delete('q')
+
+    params.delete('productPage')
+
+    setSearchParams(params, { replace: true, preventScrollReset: true })
+  }
+
   function selectProductPage(page: number) {
     const params = new URLSearchParams(searchParams)
 
@@ -246,11 +295,22 @@ export function MarketDetailPage() {
 
   const newProductPath = `/market/${marketId}/items/new`
 
+  // 넓은 화면의 웹에서는 마켓 화면 위에 모달로 등록 폼을 띄운다.
+  // 설치한 앱과 좁은 화면은 폼이 길어 모달에 맞지 않으므로 링크대로 등록 페이지로 간다
+  function openProductForm(event: MouseEvent<HTMLAnchorElement>) {
+    // 새 탭·새 창으로 여는 클릭은 건드리지 않는다
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+    if (isStandalone() || !window.matchMedia('(min-width: 768px)').matches) return
+
+    event.preventDefault()
+    setIsProductFormOpen(true)
+  }
+
   return (
     <div>
       <Header />
 
-      <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-8 md:px-14 lg:px-24">
         <Link
           to="/market"
           viewTransition
@@ -277,9 +337,11 @@ export function MarketDetailPage() {
           </p>
         ) : (
           <>
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 sm:mt-4 sm:gap-4">
               <div className="flex min-w-0 items-center gap-2">
-                <h1 className="truncate text-head-02 font-bold text-text-strong">{market.title}</h1>
+                <h1 className="truncate text-head-03 font-bold text-text-strong sm:text-head-02">
+                  {market.title}
+                </h1>
                 {isHost && (
                   <span
                     style={{ clipPath: pixelBox(2) }}
@@ -296,11 +358,11 @@ export function MarketDetailPage() {
                     onClick={() => setIsInviteOpen(true)}
                     disabled={!invitationQuery.data}
                     style={{ clipPath: pixelBox(4) }}
-                    className="group h-11 bg-primary-tint p-[2px] disabled:opacity-50"
+                    className="group h-10 bg-primary-tint p-[2px] disabled:opacity-50 sm:h-11"
                   >
                     <span
                       style={{ clipPath: pixelBox(4) }}
-                      className="flex h-full items-center bg-primary-subtle px-5 text-body-04 font-bold text-text-muted transition-colors duration-200 group-enabled:group-hover:bg-white"
+                      className="flex h-full items-center bg-primary-subtle px-4 text-body-04 font-bold text-text-muted sm:px-5 transition-colors duration-200 group-enabled:group-hover:bg-white"
                     >
                       초대 링크
                     </span>
@@ -308,9 +370,10 @@ export function MarketDetailPage() {
                 )}
                 <Link
                   to={newProductPath}
+                  onClick={openProductForm}
                   viewTransition
                   style={{ clipPath: pixelBox(4) }}
-                  className="flex h-11 items-center bg-primary px-5 text-body-04 font-bold text-white transition-colors duration-200 hover:bg-primary/90"
+                  className="flex h-10 items-center bg-primary px-4 text-body-04 font-bold text-white sm:h-11 sm:px-5 transition-colors duration-200 hover:bg-primary/90"
                 >
                   + 상품 등록
                 </Link>
@@ -327,12 +390,12 @@ export function MarketDetailPage() {
             </section>
 
             {/* MarketCover가 style을 받지 않아 바깥 요소에 모서리 클리핑을 적용한다. */}
-            <div className="mt-6" style={{ clipPath: pixelBox(6) }}>
+            <div className="mt-4 sm:mt-6" style={{ clipPath: pixelBox(6) }}>
               <MarketCover
                 coverImageUrl={market.coverImageUrl}
                 marketId={market.marketId}
                 variant="bare"
-                className="h-56 w-full md:h-72"
+                className="h-32 w-full sm:h-56 md:h-72"
               />
             </div>
 
@@ -349,10 +412,67 @@ export function MarketDetailPage() {
               ))}
             </dl>
 
-            <section className="mt-14">
-              <h2 className="text-head-03 font-bold text-text-strong">
-                상품 {productsQuery.data && <span className="text-primary">{products.length}</span>}
+            <section className="mt-8 sm:mt-14">
+              <h2 className="text-body-01 font-bold text-text-strong sm:text-head-03">
+                상품{' '}
+                {productsQuery.data && <span className="text-primary">{allProducts.length}</span>}
               </h2>
+
+              {allProducts.length > 0 && (
+                <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div role="group" aria-label="거래 상태" className="flex flex-wrap gap-1.5">
+                    {STATUS_FILTERS.map(({ key, label }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => updateProductFilter({ status: key })}
+                        aria-pressed={statusFilter === key}
+                        style={{ clipPath: pixelBox(2) }}
+                        className={`h-9 px-3 text-body-04 font-bold transition-colors ${
+                          statusFilter === key
+                            ? 'bg-primary text-white'
+                            : 'bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label className="flex w-3/4 items-center gap-2 rounded-full bg-primary-subtle px-3.5 py-2 focus-within:ring-2 focus-within:ring-primary-tint sm:w-full sm:px-5 sm:py-2.5 md:max-w-xs">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="size-4 shrink-0 text-text-muted sm:size-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+                    </svg>
+
+                    <input
+                      type="search"
+                      value={keyword}
+                      onChange={(event) => {
+                        setKeyword(event.target.value)
+                        if (!isComposingRef.current) updateProductFilter({ q: event.target.value })
+                      }}
+                      onCompositionStart={() => {
+                        isComposingRef.current = true
+                      }}
+                      onCompositionEnd={(event) => {
+                        isComposingRef.current = false
+                        updateProductFilter({ q: event.currentTarget.value })
+                      }}
+                      placeholder="상품 이름으로 검색"
+                      aria-label="상품 검색"
+                      className="w-full bg-transparent text-body-03 text-text-strong outline-none placeholder:text-body-04 placeholder:text-text-muted/50 sm:text-body-04"
+                    />
+                  </label>
+                </div>
+              )}
               {productsQuery.isPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">상품을 불러오는 중이에요...</p>
               ) : productsQuery.isError ? (
@@ -366,7 +486,7 @@ export function MarketDetailPage() {
                     다시 시도
                   </button>
                 </div>
-              ) : products.length === 0 ? (
+              ) : allProducts.length === 0 ? (
                 <div
                   className="mt-4 flex flex-col items-center bg-primary-subtle py-14 text-center"
                   style={{ clipPath: pixelBox(6) }}
@@ -385,6 +505,7 @@ export function MarketDetailPage() {
                   </p>
                   <Link
                     to={newProductPath}
+                    onClick={openProductForm}
                     viewTransition
                     style={{ clipPath: pixelBox(4) }}
                     className="mt-5 bg-primary px-5 py-2.5 text-body-04 font-bold text-white hover:bg-primary/90"
@@ -392,9 +513,13 @@ export function MarketDetailPage() {
                     + 첫 상품 등록하기
                   </Link>
                 </div>
+              ) : products.length === 0 ? (
+                <p className="mt-10 text-center text-body-04 text-text-muted">
+                  조건에 맞는 상품이 없어요.
+                </p>
               ) : (
                 <>
-                  <ul className="mt-4 grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+                  <ul className="mt-4 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
                     {pageProducts.map((product) => (
                       <li key={product.itemId}>
                         <ProductCard
@@ -433,9 +558,9 @@ export function MarketDetailPage() {
               )}
             </section>
 
-            <section className="mt-14">
+            <section className="mt-8 sm:mt-14">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-head-03 font-bold text-text-strong">
+                <h2 className="text-body-01 font-bold text-text-strong sm:text-head-03">
                   참여자 <span className="text-primary">{market.memberCount}</span>
                 </h2>
                 {hasMoreMembers && (
@@ -574,6 +699,12 @@ export function MarketDetailPage() {
                 </div>
               )}
             </Modal>
+
+            <ProductCreateModal
+              marketId={marketId}
+              open={isProductFormOpen}
+              onClose={() => setIsProductFormOpen(false)}
+            />
 
             {invitationQuery.data && (
               <InviteLinkModal

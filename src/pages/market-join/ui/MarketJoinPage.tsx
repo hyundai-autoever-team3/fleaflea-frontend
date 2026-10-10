@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router'
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router'
 
 import { useSessionStore } from '../../../entities/session'
 import {
@@ -74,6 +74,11 @@ export function MarketJoinPage() {
     })
   }
 
+  // 비로그인 상태로 초대 링크를 열면 안내 화면 없이 로그인으로 보내고, 로그인 후 자동 참여한다
+  if (inviteCode && !accessToken) {
+    return <Navigate to={authPathWithReturn('/login')} replace />
+  }
+
   if (shouldAutoJoin && accessToken && inviteCode && !error) {
     return (
       <LoadingScreen
@@ -95,11 +100,7 @@ export function MarketJoinPage() {
             className="mx-auto h-24 object-contain [image-rendering:pixelated]"
           />
           <h1 className="mt-4 text-head-03 font-bold text-text-strong">
-            {!inviteCode
-              ? '링크를 확인해 주세요'
-              : accessToken
-                ? '이 마켓에 참여할까요?'
-                : '초대받은 마켓이에요'}
+            {!inviteCode ? '링크를 확인해 주세요' : '이 마켓에 참여할까요?'}
           </h1>
 
           {!inviteCode ? (
@@ -114,25 +115,6 @@ export function MarketJoinPage() {
               >
                 처음으로
               </Link>
-            </>
-          ) : !accessToken ? (
-            <>
-              <p className="mt-2 text-body-03 text-text-muted">
-                로그인하면 이 마켓으로 바로 들어가요.
-              </p>
-              <Link
-                to={authPathWithReturn('/login')}
-                style={{ clipPath: pixelBox(4) }}
-                className="mt-8 block h-12 bg-primary text-body-03 font-bold leading-[3rem] text-white hover:bg-primary/90"
-              >
-                로그인하기
-              </Link>
-              <p className="mt-4 text-body-04 text-text-muted">
-                아직 계정이 없으신가요?{' '}
-                <Link to={authPathWithReturn('/signup')} className="font-bold text-primary">
-                  회원가입
-                </Link>
-              </p>
             </>
           ) : (
             <>

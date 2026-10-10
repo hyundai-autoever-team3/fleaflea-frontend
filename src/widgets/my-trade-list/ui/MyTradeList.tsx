@@ -35,8 +35,8 @@ const TABS: { key: TabKey; label: string }[] = [
 
 const SOURCE_LABEL: Record<TradeRequestKind, string> = {
   ITEM: '마켓',
-  COLLECTION: '도감',
-  BEG: '도감',
+  COLLECTION: '물건 도감',
+  BEG: '물건 도감',
 }
 
 // 도감 거래는 대여·교환을 사용하고 구걸 요청에는 tradeType이 없다.
@@ -88,7 +88,7 @@ type SourceKey = 'ALL' | 'ITEM' | 'DEX'
 const SOURCES: { key: SourceKey; label: string }[] = [
   { key: 'ALL', label: '전체' },
   { key: 'ITEM', label: '마켓' },
-  { key: 'DEX', label: '도감' },
+  { key: 'DEX', label: '물건 도감' },
 ]
 
 function readTab(value: string | null): TabKey {
@@ -374,7 +374,10 @@ export function MyTradeList() {
       <div style={{ clipPath: pixelBox(6) }} className="bg-bg p-4 sm:p-6">
         <div className="mb-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 id={`${tabsId}-heading`} className="text-head-03 font-bold text-text-strong">
+            <h2
+              id={`${tabsId}-heading`}
+              className="text-body-01 font-bold text-text-strong sm:text-head-03"
+            >
               내 거래
             </h2>
             {!requestsQuery.isPending && !requestsQuery.isError && (

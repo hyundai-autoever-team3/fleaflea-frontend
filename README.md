@@ -40,6 +40,8 @@ pnpm dev
 
 `.env`의 `VITE_API_BASE_URL`은 **비워 두는 것이 기본값**입니다. 코드가 `/api/v1/...`을 그대로 요청하면 개발 서버(`vite.config.ts`)와 배포(`vercel.json`)의 프록시가 백엔드로 넘깁니다. 브라우저가 우리 도메인 하나만 상대하게 되어 리프레시 토큰 쿠키가 퍼스트파티로 남고, CORS 허용 목록을 관리할 필요도 없습니다.
 
+소셜 로그인은 백엔드가 로그인 쿠키를 백엔드 도메인에 설정하므로, 소셜 로그인을 쓰는 환경에서는 `VITE_API_BASE_URL`에 백엔드 주소(배포 `https://api.fleaflea.app`, 로컬 백엔드 `http://localhost:8080`)를 넣어야 합니다. 버튼 동작은 `VITE_SOCIAL_LOGIN_ENABLED=true`일 때만 켜지고, 그 전에는 준비 중 안내가 뜹니다.
+
 ## 스크립트
 
 | 명령어 | 설명 |

@@ -1,33 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
-import type { FormEvent, MouseEvent, PointerEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import {
-  CheckCircleIcon,
-  HeartIcon,
-  LockClosedIcon,
-  SparklesIcon,
-  UserGroupIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
+import { HeartIcon, LockClosedIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
-import { MASCOTS } from '../../../shared/config/mascots'
-import { withRedirect } from '../../../shared/lib/redirect'
-import { isOutsideDialog } from '../../../shared/ui/modal'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
-import {
-  CollectionMockup,
-  FriendsMockup,
-  InviteMockup,
-  TradeFlowMockup,
-  TradeWaysMockup,
-} from './FeatureMockups'
+import { FeaturePhoto, FriendsMockup } from './FeatureMockups'
 import { LandingHeader } from './LandingHeader'
 
 // 알약 배지용 가벼운 글래스 — 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임
 const glassPill = 'glass-pill rounded-full'
 
-// 로그인 후 실제 앱 화면을 미리 보여주는 브라우저 창 목업. 실제 캡처가 아니라 우리 컴포넌트/토큰으로 재구성한 것.
+// 로그인 후 실제 앱 화면을 미리 보여주는 브라우저 창 목업. 창 틀은 코드로 그리고 안쪽은 실제 화면 캡처(public/landing)를 넣는다.
 function BrowserMockup() {
   return (
     <div className="mx-auto w-full max-w-2xl text-left">
@@ -43,49 +26,23 @@ function BrowserMockup() {
             <span className="truncate">FleaFlea · 서비스 미리보기</span>
           </span>
         </div>
-        <div className="p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-jua text-body-03 text-text-strong">FleaFlea</span>
-            <div className="flex items-center gap-3 text-xs text-text-muted">
-              <span className="font-bold text-status-brand">마켓</span>
-              <span>물건 도감</span>
-              <span>친구</span>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-primary-subtle p-3">
-            <div className="min-w-0">
-              <p className="text-body-03 font-bold text-text-strong">우리들의 플리마켓</p>
-              <p className="mt-1 text-xs text-text-muted">
-                작은 취향을 나누고, 새로운 이야기를 시작해요.
-              </p>
-            </div>
-            <img draggable={false} src={MASCOTS.smile} alt="" loading="lazy" width={48} height={48} className="size-12 shrink-0 object-contain [image-rendering:pixelated]" />
-          </div>
-
-          {/* 알림을 화면 안의 흐름에 넣어 본문을 가리거나 바깥으로 넘치지 않게 한다. */}
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="flex items-start gap-2 rounded-xl border border-primary-tint p-2">
-              <UserGroupIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-brand" />
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-text-strong">새로운 친구 요청</p>
-                <p className="mt-1 text-[11px] text-text-muted">은지님이 친구 요청을 보냈어요.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2 rounded-xl border border-primary-tint p-2">
-              <CheckCircleIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-status-brand" />
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-text-strong">기분 좋은 거래 완료</p>
-                <p className="mt-1 text-[11px] text-text-muted">물건에 새로운 이야기가 생겼어요.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* 캡처 원본 크기를 적어 두어 사진이 뜨기 전에도 자리가 잡혀 화면이 밀리지 않게 한다 */}
+        <img
+          draggable={false}
+          src="/landing/intro.png"
+          alt="FleaFlea 마켓 화면. 위쪽 배너 아래에 참여 중인 마켓 목록이 보인다."
+          loading="lazy"
+          width={1243}
+          height={860}
+          className="block h-auto w-full"
+        />
       </div>
     </div>
   )
 }
 
-const FEATURE_SECTION_CLASS = 'mx-auto flex min-h-dvh w-full max-w-6xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 lg:gap-16'
+const FEATURE_SECTION_CLASS =
+  'mx-auto flex min-h-dvh w-full max-w-6xl snap-start flex-col items-center justify-center gap-10 px-6 py-16 lg:gap-16'
 
 const navItems = [
   { id: 'intro', label: '서비스 소개' },
@@ -93,14 +50,6 @@ const navItems = [
 ]
 
 export function LandingPage() {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  // 입력칸에서 글자를 끌다 바깥에서 손을 떼도 닫히지 않도록, 누른 자리도 바깥이었는지 기억한다
-  const pressedOutsideRef = useRef(false)
-  const [invite, setInvite] = useState('')
-  const [inviteError, setInviteError] = useState('')
-  // 코드를 확인하면 모달 안에서 다음 단계로 넘어간다. 여기서 화면을 옮겨 버리면
-  // 모달로 시작한 흐름이 갑자기 페이지로 바뀌어 끊긴 느낌이 난다
-  const [invitedCode, setInvitedCode] = useState('')
   const [activeId, setActiveId] = useState<string | null>(null)
 
   const heroRevealRef = useScrollReveal<HTMLDivElement>()
@@ -127,34 +76,15 @@ export function LandingPage() {
     return () => observer.disconnect()
   }, [])
 
-  function joinMarket(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const value = invite.trim()
-    let code = value
-    if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-      try {
-        const url = new URL(value, window.location.origin)
-        const match = url.pathname.match(/^\/invite\/([a-zA-Z0-9_-]+)\/?$/)
-        if (url.origin !== window.location.origin || !match) throw new Error('Invalid invitation')
-        code = match[1]
-      } catch {
-        setInviteError('이 서비스의 초대 링크나 초대 코드를 입력해 주세요.')
-        return
-      }
-    }
-    if (!code || code.length > 128) {
-      setInviteError('올바른 초대 코드를 입력해 주세요.')
-      return
-    }
-    setInvitedCode(encodeURIComponent(code))
-  }
-
   return (
     <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <LandingHeader navItems={navItems} activeId={activeId} />
 
       {/* 히어로 — 점 그리드 텍스처 + 은은한 그라데이션 (design.md 6장 예외: 화면당 배경 1곳까지) */}
-      <section id="top" className="relative flex min-h-dvh snap-start flex-col items-center justify-center overflow-hidden bg-bg px-6 text-center">
+      <section
+        id="top"
+        className="relative flex min-h-dvh snap-start flex-col items-center justify-center overflow-hidden bg-bg px-6 text-center"
+      >
         <div
           className="absolute inset-0"
           style={{
@@ -181,13 +111,15 @@ export function LandingPage() {
             필요한 물건을 주고받는 가장 쉬운 방법
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => dialogRef.current?.showModal()}
+            {/* 로그인 화면에서 가입과 소셜 로그인으로도 갈 수 있어 시작점을 하나로 둔다 */}
+            <Link
+              to="/login"
+              viewTransition
               data-hover-lift
-              className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-body-03 font-bold text-white">
-              초대 링크로 참여하기
-            </button>
+              className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-body-03 font-bold text-white"
+            >
+              시작하기
+            </Link>
           </div>
         </div>
       </section>
@@ -206,8 +138,12 @@ export function LandingPage() {
           }}
         />
         <div data-reveal-item className="relative">
-          <h2 className="text-head-02 font-bold text-text-strong">당신의 두 번째 발견! 즐거운 플리마켓</h2>
-          <p className="mt-2 text-body-03 text-text-muted">작은 취향을 나누고, 새로운 이야기를 시작해요 💜</p>
+          <h2 className="text-head-02 font-bold text-text-strong">
+            당신의 두 번째 발견! 즐거운 플리마켓
+          </h2>
+          <p className="mt-2 text-body-03 text-text-muted">
+            작은 취향을 나누고, 새로운 이야기를 시작해요 💜
+          </p>
         </div>
         <div data-reveal-item className="relative min-w-0 max-w-full">
           <BrowserMockup />
@@ -242,15 +178,18 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <InviteMockup />
+          <FeaturePhoto
+            src="/landing/intro2.png"
+            width={596}
+            height={522}
+            alt="마켓 초대 링크 창. 초대 링크와 복사 버튼이 보인다."
+            caption="초대 링크를 나누고, 로그인해서 함께 참여해요."
+          />
         </div>
       </section>
 
       {/* 이용 방법 — 02. 판매/나눔/대여/교환 */}
-      <section
-        ref={step02RevealRef}
-        className={`${FEATURE_SECTION_CLASS} lg:flex-row-reverse`}
-      >
+      <section ref={step02RevealRef} className={`${FEATURE_SECTION_CLASS} lg:flex-row-reverse`}>
         <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
@@ -274,15 +213,18 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <TradeWaysMockup />
+          <FeaturePhoto
+            src="/landing/intro3.png"
+            width={902}
+            height={765}
+            alt="마켓 상세 화면. 커버 사진 아래에 등록된 상품이 보인다."
+            caption="마켓에서는 판매·나눔·대여, 도감에서는 서로 교환해요."
+          />
         </div>
       </section>
 
       {/* 03. 내 물건 도감 */}
-      <section
-        ref={step03RevealRef}
-        className={`${FEATURE_SECTION_CLASS} lg:flex-row`}
-      >
+      <section ref={step03RevealRef} className={`${FEATURE_SECTION_CLASS} lg:flex-row`}>
         <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
@@ -305,15 +247,18 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <CollectionMockup />
+          <FeaturePhoto
+            src="/landing/intro4.png"
+            width={919}
+            height={787}
+            alt="물건 도감 화면. 등록한 물건 사진이 칸마다 놓여 있다."
+            caption="물건은 차곡차곡, 공개 여부는 내가 정해요."
+          />
         </div>
       </section>
 
       {/* 04. 친구 추가 */}
-      <section
-        ref={step04RevealRef}
-        className={`${FEATURE_SECTION_CLASS} lg:flex-row-reverse`}
-      >
+      <section ref={step04RevealRef} className={`${FEATURE_SECTION_CLASS} lg:flex-row-reverse`}>
         <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
@@ -332,8 +277,7 @@ export function LandingPage() {
             상대가 수락하면 친구가 돼요.
             <br />
             친구끼리는 서로의 도감을 둘러보고
-            <br />
-            콕 찔러 안부도 전할 수 있어요.
+            <br />콕 찔러 안부도 전할 수 있어요.
           </p>
         </div>
 
@@ -343,10 +287,7 @@ export function LandingPage() {
       </section>
 
       {/* 05. 거래 진행 상태 */}
-      <section
-        ref={step05RevealRef}
-        className={`${FEATURE_SECTION_CLASS} lg:flex-row`}
-      >
+      <section ref={step05RevealRef} className={`${FEATURE_SECTION_CLASS} lg:flex-row`}>
         <div data-reveal-item className="w-full min-w-0 text-left lg:w-5/12 lg:shrink-0">
           <span
             data-hover-lift
@@ -367,7 +308,13 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <TradeFlowMockup />
+          <FeaturePhoto
+            src="/landing/intro5.png"
+            width={1641}
+            height={1217}
+            alt="진행 중인 거래 화면. 요청, 수락, 완료 단계와 수락 알림이 보인다."
+            caption="요청부터 완료까지, 거래 상태를 한눈에 확인해요."
+          />
         </div>
       </section>
 
@@ -380,143 +327,6 @@ export function LandingPage() {
         </span>
         <span>© 2026 FleaFlea</span>
       </footer>
-
-      <dialog
-        ref={dialogRef}
-        // macOS 창처럼 띄운다. 안쪽 여백은 본문 칸이 맡으므로 창 자체에는 주지 않는다
-        className="glass-window m-auto w-[min(440px,calc(100vw-36px))] overflow-hidden rounded-2xl text-center outline-none"
-        // <dialog>는 바깥을 눌러도 저절로 닫히지 않는다. 공용 모달과 같은 판정을 쓴다
-        onPointerDown={(event: PointerEvent<HTMLDialogElement>) => {
-          pressedOutsideRef.current = event.target === event.currentTarget && isOutsideDialog(event)
-        }}
-        onClick={(event: MouseEvent<HTMLDialogElement>) => {
-          const pressedOutside = pressedOutsideRef.current
-          pressedOutsideRef.current = false
-          if (pressedOutside && event.target === event.currentTarget && isOutsideDialog(event)) {
-            dialogRef.current?.close()
-          }
-        }}
-        onClose={() => {
-          setInvite('')
-          setInviteError('')
-          setInvitedCode('')
-        }}
-      >
-        {/* 창을 열자마자 X에 초점이 잡혀 검은 테두리가 그려지던 것을 여기로 받아낸다 */}
-        {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
-        <div tabIndex={-1} autoFocus className="outline-none" aria-hidden="true" />
-        <button
-          type="button"
-          onClick={() => dialogRef.current?.close()}
-          aria-label="닫기"
-          className="absolute right-2 top-2 flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-strong"
-        >
-          <XMarkIcon className="size-6" />
-        </button>
-
-        <div className="max-h-[90dvh] overflow-y-auto px-7 pb-11 pt-7 sm:px-10">
-        {invitedCode ? (
-          <>
-            <h2 className="text-center text-gray-800 text-head-03 font-bold">초대받은 마켓이에요</h2>
-            <p className="mt-2 text-center text-body-03 text-text-muted">
-              로그인하면 이 마켓으로 바로 들어가요.
-            </p>
-
-            <img draggable={false} src="/mascot/flea10.png" alt="" className="mx-auto my-6 w-32 [image-rendering:pixelated]" />
-
-            <Link
-              to={withRedirect('/login', `/invite/${invitedCode}?join=1`)}
-              viewTransition
-              onClick={() => dialogRef.current?.close()}
-              data-hover-lift
-              className="flex h-12 w-full items-center justify-center rounded-lg bg-primary text-body-03 font-bold text-white"
-            >
-              로그인하고 참여하기
-            </Link>
-
-            <p className="mt-6 text-center text-body-04 text-text-muted">
-              아직 계정이 없으신가요?{' '}
-              <Link
-                to={withRedirect('/signup', `/invite/${invitedCode}?join=1`)}
-                viewTransition
-                onClick={() => dialogRef.current?.close()}
-                className="font-bold text-primary"
-              >
-                회원가입
-              </Link>
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setInvitedCode('')}
-              className="mt-4 text-body-04 text-text-muted underline underline-offset-2"
-            >
-              다른 링크 넣기
-            </button>
-          </>
-        ) : (
-          <>
-          <h2 className="text-center text-gray-800 text-head-03 font-bold">
-            이웃의 초대를 받으셨나요?
-          </h2>
-          <p className="mt-2 text-gray-800 text-center text-body-03">
-            받은 초대 링크나 코드를 붙여 넣어 주세요.
-          </p>
-
-          <img draggable={false} src="/mascot/flea.png" alt="" className="mx-auto my-6 w-32" />
-
-          <form onSubmit={joinMarket} noValidate className="text-left">
-            <label htmlFor="flea-invite-input" className="text-gray-800 text-body-04 font-bold ">
-              초대 링크 또는 코드
-            </label>
-            <input
-              id="flea-invite-input"
-              name="invite"
-              value={invite}
-              onChange={(event) => {
-                setInvite(event.target.value)
-                setInviteError('')
-              }}
-              placeholder="초대 링크 또는 코드 붙여넣기"
-              required
-              maxLength={2048}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              aria-invalid={Boolean(inviteError)}
-              className="mt-2 h-12 w-full rounded-lg border border-purple-100 bg-white/60 px-3 text-body-03 outline-none transition-colors focus:border-primary-tint focus:bg-white focus:ring-2 focus:ring-primary-tint"
-            />
-            {inviteError && <p className="mt-2 text-body-04 text-red-600">{inviteError}</p>}
-            <button
-              type="submit"
-              data-hover-lift
-              className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-body-03 font-bold text-white"
-            >
-              마켓 참여하기
-            </button>
-          </form>
-
-          <div className="mt-6 flex items-center gap-3">
-            <hr className="flex-1 border-border" />
-            <span className="text-body-04 text-text-muted">또는</span>
-            <hr className="flex-1 border-border" />
-          </div>
-
-          <p className="mt-6 text-center text-body-04 text-text-muted">
-            아직 계정이 없으신가요?{' '}
-            <Link
-              to="/signup"
-              viewTransition
-              onClick={() => dialogRef.current?.close()}
-              className="font-bold text-primary"
-            >
-              회원가입
-            </Link>
-          </p>
-          </>
-        )}
-        </div>
-      </dialog>
     </div>
   )
 }
