@@ -1,14 +1,14 @@
 import {
   BookOpenIcon,
+  BuildingStorefrontIcon,
   ChatBubbleLeftRightIcon,
-  HomeIcon,
   UserCircleIcon,
   UsersIcon,
 } from '@heroicons/react/24/outline'
 import {
   BookOpenIcon as BookOpenSolidIcon,
+  BuildingStorefrontIcon as BuildingStorefrontSolidIcon,
   ChatBubbleLeftRightIcon as ChatBubbleLeftRightSolidIcon,
-  HomeIcon as HomeSolidIcon,
   UserCircleIcon as UserCircleSolidIcon,
   UsersIcon as UsersSolidIcon,
 } from '@heroicons/react/24/solid'
@@ -16,7 +16,12 @@ import { NavLink } from 'react-router'
 
 // 지금 있는 탭은 채운 아이콘, 나머지는 선 아이콘으로 그려 색을 못 봐도 구분되게 한다
 const tabs = [
-  { to: '/market', label: '홈', Icon: HomeIcon, ActiveIcon: HomeSolidIcon },
+  {
+    to: '/market',
+    label: '마켓',
+    Icon: BuildingStorefrontIcon,
+    ActiveIcon: BuildingStorefrontSolidIcon,
+  },
   { to: '/friends', label: '친구', Icon: UsersIcon, ActiveIcon: UsersSolidIcon },
   { to: '/item-dex', label: '물건 도감', Icon: BookOpenIcon, ActiveIcon: BookOpenSolidIcon },
   {
@@ -29,7 +34,7 @@ const tabs = [
 ]
 
 // 설치한 앱에서 헤더의 메뉴 줄을 대신하는 하단 탭. 브라우저 탭에서는 헤더 메뉴를 쓴다(AppLayout이 가른다).
-// 높이를 바꾸면 AppLayout의 아래 여백과 Toast·UpdatePrompt·알림 패널의 위치도 함께 맞춘다
+// 높이를 바꾸면 AppLayout의 아래 여백과 Toast·알림 패널의 위치도 함께 맞춘다
 export function BottomNav() {
   return (
     <nav

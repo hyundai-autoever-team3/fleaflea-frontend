@@ -20,7 +20,7 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
 
       {/* 카드 자체가 충분히 넓을 때만 입장 버튼을 옆에 둔다. 좁으면 아래 한 줄을 쓴다. */}
       <div
-        className="grid grid-cols-[6rem_minmax(0,1fr)] items-center gap-x-3 gap-y-4 bg-bg px-4 pb-6 pt-10 @lg:grid-cols-[9rem_minmax(0,1fr)_auto] @lg:gap-5 @lg:px-6 @lg:pb-8 @lg:pt-12"
+        className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-x-3 gap-y-3 bg-bg px-4 pb-5 pt-9 @lg:grid-cols-[9rem_minmax(0,1fr)_auto] @lg:gap-5 @lg:px-6 @lg:pb-8 @lg:pt-12"
         style={{ clipPath: pixelCorners('bottom') }}
       >
         <MarketCover
@@ -63,7 +63,7 @@ function AwningCard({ market, isHost }: { market: MarketSummary; isHost: boolean
           to={`/market/${market.marketId}`}
           viewTransition
           aria-label={`${market.title} 마켓 입장하기`}
-          className="col-span-2 flex min-h-11 w-full items-center justify-center whitespace-nowrap bg-purple-600 px-6 py-2.5 text-sm font-semibold text-white @lg:col-span-1 @lg:w-auto"
+          className="col-span-2 flex min-h-10 w-full items-center justify-center whitespace-nowrap bg-purple-600 px-6 py-2 @lg:min-h-11 @lg:py-2.5 text-sm font-semibold text-white @lg:col-span-1 @lg:w-auto"
           style={{ clipPath: pixelBox() }}
         >
           입장하기

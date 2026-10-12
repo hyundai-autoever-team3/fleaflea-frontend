@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router'
 import { AppProviders } from './app/provider'
 import './app/styles/index.css'
 import { router } from './app/router/router'
+import { registerServiceWorker } from './app/pwa/register'
 import { hideSplash } from './app/pwa/splash'
 import { fitViewportInApp } from './app/pwa/viewport'
 
@@ -19,3 +20,5 @@ createRoot(document.getElementById('root')!).render(
 
 // 첫 화면을 그리기 시작했으니 index.html의 스플래시를 걷어낸다
 hideSplash()
+
+registerServiceWorker()

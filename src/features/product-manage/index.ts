@@ -1,3 +1,4 @@
+export { ProductCreateModal } from './ui/ProductCreateModal'
 export { ProductForm } from './ui/ProductForm'
 export type { ProductFormInitialValue } from './ui/ProductForm'
 export {

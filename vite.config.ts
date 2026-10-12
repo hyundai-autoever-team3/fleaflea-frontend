@@ -25,13 +25,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      //새 버전이 오면 바로 변경 하지 않고 사용자에게 물어본 후 진행
+      // 새 버전이 와도 쓰던 화면을 바로 바꾸지 않는다. 앱을 닫았다 열 때 교체된다
       registerType: 'prompt',
 
       // manifest는 3번에서 만든 public/manifest.webmanifest를 그대로 쓴다
       manifest: false,
 
-      // 등록은 UpdatePrompt의 useRegisterSW가 하므로 플러그인이 등록 코드를 따로 넣지 않게 한다
+      // 등록은 src/app/pwa/register.ts가 하므로 플러그인이 등록 코드를 따로 넣지 않게 한다
       injectRegister: false,
 
       workbox: {

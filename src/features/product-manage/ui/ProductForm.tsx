@@ -37,6 +37,8 @@ interface ProductFormProps {
   submitLabel: string
   submittingLabel: string
   onSubmit: (payload: CreateProductPayload) => Promise<void>
+  // 모달로 띄울 때, 적어 둔 내용이 있는지 알려 닫기 전에 확인을 받을 수 있게 한다
+  onDirtyChange?: (dirty: boolean) => void
   toErrorMessage: (error: unknown) => string
 }
 
@@ -47,6 +49,7 @@ export function ProductForm({
   submitLabel,
   submittingLabel,
   onSubmit,
+  onDirtyChange,
   toErrorMessage,
 }: ProductFormProps) {
   const [title, setTitle] = useState(initialValue?.title ?? '')
@@ -68,6 +71,18 @@ export function ProductForm({
   const needsPrice = tradeType === 'SALE'
   // 새 사진, 불러온 도감 사진, 기존 상품 사진 순으로 표시한다.
   const shownImageUrl = previewUrl ?? collectionItem?.imageUrl ?? initialValue?.imageUrl ?? null
+
+  const isDirty =
+    title !== (initialValue?.title ?? '') ||
+    description !== (initialValue?.description ?? '') ||
+    tradeType !== (initialValue?.tradeType ?? 'SALE') ||
+    price !== (initialValue?.price != null ? String(initialValue.price) : '') ||
+    image !== null ||
+    collectionItem !== null
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
 
   // 언마운트 후 완료되는 이미지 처리 결과를 무효화한다.
   useEffect(
