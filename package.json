@@ -38,10 +38,15 @@
     "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vite-plugin-pwa": "^2.0.0",
+    "workbox-window": "^7.4.1"
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["prettier --write", "oxlint"],
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "oxlint"
+    ],
     "*.css": "prettier --write"
   },
   "msw": {

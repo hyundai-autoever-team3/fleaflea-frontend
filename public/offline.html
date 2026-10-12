@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0" />
+
+    <title>FleaFlea 연결 끊김</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-content: center;
+        justify-content: center;
+        background-color: #f5f0fc;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        color: #1e1b3a;
+        text-align: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      img {
+        width: 100%;
+        image-rendering: pixelated;
+      }
+      h1{
+        margin: 20px 0 8px;
+        font-size: 22px;
+      }
+      p {
+        margin: 0;
+        color: #6b6880;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      button {
+        margin: 28px;
+        padding: 12px 24px;
+        border: 0;
+        border-radius: 8px;
+        background: #b196dc;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+      }
+    </style>
+</head>
+
+    <body>
+        <main>
+            <img src="/mascot/flea4.png" alt="" />
+            <h1>인터넷에 연결되어 있지 않아요!</h1>
+            <p>연결을 확인한 뒤 다시 시도해주세요</p>
+            <button type = "button" onclick="location.reload()">다시 시도</button>
+        </main>
+    </body>
+</html>
