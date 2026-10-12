@@ -4,7 +4,7 @@ import { HeartIcon, LockClosedIcon, SparklesIcon } from '@heroicons/react/24/out
 
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
-import { FeaturePhoto, FriendsMockup } from './FeatureMockups'
+import { FeaturePhoto } from './FeaturePhoto'
 import { LandingHeader } from './LandingHeader'
 
 // 알약 배지용 가벼운 글래스 — 같은 톤이지만 pill 크기에 맞춰 블러/그림자를 줄임
@@ -184,6 +184,7 @@ export function LandingPage() {
             height={522}
             alt="마켓 초대 링크 창. 초대 링크와 복사 버튼이 보인다."
             caption="초대 링크를 나누고, 로그인해서 함께 참여해요."
+            small
           />
         </div>
       </section>
@@ -282,7 +283,13 @@ export function LandingPage() {
         </div>
 
         <div data-reveal-item className="w-full min-w-0 flex-1">
-          <FriendsMockup />
+          <FeaturePhoto
+            src="/landing/intro6.png"
+            width={918}
+            height={556}
+            alt="친구 화면. 친구가 되는 방법 안내 아래에 내 친구 목록이 보인다."
+            caption="친구가 되면 도감을 둘러보고, 콕 찔러 안부를 전해요."
+          />
         </div>
       </section>
 
