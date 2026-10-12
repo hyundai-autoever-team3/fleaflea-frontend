@@ -62,7 +62,7 @@ const PROVIDERS: {
     label: '네이버',
     icon: <NaverIcon />,
     className: 'bg-[#03C75A]',
-    ready: false,
+    ready: env.socialLoginEnabled,
   },
   {
     provider: 'kakao',
