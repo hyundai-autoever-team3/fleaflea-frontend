@@ -115,13 +115,14 @@ export function ChatComposer({
 
   if (!canSend)
     return (
-      <p className="px-4 py-4 text-center text-body-04 text-text-muted">
+      <p className="px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 text-center text-body-04 text-text-muted">
         지금은 친구가 아니라서 메시지를 보낼 수 없어요.
       </p>
     )
 
   return (
-    <div className="relative px-3 pb-3 pt-1 md:px-4 md:pb-4">
+    // 바탕이나 선이 있는 막대 없이 알약만 띄운다. 아래 여백에는 아이폰 홈 막대만큼의 안전 영역을 더한다
+    <div className="relative px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 md:px-4 md:pb-4">
       {!connected && (
         <p role="status" className="mb-2 text-center text-xs text-text-muted">
           {status === 'reconnecting'

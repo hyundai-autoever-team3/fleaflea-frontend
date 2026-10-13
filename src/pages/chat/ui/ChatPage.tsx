@@ -16,10 +16,11 @@ export function ChatPage() {
 
   return (
     // 대화 영역만 스크롤되도록 페이지 높이를 화면에 맞춘다.
-    // 설치한 앱에서는 AppLayout이 하단 탭만큼 아래 여백을 따로 두므로 그만큼 뺀다
+    // 설치한 앱의 채팅 목록에서는 AppLayout이 하단 탭만큼 아래 여백을 따로 두므로 그만큼 뺀다.
+    // 대화방에서는 하단 탭이 없어 화면 전체를 쓴다
     <div
       className={`flex flex-col md:bg-primary-subtle/30 ${
-        isStandalone() ? 'h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))]' : 'h-dvh'
+        isStandalone() && !roomId ? 'h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))]' : 'h-dvh'
       }`}
     >
       <Header />
