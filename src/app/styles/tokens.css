@@ -85,6 +85,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 20px 48px -10px rgba(20, 30, 60, 0.28);
   --shadow-glass-pill:
     inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 20px -6px rgba(20, 30, 60, 0.22);
+  --shadow-glass-bubble:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 16px -8px rgba(20, 30, 60, 0.22);
 
   /* 유리창 모달 — 패널보다 한 단 더 띄운다. 첫 줄의 0.5px 그림자가 hairline 테두리를
    * 대신하고(경계선을 따로 그리면 clip과 겹쳐 두꺼워짐), 마지막 줄이 위쪽 하이라이트다 */
