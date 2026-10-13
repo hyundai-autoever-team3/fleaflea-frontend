@@ -292,8 +292,8 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
 
   return (
     <>
-      {/* 이름 줄과 입력 줄은 선으로 나누지 않고, 판 위에 뜬 흰 알약으로 둔다 */}
-      <header className="mx-3 mt-3 flex items-center gap-2 rounded-full bg-bg p-1.5 pr-5 shadow-(--shadow-chat-bar) md:mx-4 md:mt-4 md:pl-3">
+      {/* 이름 줄은 바탕과 선 없이 프로필과 닉네임만 판 위에 둔다 */}
+      <header className="flex items-center gap-2 px-2 pt-3 md:px-5 md:pt-4">
         <Link
           to="/chat"
           aria-label="채팅 목록으로"
