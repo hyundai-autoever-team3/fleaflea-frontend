@@ -6,12 +6,18 @@ import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { EMAIL_PATTERN, FIELD_LIMITS } from '../../../shared/config/field-limits'
 import { isStandalone } from '../../../shared/lib/pwa'
 import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
-import { StarField } from '../../../shared/ui/star-field'
 import { login } from '../api/auth-api'
+import { AuthVisual } from './AuthVisual'
 import { SocialLoginButtons } from './SocialLoginButtons'
 import { useSessionStore } from '../../../entities/session'
 
-export function LoginForm() {
+// 모달 안에 넣을 때 넘기는 값. 제목 id는 창 이름으로 쓰고, 로그인·회원가입 전환은 주소를 바꾸지 않고 창 안에서 한다
+export interface AuthFormModalOptions {
+  titleId: string
+  onSwitch: () => void
+}
+
+export function LoginForm({ modal }: { modal?: AuthFormModalOptions }) {
   const navigate = useNavigate()
   // 초대 링크처럼 로그인 전에 들어왔던 화면이 있으면 그 자리로 돌려보낸다
   const redirectTo = readRedirect(useLocation().search)
@@ -20,7 +26,7 @@ export function LoginForm() {
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [error, setError] = useState('')
   // 설치한 앱에서는 카드와 옆 그림 없이 흰 화면 가운데에 로고와 폼만 둔다
-  const inApp = isStandalone()
+  const inApp = !modal && isStandalone()
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -51,20 +57,26 @@ export function LoginForm() {
   return (
     <div
       className={
-        inApp
-          ? 'flex min-h-dvh items-center justify-center bg-bg'
-          : 'flex min-h-screen items-center justify-center bg-primary-subtle p-6'
+        modal
+          ? 'bg-bg'
+          : inApp
+            ? 'flex min-h-dvh items-center justify-center bg-bg'
+            : 'flex min-h-screen items-center justify-center bg-primary-subtle p-6'
       }
     >
       <div
         className={
-          inApp
-            ? 'w-full max-w-sm'
-            : 'grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10'
+          modal
+            ? 'grid p-8 md:grid-cols-2 md:gap-8'
+            : inApp
+              ? 'w-full max-w-sm'
+              : 'grid w-full max-w-6xl rounded-3xl bg-bg p-6 shadow-lg md:grid-cols-2 md:gap-8 md:p-10'
         }
       >
         {/* 왼쪽: 폼 */}
-        <div className={`flex h-full flex-col ${inApp ? 'px-8 py-10' : 'p-6 md:p-10'}`}>
+        <div
+          className={`flex h-full flex-col ${modal ? 'p-6' : inApp ? 'px-8 py-10' : 'p-6 md:p-10'}`}
+        >
           <div className={inApp ? 'hidden' : 'flex items-center gap-2'}>
             <div className="size-8 overflow-hidden rounded-full">
               <img
@@ -94,7 +106,12 @@ export function LoginForm() {
               </>
             ) : (
               <>
-                <h1 className="text-head-02 text-gray-800 font-bold text-text-strong">로그인</h1>
+                <h1
+                  id={modal?.titleId}
+                  className="text-head-02 text-gray-800 font-bold text-text-strong"
+                >
+                  로그인
+                </h1>
                 <p className="mt-1 text-body-04 text-text-muted">FleaFlea 계정으로 로그인하세요</p>
               </>
             )}
@@ -182,36 +199,25 @@ export function LoginForm() {
 
               <p className="text-center text-body-04 text-text-muted">
                 계정이 없으신가요?{' '}
-                <Link
-                  to={redirectTo ? withRedirect('/signup', redirectTo) : '/signup'}
-                  className="font-bold text-primary"
-                >
-                  회원가입
-                </Link>
+                {modal ? (
+                  <button type="button" onClick={modal.onSwitch} className="font-bold text-primary">
+                    회원가입
+                  </button>
+                ) : (
+                  <Link
+                    to={redirectTo ? withRedirect('/signup', redirectTo) : '/signup'}
+                    className="font-bold text-primary"
+                  >
+                    회원가입
+                  </Link>
+                )}
               </p>
             </form>
           </div>
         </div>
 
         {/* 오른쪽: 큰 카드 안에 여백을 두고 떠있는 별도 비주얼 카드 */}
-        <div
-          className={`relative hidden overflow-hidden rounded-2xl bg-cosmic-bg ${inApp ? '' : 'md:block'}`}
-        >
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'radial-gradient(ellipse at 50% 100%, var(--color-cosmic-tint) 0%, transparent 60%), linear-gradient(180deg, var(--color-cosmic-bg), var(--color-cosmic))',
-            }}
-          />
-          <StarField />
-          <img
-            draggable={false}
-            src="/mascot/flea-bg.png"
-            alt=""
-            className="relative h-full w-full object-cover"
-          />
-        </div>
+        {!inApp && <AuthVisual fill={Boolean(modal)} />}
       </div>
     </div>
   )

@@ -6,8 +6,9 @@ interface ModalProps {
   open: boolean
   onRequestClose: () => void
   labelledBy?: string
-  // md: 일반 폼, sm: 프로필·확인, lg: 선택 그리드, compact: 짧은 거래 요청.
-  size?: 'md' | 'sm' | 'lg' | 'compact'
+  // md: 일반 폼, sm: 프로필·확인, lg: 선택 그리드, compact: 짧은 거래 요청,
+  // xl: 폼 옆에 그림을 나란히 두는 창. 안쪽 여백은 내용이 직접 잡는다.
+  size?: 'md' | 'sm' | 'lg' | 'xl' | 'compact'
   // 내용 안에 별도 닫기 버튼이 있으면 기본 버튼을 숨길 수 있다.
   showClose?: boolean
   children: ReactNode
@@ -15,6 +16,7 @@ interface ModalProps {
 
 // Tailwind가 빌드 시 클래스를 찾을 수 있도록 완성된 문자열로 정의한다.
 const SIZE_CLASS = {
+  xl: 'w-[min(960px,calc(100vw-36px))]',
   lg: 'w-[min(760px,calc(100vw-36px))] p-10',
   md: 'w-[min(600px,calc(100vw-36px))] p-10',
   sm: 'w-[min(380px,calc(100vw-36px))] p-8',
@@ -105,9 +107,9 @@ export function Modal({
           type="button"
           onClick={onRequestClose}
           aria-label="닫기"
-          className="absolute right-2 top-2 flex size-11 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-strong"
+          className="absolute right-2 top-2 flex size-11 items-center justify-center text-text-muted transition-colors hover:text-text-strong focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-text-strong"
         >
-          <XMarkIcon className="size-6" />
+          <XMarkIcon className="size-5" />
         </button>
       )}
       <div key={openCount}>{shownChildren}</div>
