@@ -183,7 +183,7 @@ export function ChatComposer({
           maxLength={MAX_LENGTH}
           placeholder="메시지를 입력해 주세요"
           aria-label="메시지"
-          className="min-h-11 flex-1 resize-none rounded-2xl border border-border bg-bg px-4 py-2.5 text-body-03 text-text-strong outline-none placeholder:text-text-muted focus:border-primary"
+          className="min-h-11 flex-1 resize-none rounded-2xl border border-border bg-bg px-4 py-2.5 text-body-03 text-text-strong outline-none [scrollbar-width:none] placeholder:text-text-muted focus:border-primary [&::-webkit-scrollbar]:hidden"
         />
 
         <button

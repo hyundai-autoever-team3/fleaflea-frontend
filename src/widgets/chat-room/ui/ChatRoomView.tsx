@@ -207,6 +207,8 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
   const messages = messagesQuery.data?.pages.flatMap((page) => page.content) ?? []
   const pending = allPending.filter((message) => message.roomId === roomId)
   const newest = messages[0]
+  const isEmpty =
+    !messagesQuery.isPending && messages.length === 0 && pending.length === 0 && !typing
   // 내가 보낸 것 가운데 상대가 읽은 가장 최근 메시지 하나에만 "읽음"을 붙인다
   const lastReadMine = room
     ? messages.find(
@@ -299,7 +301,7 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
           위쪽에 과거 메시지를 이어 붙여도 보고 있던 자리가 밀리지 않는다 */}
       <div
         ref={scrollRef}
-        className="chat-backdrop flex min-h-0 flex-1 flex-col-reverse overflow-y-auto overscroll-contain px-3 py-4 md:px-5"
+        className="flex min-h-0 flex-1 flex-col-reverse overflow-y-auto overscroll-contain px-3 py-4 md:px-5"
       >
         {messagesQuery.isError ? (
           <Notice title="대화를 불러오지 못했어요">
@@ -311,6 +313,22 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
               다시 시도
             </button>
           </Notice>
+        ) : isEmpty ? (
+          // 아직 나눈 대화가 없으면 안내를 대화 영역 한가운데에 둔다
+          <div className="m-auto flex flex-col items-center px-6 text-center">
+            <img
+              draggable={false}
+              src={MASCOTS.wink}
+              alt=""
+              className="h-24 object-contain [image-rendering:pixelated]"
+            />
+            <p className="mt-5 text-body-02 font-bold text-text-strong">
+              처음으로 대화를 시작해 봐요
+            </p>
+            <p className="mt-1 text-body-04 text-text-muted">
+              {room.nickname}님에게 첫 메시지를 보내 보세요.
+            </p>
+          </div>
         ) : (
           <ul aria-label="대화 내용" className="flex flex-col-reverse gap-1.5">
             {typing && <TypingRow room={room} />}
@@ -348,12 +366,6 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
             {messagesQuery.isPending && (
               <li role="status" className="py-6 text-center text-body-04 text-text-muted">
                 대화를 불러오는 중이에요...
-              </li>
-            )}
-
-            {!messagesQuery.isPending && messages.length === 0 && pending.length === 0 && (
-              <li className="py-10 text-center text-body-04 text-text-muted">
-                {room.nickname}님에게 첫 메시지를 보내 보세요.
               </li>
             )}
 

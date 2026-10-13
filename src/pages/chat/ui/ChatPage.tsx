@@ -18,7 +18,7 @@ export function ChatPage() {
     // 대화 영역만 스크롤되도록 페이지 높이를 화면에 맞춘다.
     // 설치한 앱에서는 AppLayout이 하단 탭만큼 아래 여백을 따로 두므로 그만큼 뺀다
     <div
-      className={`flex flex-col ${
+      className={`flex flex-col md:bg-primary-subtle/30 ${
         isStandalone() ? 'h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))]' : 'h-dvh'
       }`}
     >
@@ -28,7 +28,7 @@ export function ChatPage() {
       <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 md:gap-4 md:px-6 md:pb-6 md:pt-2">
         <section
           aria-label="채팅 목록"
-          className={`min-h-0 w-full flex-col overflow-hidden bg-bg md:w-80 md:shrink-0 md:rounded-3xl md:border md:border-border/60 ${
+          className={`min-h-0 w-full flex-col overflow-hidden bg-bg md:glass-pane md:w-80 md:shrink-0 md:rounded-3xl ${
             roomId ? 'hidden md:flex' : 'flex'
           }`}
         >
@@ -38,7 +38,7 @@ export function ChatPage() {
 
         <section
           aria-label="대화"
-          className={`min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bg md:rounded-3xl md:border md:border-border/60 ${
+          className={`min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bg md:glass-pane md:rounded-3xl ${
             roomId ? 'flex' : 'hidden md:flex'
           }`}
         >
@@ -46,7 +46,7 @@ export function ChatPage() {
             // 방이 바뀌면 입력하던 글과 스크롤 위치를 새로 시작한다
             <ChatRoomView key={roomId} roomId={roomId} />
           ) : (
-            <div className="chat-backdrop flex flex-1 flex-col items-center justify-center px-6 text-center">
+            <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
               <img
                 draggable={false}
                 src={MASCOTS.wink}

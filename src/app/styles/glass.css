@@ -40,12 +40,12 @@
   box-shadow: var(--shadow-glass-window);
 }
 
-/* 채팅 말풍선 — 상대는 흰 유리, 나는 라벤더 유리.
+/* 채팅 말풍선 — 흰 바탕 위에 놓이므로 상대는 옅은 라벤더 유리, 나는 진한 라벤더 유리로 구분한다.
    한 화면에 수십 개가 깔리므로 블러와 그림자를 pill보다 더 줄여 스크롤이 무겁지 않게 한다.
    내 말풍선도 글자는 진한 색으로 둔다. 라벤더 위의 흰 글자는 대비가 낮아 읽기 어렵다 */
 @utility glass-bubble {
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  background-color: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(177, 150, 220, 0.24);
+  background-image: linear-gradient(135deg, rgba(250, 247, 254, 0.9), rgba(240, 233, 251, 0.82));
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
   box-shadow: var(--shadow-glass-bubble);
@@ -53,19 +53,17 @@
 
 @utility glass-bubble-mine {
   border: 1px solid rgba(255, 255, 255, 0.55);
-  background-image: linear-gradient(135deg, rgba(224, 211, 246, 0.82), rgba(177, 150, 220, 0.72));
+  background-image: linear-gradient(135deg, rgba(224, 211, 246, 0.86), rgba(177, 150, 220, 0.76));
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   backdrop-filter: blur(14px) saturate(160%);
   box-shadow: var(--shadow-glass-bubble);
 }
 
-/* 대화 영역 바탕. 유리 말풍선은 뒤에 색이 있어야 유리로 보이므로 파스텔 색 번짐을 깐다 */
-@utility chat-backdrop {
-  background-color: var(--purple-100);
-  background-image:
-    radial-gradient(ellipse 60% 45% at 12% 8%, rgba(251, 225, 239, 0.9), transparent 70%),
-    radial-gradient(ellipse 55% 45% at 92% 30%, rgba(224, 211, 246, 0.95), transparent 70%),
-    radial-gradient(ellipse 70% 50% at 40% 100%, rgba(214, 226, 252, 0.8), transparent 70%);
+/* 채팅 화면의 두 판(목록·대화). 회색 선을 긋지 않고 유리창 모달처럼
+   0.5px 그림자 선과 위쪽 하이라이트로 가장자리를 잡는다 */
+@utility glass-pane {
+  background-color: var(--color-glass-strong);
+  box-shadow: var(--shadow-glass-pane);
 }
 
 /* 뒤 배경을 흐리게 하는 유리는 지원하지 않는 브라우저에서 그냥 반투명한 판이 되어
@@ -96,7 +94,8 @@
 /* 말풍선은 색으로 누가 보냈는지 구분하므로 유리를 걷어낼 때도 색을 따로 남긴다 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-bubble {
-    background-color: rgba(255, 255, 255, 0.96);
+    background-image: none;
+    background-color: var(--purple-100);
   }
 
   .glass-bubble-mine {
@@ -113,7 +112,8 @@
   }
 
   .glass-bubble {
-    background-color: rgba(255, 255, 255, 0.96);
+    background-image: none;
+    background-color: var(--purple-100);
   }
 
   .glass-bubble-mine {

@@ -35,7 +35,7 @@ function RoomRow({ room, active }: { room: ChatRoom; active: boolean }) {
       <Link
         to={`/chat/${room.id}`}
         aria-current={active ? 'page' : undefined}
-        className={`flex items-center gap-3 px-4 py-3 transition-colors hover:bg-primary-subtle ${FOCUS_RING} ${active ? 'bg-primary-subtle' : ''}`}
+        className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors ${FOCUS_RING} ${active ? 'bg-primary-subtle' : 'hover:bg-primary-subtle/60'}`}
       >
         <Avatar profileImageUrl={room.profileImageUrl} />
         <div className="min-w-0 flex-1">
@@ -126,8 +126,9 @@ export function ChatRoomList({ activeRoomId }: { activeRoomId: number | null }) 
       </div>
     )
 
+  // 고른 방은 판 끝까지 띠로 칠하지 않고, 안쪽에 둥근 칸으로 띄워 표시한다
   return (
-    <ul className="min-h-0 flex-1 divide-y divide-border/50 overflow-y-auto">
+    <ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 pb-2">
       {roomsQuery.data.map((room) => (
         <RoomRow key={room.id} room={room} active={room.id === activeRoomId} />
       ))}
