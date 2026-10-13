@@ -128,6 +128,8 @@ export function FriendsPage() {
   const respondMutation = useRespondToFriendRequest()
   const deleteFriendshipMutation = useDeleteFriendship()
   const openChatRoom = useOpenChatRoom()
+  // 채팅방을 여는 중인 친구. 그 줄의 버튼만 눌린 상태로 보이게 한다
+  const openingChatId = openChatRoom.isPending ? openChatRoom.variables : null
 
   const pendingId = sendRequestMutation.isPending
     ? sendRequestMutation.variables
@@ -388,8 +390,11 @@ export function FriendsPage() {
                     <FriendRow key={friend.memberId} friend={friend} caption="친구">
                       <button
                         type="button"
-                        disabled={openChatRoom.isPending}
-                        onClick={() => openChatRoom.mutate(friend.memberId)}
+                        disabled={openingChatId === friend.memberId}
+                        onClick={() => {
+                          // 한 방을 여는 동안 다른 친구를 눌러도 겹쳐 열지 않는다
+                          if (openingChatId === null) openChatRoom.mutate(friend.memberId)
+                        }}
                         style={{ clipPath: pixelBox(2) }}
                         className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong disabled:opacity-50`}
                       >
