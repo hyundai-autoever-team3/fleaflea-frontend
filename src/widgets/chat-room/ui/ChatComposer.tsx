@@ -121,8 +121,9 @@ export function ChatComposer({
     )
 
   return (
-    // 바탕이나 선이 있는 막대 없이 알약만 띄운다. 아래 여백에는 아이폰 홈 막대만큼의 안전 영역을 더한다
-    <div className="relative px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 md:px-4 md:pb-4">
+    // 바탕이나 선이 있는 막대 없이 알약만 띄운다. 아래 여백에는 아이폰 홈 막대만큼의 안전 영역을 더하고,
+    // 키보드가 올라와 홈 막대가 가려진 동안에는(ChatPage가 data-keyboard로 알린다) 그 여백을 뺀다
+    <div className="relative px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 group-data-keyboard/chat:pb-2 md:px-4 md:pb-4">
       {!connected && (
         <p role="status" className="mb-2 text-center text-xs text-text-muted">
           {status === 'reconnecting'
@@ -132,8 +133,8 @@ export function ChatComposer({
       )}
 
       {/* 스티커·입력칸·보내기를 흰 알약 하나에 담는다. 입력칸에는 테두리를 따로 두지 않고,
-          글자를 쓰는 동안에는 알약 전체에 테를 둘러 어디에 입력 중인지 알린다 */}
-      <div className="flex items-end gap-1 rounded-[28px] bg-bg p-1.5 shadow-(--shadow-chat-bar) focus-within:ring-2 focus-within:ring-primary/50">
+          글자를 쓰는 동안에는 알약 전체에 가는 테를 둘러 어디에 입력 중인지 알린다 */}
+      <div className="flex items-end gap-1 rounded-[28px] bg-bg p-1.5 shadow-(--shadow-chat-bar) focus-within:ring-1 focus-within:ring-primary/40">
         <div ref={stickerRef} className="relative shrink-0">
           <button
             type="button"

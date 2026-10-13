@@ -3,6 +3,7 @@ import { useParams } from 'react-router'
 import { ChatRealtimeSync } from '../../../features/chat'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { isStandalone } from '../../../shared/lib/pwa'
+import { useKeyboardViewportHeight } from '../../../shared/lib/useKeyboardViewportHeight'
 import { ChatRoomView } from '../../../widgets/chat-room'
 import { ChatRoomList } from '../../../widgets/chat-room-list'
 import { Header } from '../../../widgets/header'
@@ -13,13 +14,17 @@ export function ChatPage() {
   const params = useParams()
   const parsed = Number(params.roomId)
   const roomId = Number.isInteger(parsed) && parsed > 0 ? parsed : null
+  // 대화방에서 화면 키보드가 올라오면 보이는 영역 높이에 맞춰, 입력창이 키보드 바로 위에 붙게 한다
+  const keyboardHeight = useKeyboardViewportHeight(roomId !== null)
 
   return (
     // 대화 영역만 스크롤되도록 페이지 높이를 화면에 맞춘다.
     // 설치한 앱의 채팅 목록에서는 AppLayout이 하단 탭만큼 아래 여백을 따로 두므로 그만큼 뺀다.
     // 대화방에서는 하단 탭이 없어 화면 전체를 쓴다
     <div
-      className={`flex flex-col md:bg-primary-subtle/30 ${
+      data-keyboard={keyboardHeight !== null || undefined}
+      style={keyboardHeight !== null ? { height: keyboardHeight } : undefined}
+      className={`group/chat flex flex-col md:bg-primary-subtle/30 ${
         isStandalone() && !roomId ? 'h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))]' : 'h-dvh'
       }`}
     >
