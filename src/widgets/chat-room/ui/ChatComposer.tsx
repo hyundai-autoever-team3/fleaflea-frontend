@@ -115,13 +115,13 @@ export function ChatComposer({
 
   if (!canSend)
     return (
-      <p className="border-t border-border/60 bg-bg px-4 py-4 text-center text-body-04 text-text-muted">
+      <p className="px-4 py-4 text-center text-body-04 text-text-muted">
         지금은 친구가 아니라서 메시지를 보낼 수 없어요.
       </p>
     )
 
   return (
-    <div className="relative border-t border-border/60 bg-bg px-3 py-2.5">
+    <div className="relative px-3 py-2.5 md:pb-3">
       {!connected && (
         <p role="status" className="mb-2 text-center text-xs text-text-muted">
           {status === 'reconnecting'

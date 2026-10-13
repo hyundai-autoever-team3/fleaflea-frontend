@@ -51,8 +51,17 @@ function sameGroup(a: ChatMessage, b: ChatMessage) {
   return Math.floor(first.getTime() / 60_000) === Math.floor(second.getTime() / 60_000)
 }
 
-// 스티커는 말풍선 없이 그림만, 글자는 유리 말풍선에 담는다
-function MessageBody({ content, mine }: { content: string; mine: boolean }) {
+// 스티커는 말풍선 없이 그림만, 글자는 유리 말풍선에 담는다.
+// tail: 말풍선 꼬리를 붙일지. 이어 보낸 메시지 묶음에서는 마지막 하나에만 붙인다
+function MessageBody({
+  content,
+  mine,
+  tail = true,
+}: {
+  content: string
+  mine: boolean
+  tail?: boolean
+}) {
   const sticker = parseSticker(content)
 
   if (sticker && sticker !== 'unknown')
@@ -69,7 +78,7 @@ function MessageBody({ content, mine }: { content: string; mine: boolean }) {
     <p
       className={`max-w-[75%] whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-body-04 leading-relaxed text-text-strong md:max-w-[62%] ${
         mine ? 'glass-bubble-mine rounded-br-md' : 'glass-bubble rounded-bl-md'
-      }`}
+      } ${tail ? (mine ? 'bubble-tail-mine' : 'bubble-tail') : ''}`}
     >
       {sticker === 'unknown' ? '스티커' : content}
     </p>
@@ -102,7 +111,7 @@ function MessageRow({
     return (
       <li className="flex items-end justify-end gap-1.5">
         {meta}
-        <MessageBody content={message.content} mine />
+        <MessageBody content={message.content} mine tail={showTime} />
       </li>
     )
 
@@ -112,7 +121,7 @@ function MessageRow({
       <span className="w-8 shrink-0 self-start">
         {showAvatar && <Avatar profileImageUrl={room.profileImageUrl} size="sm" />}
       </span>
-      <MessageBody content={message.content} mine={false} />
+      <MessageBody content={message.content} mine={false} tail={showTime} />
       {meta}
     </li>
   )
@@ -160,7 +169,7 @@ function TypingRow({ room }: { room: ChatRoom }) {
       </span>
       <span
         role="status"
-        className="glass-bubble flex items-center gap-1 rounded-2xl rounded-bl-md px-3.5 py-3"
+        className="glass-bubble bubble-tail flex items-center gap-1 rounded-2xl rounded-bl-md px-3.5 py-3"
       >
         <span className="sr-only">{room.nickname}님이 입력하고 있어요</span>
         {[0, 1, 2].map((index) => (
@@ -283,7 +292,8 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
 
   return (
     <>
-      <header className="flex items-center gap-2 border-b border-border/60 bg-bg px-2 py-2 md:px-4">
+      {/* 머리글·대화·입력창 사이에 선을 긋지 않고 한 판으로 잇는다. 바탕색도 판의 것을 그대로 쓴다 */}
+      <header className="flex items-center gap-2 px-2 py-2 md:px-4 md:pt-3">
         <Link
           to="/chat"
           aria-label="채팅 목록으로"
@@ -301,7 +311,7 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
           위쪽에 과거 메시지를 이어 붙여도 보고 있던 자리가 밀리지 않는다 */}
       <div
         ref={scrollRef}
-        className="flex min-h-0 flex-1 flex-col-reverse overflow-y-auto overscroll-contain px-3 py-4 md:px-5"
+        className="flex min-h-0 flex-1 flex-col-reverse overflow-y-auto overscroll-contain px-4 py-4 [scrollbar-width:none] md:px-5 [&::-webkit-scrollbar]:hidden"
       >
         {messagesQuery.isError ? (
           <Notice title="대화를 불러오지 못했어요">

@@ -59,6 +59,40 @@
   box-shadow: var(--shadow-glass-bubble);
 }
 
+/* 말풍선 꼬리. 묶음의 마지막 메시지에만 붙여 누가 한 말인지 가리킨다.
+   말풍선 아래 모서리 바깥으로 작은 갈고리 모양을 덧대며, 색은 말풍선 그 모서리 쪽 색에 맞춘다.
+   상대 쪽은 같은 모양을 좌우로 뒤집어 왼쪽에 붙인다 */
+@utility bubble-tail {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -6px;
+    width: 10px;
+    height: 13px;
+    background-color: rgb(236, 228, 249);
+    clip-path: path('M0 0 C0 6 3 11 10 13 C5 13 2 12 0 10 Z');
+    transform: scaleX(-1);
+  }
+}
+
+@utility bubble-tail-mine {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    bottom: 0;
+    width: 10px;
+    height: 13px;
+    background-color: rgb(190, 167, 226);
+    clip-path: path('M0 0 C0 6 3 11 10 13 C5 13 2 12 0 10 Z');
+  }
+}
+
 /* 채팅 화면의 두 판(목록·대화). 회색 선을 긋지 않고 유리창 모달처럼
    0.5px 그림자 선과 위쪽 하이라이트로 가장자리를 잡는다 */
 @utility glass-pane {

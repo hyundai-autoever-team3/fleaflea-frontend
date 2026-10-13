@@ -128,7 +128,7 @@ export function ChatRoomList({ activeRoomId }: { activeRoomId: number | null }) 
 
   // 고른 방은 판 끝까지 띠로 칠하지 않고, 안쪽에 둥근 칸으로 띄워 표시한다
   return (
-    <ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 pb-2">
+    <ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {roomsQuery.data.map((room) => (
         <RoomRow key={room.id} room={room} active={room.id === activeRoomId} />
       ))}
