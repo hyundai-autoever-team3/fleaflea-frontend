@@ -121,7 +121,7 @@ export function ChatComposer({
     )
 
   return (
-    <div className="relative px-3 py-2.5 md:pb-3">
+    <div className="relative px-3 pb-3 pt-1 md:px-4 md:pb-4">
       {!connected && (
         <p role="status" className="mb-2 text-center text-xs text-text-muted">
           {status === 'reconnecting'
@@ -130,7 +130,9 @@ export function ChatComposer({
         </p>
       )}
 
-      <div className="flex items-end gap-1.5">
+      {/* 스티커·입력칸·보내기를 흰 알약 하나에 담는다. 입력칸에는 테두리를 따로 두지 않고,
+          글자를 쓰는 동안에는 알약 전체에 테를 둘러 어디에 입력 중인지 알린다 */}
+      <div className="flex items-end gap-1 rounded-[28px] bg-bg p-1.5 shadow-(--shadow-chat-bar) focus-within:ring-2 focus-within:ring-primary/50">
         <div ref={stickerRef} className="relative shrink-0">
           <button
             type="button"
@@ -138,7 +140,7 @@ export function ChatComposer({
             disabled={!connected}
             aria-label="스티커"
             aria-expanded={stickerOpen}
-            className={`flex size-11 items-center justify-center rounded-full text-text-muted transition-colors hover:bg-primary-subtle hover:text-text-strong disabled:opacity-40 ${FOCUS_RING}`}
+            className={`flex size-11 items-center justify-center rounded-full bg-primary-subtle text-(--purple-700) transition-colors hover:bg-primary-tint disabled:opacity-40 ${FOCUS_RING}`}
           >
             <FaceSmileIcon className="size-6" />
           </button>
@@ -147,7 +149,7 @@ export function ChatComposer({
             <div
               role="group"
               aria-label="스티커 고르기"
-              className="glass-panel absolute bottom-full left-0 z-10 mb-2 grid w-64 grid-cols-4 gap-1 rounded-2xl p-2"
+              className="glass-panel absolute bottom-full left-0 z-10 mb-3 grid w-64 grid-cols-4 gap-1 rounded-2xl p-2"
             >
               {STICKERS.map((sticker) => (
                 <button
@@ -183,7 +185,7 @@ export function ChatComposer({
           maxLength={MAX_LENGTH}
           placeholder="메시지를 입력해 주세요"
           aria-label="메시지"
-          className="min-h-11 flex-1 resize-none rounded-2xl border border-border bg-bg px-4 py-2.5 text-body-03 text-text-strong outline-none [scrollbar-width:none] placeholder:text-text-muted focus:border-primary [&::-webkit-scrollbar]:hidden"
+          className="min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-body-03 text-text-strong outline-none [scrollbar-width:none] placeholder:text-text-muted [&::-webkit-scrollbar]:hidden"
         />
 
         <button

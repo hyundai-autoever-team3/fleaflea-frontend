@@ -292,12 +292,12 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
 
   return (
     <>
-      {/* 머리글·대화·입력창 사이에 선을 긋지 않고 한 판으로 잇는다. 바탕색도 판의 것을 그대로 쓴다 */}
-      <header className="flex items-center gap-2 px-2 py-2 md:px-4 md:pt-3">
+      {/* 이름 줄과 입력 줄은 선으로 나누지 않고, 판 위에 뜬 흰 알약으로 둔다 */}
+      <header className="mx-3 mt-3 flex items-center gap-2 rounded-full bg-bg p-1.5 pr-5 shadow-(--shadow-chat-bar) md:mx-4 md:mt-4 md:pl-3">
         <Link
           to="/chat"
           aria-label="채팅 목록으로"
-          className={`flex size-11 shrink-0 items-center justify-center text-text-muted hover:text-text-strong md:hidden ${FOCUS_RING}`}
+          className={`flex size-11 shrink-0 items-center justify-center rounded-full text-text-muted hover:bg-primary-subtle hover:text-text-strong md:hidden ${FOCUS_RING}`}
         >
           <ChevronLeftIcon className="size-6" />
         </Link>
@@ -350,8 +350,9 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
             {messages.map((message, index) => {
               const newer = messages[index - 1]
               const older = messages[index + 1]
-              // 날짜가 바뀌는 자리와, 더 받을 과거가 없는 대화의 첫머리에 날짜를 둔다
-              const startsDay = older ? !sameDay(message.createdAt, older.createdAt) : !hasNextPage
+              // 바로 앞 메시지와 날짜가 다를 때만, 즉 하루가 넘어간 자리에만 날짜를 둔다.
+              // 대화의 첫머리에는 두지 않는다. 메시지가 몇 개 없을 때 날짜만 위로 밀려 올라가 보이기 때문이다
+              const startsDay = older !== undefined && !sameDay(message.createdAt, older.createdAt)
               const date = toDate(message.createdAt)
 
               return [
@@ -365,7 +366,7 @@ export function ChatRoomView({ roomId }: { roomId: number }) {
                 />,
                 startsDay && date && (
                   <li key={`day-${message.id}`} className="my-3 flex justify-center">
-                    <span className="glass-pill rounded-full px-3 py-1 text-xs text-text-muted">
+                    <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs text-text-muted">
                       {dayFormat.format(date)}
                     </span>
                   </li>
