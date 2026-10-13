@@ -1,21 +1,24 @@
+import type { MouseEvent } from 'react'
 import { Link } from 'react-router'
 
 import { BrandMark } from '../../../shared/ui/brand'
-
 
 export interface LandingNavItem {
   id: string
   label: string
 }
 
-const FOCUS_RING = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
+const FOCUS_RING =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
 
 export function LandingHeader({
   navItems,
   activeId,
+  onLoginClick,
 }: {
   navItems: LandingNavItem[]
   activeId: string | null
+  onLoginClick: (event: MouseEvent<HTMLAnchorElement>) => void
 }) {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-bg/90 px-6 py-4 backdrop-blur">
@@ -48,6 +51,7 @@ export function LandingHeader({
         <Link
           to="/login"
           viewTransition
+          onClick={onLoginClick}
           className={`shrink-0 whitespace-nowrap text-body-03 text-text-muted transition-colors hover:text-primary ${FOCUS_RING}`}
         >
           로그인

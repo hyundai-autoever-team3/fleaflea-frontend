@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import type { MouseEvent } from 'react'
 import { Link } from 'react-router'
 import { HeartIcon, LockClosedIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
+import { AuthModal, type AuthModalView } from '../../../features/auth'
+import { isStandalone } from '../../../shared/lib/pwa'
 import { useScrollReveal } from '../../../shared/lib/useScrollReveal'
 import { useStaggerReveal } from '../../../shared/lib/useStaggerReveal'
 import { FeaturePhoto } from './FeaturePhoto'
@@ -51,6 +54,7 @@ const navItems = [
 
 export function LandingPage() {
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [authView, setAuthView] = useState<AuthModalView | null>(null)
 
   const heroRevealRef = useScrollReveal<HTMLDivElement>()
   const introRevealRef = useStaggerReveal<HTMLElement>()
@@ -76,9 +80,20 @@ export function LandingPage() {
     return () => observer.disconnect()
   }, [])
 
+  // 넓은 화면의 웹에서는 랜딩 위에 모달로 로그인 창을 띄운다.
+  // 설치한 앱과 좁은 화면은 옆 그림을 둘 자리가 없으므로 링크대로 로그인 페이지로 간다
+  function openAuthModal(event: MouseEvent<HTMLAnchorElement>) {
+    // 새 탭·새 창으로 여는 클릭은 건드리지 않는다
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
+    if (isStandalone() || !window.matchMedia('(min-width: 768px)').matches) return
+
+    event.preventDefault()
+    setAuthView('login')
+  }
+
   return (
     <div className="h-dvh snap-y snap-proximity scroll-smooth overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <LandingHeader navItems={navItems} activeId={activeId} />
+      <LandingHeader navItems={navItems} activeId={activeId} onLoginClick={openAuthModal} />
 
       {/* 히어로 — 점 그리드 텍스처 + 은은한 그라데이션 (design.md 6장 예외: 화면당 배경 1곳까지) */}
       <section
@@ -115,6 +130,7 @@ export function LandingPage() {
             <Link
               to="/login"
               viewTransition
+              onClick={openAuthModal}
               data-hover-lift
               className="flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-body-03 font-bold text-white"
             >
@@ -334,6 +350,8 @@ export function LandingPage() {
         </span>
         <span>© 2026 FleaFlea</span>
       </footer>
+
+      <AuthModal view={authView} onViewChange={setAuthView} onClose={() => setAuthView(null)} />
     </div>
   )
 }
