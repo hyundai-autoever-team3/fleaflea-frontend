@@ -121,9 +121,11 @@ export function ChatComposer({
     )
 
   return (
-    // 바탕이나 선이 있는 막대 없이 알약만 띄운다. 아래 여백에는 아이폰 홈 막대만큼의 안전 영역을 더하고,
-    // 키보드가 올라와 홈 막대가 가려진 동안에는(ChatPage가 data-keyboard로 알린다) 그 여백을 뺀다
-    <div className="relative px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 group-data-keyboard/chat:pb-2 md:px-4 md:pb-4">
+    // 바탕이나 선이 있는 막대 없이 알약만 띄운다. 아래 여백에는 아이폰 홈 막대만큼의 안전 영역을 더한다.
+    // 터치 기기에서 입력칸을 누르면 키보드가 올라와 홈 막대가 가려지므로, 그동안에는 여백을 거의 없애
+    // 알약이 키보드 바로 위에 붙게 한다. 키보드 감지(ChatPage의 data-keyboard)가 늦거나 빠져도
+    // 입력칸에 초점이 있는지만으로 같은 결과가 나오도록 두 조건을 함께 건다
+    <div className="relative px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-1 group-data-keyboard/chat:px-2 group-data-keyboard/chat:pb-1 pointer-coarse:has-[textarea:focus]:px-2 pointer-coarse:has-[textarea:focus]:pb-1 md:px-4 md:pb-4">
       {!connected && (
         <p role="status" className="mb-2 text-center text-xs text-text-muted">
           {status === 'reconnecting'
