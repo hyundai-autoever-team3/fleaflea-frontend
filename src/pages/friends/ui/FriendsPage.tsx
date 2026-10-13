@@ -19,6 +19,7 @@ import {
   useSendFriendRequest,
   type FriendRequestAction,
 } from '../../../features/friend-manage'
+import { useOpenChatRoom } from '../../../features/chat'
 import { useMyProfile } from '../../../entities/user'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { Avatar } from '../../../shared/ui/avatar'
@@ -126,6 +127,7 @@ export function FriendsPage() {
   const sendRequestMutation = useSendFriendRequest()
   const respondMutation = useRespondToFriendRequest()
   const deleteFriendshipMutation = useDeleteFriendship()
+  const openChatRoom = useOpenChatRoom()
 
   const pendingId = sendRequestMutation.isPending
     ? sendRequestMutation.variables
@@ -384,6 +386,15 @@ export function FriendsPage() {
                 <ul className="mt-4 flex flex-col gap-2 sm:gap-3">
                   {friends.map((friend) => (
                     <FriendRow key={friend.memberId} friend={friend} caption="친구">
+                      <button
+                        type="button"
+                        disabled={openChatRoom.isPending}
+                        onClick={() => openChatRoom.mutate(friend.memberId)}
+                        style={{ clipPath: pixelBox(2) }}
+                        className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong disabled:opacity-50`}
+                      >
+                        채팅
+                      </button>
                       {/* 도감 응답에는 소유자 이름이 없어 제목에 사용할 닉네임을 전달한다. */}
                       <Link
                         to={`/members/${friend.memberId}/item-dex`}
