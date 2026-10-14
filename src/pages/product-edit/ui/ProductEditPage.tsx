@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router'
 
-import { useMarketProducts, useProduct } from '../../../entities/product'
+import { useProduct } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import {
   getUpdateProductErrorMessage,
@@ -23,9 +23,7 @@ export function ProductEditPage() {
   const meQuery = useMyProfile()
   const product = productQuery.data
 
-  // 상세 응답에 사진 URL이 없어 목록 응답으로 폼의 초기 이미지를 보완한다.
-  const productsQuery = useMarketProducts(product?.marketId ?? 0)
-  const imageUrl = productsQuery.data?.find((item) => item.itemId === itemId)?.imageUrl ?? null
+  const imageUrl = product?.imageUrl ?? null
 
   const isOwner = product !== undefined && product.seller.id === meQuery.data?.memberId
 

@@ -22,7 +22,7 @@ export interface ProductSeller {
 }
 
 // GET /api/v1/items/{itemId} 응답 (Swagger ItemDetailResponse).
-// 상세 응답은 imageKey만 제공하므로 사진 주소는 목록의 imageUrl을 사용한다.
+// imageUrl은 목록의 썸네일이 아닌 원본 사진의 서명 주소이다.
 export interface ProductDetail {
   itemId: number
   marketId: number
@@ -33,5 +33,6 @@ export interface ProductDetail {
   price: number | null
   status: ProductStatus
   imageKey: string | null
+  imageUrl: string | null
   createdAt: string
 }

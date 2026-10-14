@@ -7,7 +7,6 @@ import {
   formatProductPrice,
   getRequestActionLabel,
   getStatusTagLabel,
-  useMarketProducts,
   useProduct,
 } from '../../../entities/product'
 import type { ProductDetail } from '../../../entities/product'
@@ -35,8 +34,14 @@ function getDetailErrorMessage(error: unknown) {
 function closedNotice({ status, tradeType }: ProductDetail) {
   if (status === 'IN_PROGRESS') {
     return tradeType === 'RENTAL'
-      ? { button: '지금 대여 중이에요', hint: '다른 분이 빌려 갔어요. 반납되면 다시 빌릴 수 있어요.' }
-      : { button: '지금 예약 중이에요', hint: '거래가 진행 중이에요. 취소되면 다시 요청할 수 있어요.' }
+      ? {
+          button: '지금 대여 중이에요',
+          hint: '다른 분이 빌려 갔어요. 반납되면 다시 빌릴 수 있어요.',
+        }
+      : {
+          button: '지금 예약 중이에요',
+          hint: '거래가 진행 중이에요. 취소되면 다시 요청할 수 있어요.',
+        }
   }
   return { button: '거래가 끝난 상품이에요', hint: '이미 거래를 마친 상품이에요.' }
 }
@@ -52,9 +57,7 @@ export function ProductDetailPage() {
   const product = productQuery.data
 
   const marketQuery = useMarket(product?.marketId ?? 0)
-  // 상세 응답에는 사진 주소가 없고 저장 키만 있어서, 목록 응답의 imageUrl을 사용
-  const productsQuery = useMarketProducts(product?.marketId ?? 0)
-  const imageUrl = productsQuery.data?.find((item) => item.itemId === itemId)?.imageUrl ?? null
+  const imageUrl = product?.imageUrl ?? null
 
   const isOwner = product !== undefined && product.seller.id === meQuery.data?.memberId
   const isClosed = product !== undefined && product.status !== 'AVAILABLE'
@@ -91,7 +94,12 @@ export function ProductDetailPage() {
       <div className="mx-auto w-full max-w-7xl px-6 py-8 md:px-14 lg:px-24">
         {!isValidId || productQuery.isError ? (
           <div className="flex flex-col items-center py-16 lg:py-24 text-center">
-            <img draggable={false} src={MASCOTS.surprised} alt="" className="h-24 object-contain [image-rendering:pixelated]" />
+            <img
+              draggable={false}
+              src={MASCOTS.surprised}
+              alt=""
+              className="h-24 object-contain [image-rendering:pixelated]"
+            />
             <p className="mt-4 text-body-03 text-text-muted">
               {isValidId ? getDetailErrorMessage(productQuery.error) : '상품을 찾을 수 없어요.'}
             </p>
@@ -100,10 +108,17 @@ export function ProductDetailPage() {
             </Link>
           </div>
         ) : !product ? (
-          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">상품을 불러오는 중이에요...</p>
+          <p className="py-16 lg:py-24 text-center text-body-03 text-text-muted">
+            상품을 불러오는 중이에요...
+          </p>
         ) : (
           <>
-            <BackLink fallback={{ to: `/market/${product.marketId}`, label: marketQuery.data?.title ?? '마켓' }} />
+            <BackLink
+              fallback={{
+                to: `/market/${product.marketId}`,
+                label: marketQuery.data?.title ?? '마켓',
+              }}
+            />
             <h1 className="mt-3 text-head-02 font-bold text-text-strong">상품 상세</h1>
             <p className="mt-1 text-body-04 text-text-muted">
               {marketQuery.data?.title ?? '마켓'}
@@ -156,7 +171,9 @@ export function ProductDetailPage() {
                   )}
                 </div>
                 <h2 className="mt-3 text-head-03 font-bold text-text-strong">{product.title}</h2>
-                <p className="mt-2 text-body-02 font-bold text-primary">{formatProductPrice(product)}</p>
+                <p className="mt-2 text-body-02 font-bold text-primary">
+                  {formatProductPrice(product)}
+                </p>
 
                 {/* 판매자 */}
                 <div className="mt-6 flex items-center gap-2">
@@ -194,7 +211,9 @@ export function ProductDetailPage() {
                   {/* 왜 요청할 수 없는지는 주인에게도 알려준다 — 주인 화면에는 버튼이 없어
                       사진 위 표시만으로는 지금 어떤 상태인지 읽히지 않는다 */}
                   {isClosed && (
-                    <p className="mb-3 text-body-04 text-text-muted">{closedNotice(product).hint}</p>
+                    <p className="mb-3 text-body-04 text-text-muted">
+                      {closedNotice(product).hint}
+                    </p>
                   )}
                   {!isOwner && (
                     <button
@@ -204,21 +223,31 @@ export function ProductDetailPage() {
                       style={{ clipPath: pixelBox(4) }}
                       className="h-12 w-full bg-primary text-body-03 font-bold text-white transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50"
                     >
-                      {isClosed ? closedNotice(product).button : getRequestActionLabel(product.tradeType)}
+                      {isClosed
+                        ? closedNotice(product).button
+                        : getRequestActionLabel(product.tradeType)}
                     </button>
                   )}
                 </div>
               </div>
             </div>
-
           </>
         )}
       </div>
 
       {/* 삭제 확인 */}
-      <Modal open={isDeleteOpen} onRequestClose={() => setIsDeleteOpen(false)} labelledBy="delete-product-title">
+      <Modal
+        open={isDeleteOpen}
+        onRequestClose={() => setIsDeleteOpen(false)}
+        labelledBy="delete-product-title"
+      >
         <div className="py-8 text-center">
-          <img draggable={false} src={MASCOTS.surprised} alt="" className="mx-auto h-28 object-contain [image-rendering:pixelated]" />
+          <img
+            draggable={false}
+            src={MASCOTS.surprised}
+            alt=""
+            className="mx-auto h-28 object-contain [image-rendering:pixelated]"
+          />
           <h2 id="delete-product-title" className="mt-6 text-head-03 font-bold text-text-strong">
             이 상품을 삭제할까요?
           </h2>

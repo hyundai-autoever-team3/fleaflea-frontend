@@ -5,9 +5,6 @@ import { api } from '../../../shared/api/axios'
 import type { PageResponse } from '../../../shared/api/page-response'
 import type { ProductDetail, ProductStatus, ProductSummary } from '../model/types'
 
-// 서버가 허용하는 페이지당 최대 조회 개수.
-const LIST_SIZE = 100
-
 // 목록 화면에서 한 페이지에 넘기는 조건. 값이 없는 조건은 서버에 보내지 않는다
 export interface MarketProductPageParams {
   page: number
@@ -46,32 +43,6 @@ export function getMarketProducts(
     // axios는 undefined인 값을 주소에 싣지 않는다
     params: { page, size, status, keyword },
     signal,
-  })
-}
-
-// 페이지 조회 도중 상품 순서가 바뀔 수 있어 itemId로 중복을 제거한 뒤 정렬한다.
-async function getAllMarketProducts(marketId: number, signal?: AbortSignal) {
-  const firstPage = (await getMarketProducts(marketId, { page: 0, size: LIST_SIZE }, signal)).data
-  const remainingPages = await Promise.all(
-    Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, index) =>
-      getMarketProducts(marketId, { page: index + 1, size: LIST_SIZE }, signal).then(
-        (response) => response.data.content,
-      ),
-    ),
-  )
-  const products = [firstPage.content, ...remainingPages].flat()
-
-  return [...new Map(products.map((product) => [product.itemId, product])).values()].sort(
-    (left, right) => right.createdAt.localeCompare(left.createdAt) || right.itemId - left.itemId,
-  )
-}
-
-export function useMarketProducts(marketId: number) {
-  return useQuery({
-    queryKey: productKeys.market(marketId),
-    queryFn: ({ signal }) => getAllMarketProducts(marketId, signal),
-    enabled: isValidId(marketId),
-    retry: retryUnlessClientError,
   })
 }
 

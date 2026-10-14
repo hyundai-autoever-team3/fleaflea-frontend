@@ -17,7 +17,6 @@ export type { MarketProductPageParams } from './api/product-api'
 export {
   productKeys,
   useMarketProductPage,
-  useMarketProducts,
   useMarketProductTotal,
   useProduct,
 } from './api/product-api'
