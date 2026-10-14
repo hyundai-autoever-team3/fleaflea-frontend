@@ -11,7 +11,12 @@ import {
 } from '../../../entities/market'
 import type { MarketMember } from '../../../entities/market'
 import type { RelationshipStatus } from '../../../entities/friend'
-import { ProductCard, STATUS_LABEL, useMarketProducts } from '../../../entities/product'
+import {
+  ProductCard,
+  STATUS_LABEL,
+  useMarketProductPage,
+  useMarketProductTotal,
+} from '../../../entities/product'
 import type { ProductStatus } from '../../../entities/product'
 import { useMyProfile } from '../../../entities/user'
 import {
@@ -25,6 +30,7 @@ import { ProductCreateModal } from '../../../features/product-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { pixelBox } from '../../../shared/lib/pixel'
 import { isStandalone } from '../../../shared/lib/pwa'
+import { useDebouncedValue } from '../../../shared/lib/useDebouncedValue'
 import { Avatar } from '../../../shared/ui/avatar'
 import { Modal } from '../../../shared/ui/modal'
 import { useToastStore } from '../../../shared/ui/toast'
@@ -59,6 +65,9 @@ const FRIEND_RELATIONSHIP_CAPTION: Record<RelationshipStatus, string> = {
 }
 
 const PRODUCTS_PER_PAGE = 12
+
+// 검색어는 입력이 멈춘 뒤에 서버로 보낸다
+const SEARCH_DELAY_MS = 300
 
 function readProductPage(value: string | null) {
   return value !== null && /^\d+$/.test(value) ? Number(value) : 0
@@ -139,7 +148,15 @@ export function MarketDetailPage() {
 
   const marketQuery = useMarket(marketId)
   const membersQuery = useMarketMembers(marketId)
-  const productsQuery = useMarketProducts(marketId)
+  // 주소에 직접 적은 검색어에도 공백이 섞일 수 있어 보내기 전에 한 번 더 자른다
+  const searchKeyword = useDebouncedValue(appliedKeyword.trim(), SEARCH_DELAY_MS)
+  const productsQuery = useMarketProductPage(marketId, {
+    page: productPage,
+    size: PRODUCTS_PER_PAGE,
+    status: statusFilter === 'ALL' ? undefined : statusFilter,
+    keyword: searchKeyword || undefined,
+  })
+  const productTotalQuery = useMarketProductTotal(marketId)
   const meQuery = useMyProfile()
 
   const market = marketQuery.data
@@ -152,19 +169,13 @@ export function MarketDetailPage() {
   const [areMembersExpanded, setAreMembersExpanded] = useState(false)
   const [memberColumnCount, setMemberColumnCount] = useState(2)
 
-  const allProducts = productsQuery.data ?? []
-  const normalizedKeyword = appliedKeyword.trim().toLowerCase()
-
-  const products = allProducts.filter(
-    (product) =>
-      (statusFilter === 'ALL' || product.status === statusFilter) &&
-      product.title.toLowerCase().includes(normalizedKeyword),
-  )
-  const productPageCount = Math.ceil(products.length / PRODUCTS_PER_PAGE)
-  const pageProducts = products.slice(
-    productPage * PRODUCTS_PER_PAGE,
-    (productPage + 1) * PRODUCTS_PER_PAGE,
-  )
+  // 마켓 전체 상품 수와 지금 조건에 맞는 상품 수를 나눠 쓴다
+  const productTotal = productTotalQuery.data ?? 0
+  const matchedCount = productsQuery.data?.totalElements ?? 0
+  const productPageCount = productsQuery.data?.totalPages ?? 0
+  const pageProducts = productsQuery.data?.content ?? []
+  const isProductListPending = productsQuery.isPending || productTotalQuery.isPending
+  const isProductListError = productsQuery.isError || productTotalQuery.isError
 
   // 첫 페이지는 기본 경로를 사용하고, 다른 검색 매개변수는 유지한다.
   const productListParams = new URLSearchParams(searchParams)
@@ -182,8 +193,9 @@ export function MarketDetailPage() {
   const visibleMembers = areMembersExpanded ? members : members.slice(0, memberColumnCount)
 
   // 삭제나 재조회로 페이지 수가 줄면 URL도 유효한 마지막 페이지로 보정한다.
+  // 이전 조건의 결과를 잠시 보여주는 동안에는 페이지 수가 맞지 않으므로 기다린다.
   useEffect(() => {
-    if (!productsQuery.data) return
+    if (!productsQuery.data || productsQuery.isPlaceholderData) return
 
     const lastPage = Math.max(0, productPageCount - 1)
 
@@ -195,7 +207,14 @@ export function MarketDetailPage() {
     else params.set('productPage', String(lastPage))
 
     setSearchParams(params, { replace: true, preventScrollReset: true })
-  }, [productPage, productPageCount, productsQuery.data, searchParams, setSearchParams])
+  }, [
+    productPage,
+    productPageCount,
+    productsQuery.data,
+    productsQuery.isPlaceholderData,
+    searchParams,
+    setSearchParams,
+  ])
 
   // 접힌 참여자 목록은 현재 반응형 그리드의 한 행만 보여준다.
   useLayoutEffect(() => {
@@ -415,10 +434,12 @@ export function MarketDetailPage() {
             <section className="mt-8 sm:mt-14">
               <h2 className="text-body-01 font-bold text-text-strong sm:text-head-03">
                 상품{' '}
-                {productsQuery.data && <span className="text-primary">{allProducts.length}</span>}
+                {productTotalQuery.data !== undefined && (
+                  <span className="text-primary">{productTotal}</span>
+                )}
               </h2>
 
-              {allProducts.length > 0 && (
+              {productTotal > 0 && (
                 <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div role="group" aria-label="거래 상태" className="flex flex-wrap gap-1.5">
                     {STATUS_FILTERS.map(({ key, label }) => (
@@ -473,20 +494,23 @@ export function MarketDetailPage() {
                   </label>
                 </div>
               )}
-              {productsQuery.isPending ? (
+              {isProductListPending ? (
                 <p className="mt-4 text-body-04 text-text-muted">상품을 불러오는 중이에요...</p>
-              ) : productsQuery.isError ? (
+              ) : isProductListError ? (
                 <div className="mt-4 flex items-center gap-3">
                   <p className="text-body-04 text-text-muted">상품 목록을 불러오지 못했어요.</p>
                   <button
                     type="button"
-                    onClick={() => void productsQuery.refetch()}
+                    onClick={() => {
+                      if (productsQuery.isError) void productsQuery.refetch()
+                      if (productTotalQuery.isError) void productTotalQuery.refetch()
+                    }}
                     className="text-body-04 font-bold text-primary underline"
                   >
                     다시 시도
                   </button>
                 </div>
-              ) : allProducts.length === 0 ? (
+              ) : productTotal === 0 ? (
                 <div
                   className="mt-4 flex flex-col items-center bg-primary-subtle py-14 text-center"
                   style={{ clipPath: pixelBox(6) }}
@@ -513,7 +537,7 @@ export function MarketDetailPage() {
                     + 첫 상품 등록하기
                   </Link>
                 </div>
-              ) : products.length === 0 ? (
+              ) : matchedCount === 0 ? (
                 <p className="mt-10 text-center text-body-04 text-text-muted">
                   조건에 맞는 상품이 없어요.
                 </p>

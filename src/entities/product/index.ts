@@ -1,4 +1,10 @@
-export type { ProductDetail, ProductSeller, ProductStatus, ProductSummary, TradeType } from './model/types'
+export type {
+  ProductDetail,
+  ProductSeller,
+  ProductStatus,
+  ProductSummary,
+  TradeType,
+} from './model/types'
 export {
   formatProductPrice,
   getRequestActionLabel,
@@ -7,9 +13,12 @@ export {
   STATUS_LABEL,
   TRADE_TYPE_LABEL,
 } from './model/trade'
+export type { MarketProductPageParams } from './api/product-api'
 export {
   productKeys,
+  useMarketProductPage,
   useMarketProducts,
+  useMarketProductTotal,
   useProduct,
 } from './api/product-api'
 export { ProductCard } from './ui/ProductCard'
