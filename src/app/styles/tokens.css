@@ -85,6 +85,13 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 20px 48px -10px rgba(20, 30, 60, 0.28);
   --shadow-glass-pill:
     inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 20px -6px rgba(20, 30, 60, 0.22);
+  --shadow-glass-bubble:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 16px -8px rgba(20, 30, 60, 0.22);
+  /* 채팅방의 이름 줄과 입력 줄 — 판 위에 살짝 떠 있는 흰 알약. 선 대신 옅은 그림자로만 구분한다 */
+  --shadow-chat-bar: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 6px 24px -6px rgba(20, 30, 60, 0.16);
+  --shadow-glass-pane:
+    0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 18px 44px -18px rgba(20, 30, 60, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
   /* 유리창 모달 — 패널보다 한 단 더 띄운다. 첫 줄의 0.5px 그림자가 hairline 테두리를
    * 대신하고(경계선을 따로 그리면 clip과 겹쳐 두꺼워짐), 마지막 줄이 위쪽 하이라이트다 */

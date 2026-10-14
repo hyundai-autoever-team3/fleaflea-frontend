@@ -199,6 +199,10 @@ export const router = createBrowserRouter([
           },
           { path: '/chat', lazy: lazyAuthed(() => import('../../pages/chat'), 'ChatPage') },
           {
+            path: '/chat/:roomId',
+            lazy: lazyAuthed(() => import('../../pages/chat'), 'ChatPage'),
+          },
+          {
             path: '/friends',
             lazy: lazyAuthed(() => import('../../pages/friends'), 'FriendsPage'),
           },

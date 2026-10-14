@@ -40,6 +40,32 @@
   box-shadow: var(--shadow-glass-window);
 }
 
+/* 채팅 말풍선 — 흰 바탕 위에 놓이므로 상대는 옅은 라벤더 유리, 나는 진한 라벤더 유리로 구분한다.
+   한 화면에 수십 개가 깔리므로 블러와 그림자를 pill보다 더 줄여 스크롤이 무겁지 않게 한다.
+   내 말풍선도 글자는 진한 색으로 둔다. 라벤더 위의 흰 글자는 대비가 낮아 읽기 어렵다 */
+@utility glass-bubble {
+  border: 1px solid rgba(177, 150, 220, 0.24);
+  background-image: linear-gradient(135deg, rgba(250, 247, 254, 0.9), rgba(240, 233, 251, 0.82));
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: var(--shadow-glass-bubble);
+}
+
+@utility glass-bubble-mine {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background-image: linear-gradient(135deg, rgba(224, 211, 246, 0.86), rgba(177, 150, 220, 0.76));
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: var(--shadow-glass-bubble);
+}
+
+/* 채팅 화면의 두 판(목록·대화). 회색 선을 긋지 않고 유리창 모달처럼
+   0.5px 그림자 선과 위쪽 하이라이트로 가장자리를 잡는다 */
+@utility glass-pane {
+  background-color: var(--color-glass-strong);
+  box-shadow: var(--shadow-glass-pane);
+}
+
 /* 뒤 배경을 흐리게 하는 유리는 지원하지 않는 브라우저에서 그냥 반투명한 판이 되어
    뒤 글자가 비쳐 읽기 어려워진다. 그럴 때는 불투명하게 바꾼다 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -62,5 +88,36 @@
     backdrop-filter: none;
     background-color: rgba(252, 252, 254, 0.98);
     background-image: none;
+  }
+}
+
+/* 말풍선은 색으로 누가 보냈는지 구분하므로 유리를 걷어낼 때도 색을 따로 남긴다 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-bubble {
+    background-image: none;
+    background-color: var(--purple-100);
+  }
+
+  .glass-bubble-mine {
+    background-image: none;
+    background-color: var(--purple-500);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-bubble,
+  .glass-bubble-mine {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .glass-bubble {
+    background-image: none;
+    background-color: var(--purple-100);
+  }
+
+  .glass-bubble-mine {
+    background-image: none;
+    background-color: var(--purple-500);
   }
 }

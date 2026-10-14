@@ -18,6 +18,12 @@ const apiProxy = {
     target: 'https://api.fleaflea.app',
     changeOrigin: true,
   },
+  // 채팅 웹소켓. VITE_API_BASE_URL을 비워 두면 개발 서버 주소로 연결하고 여기서 백엔드로 넘긴다
+  '/ws': {
+    target: 'https://api.fleaflea.app',
+    changeOrigin: true,
+    ws: true,
+  },
 }
 
 export default defineConfig({

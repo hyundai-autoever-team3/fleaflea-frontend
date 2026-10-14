@@ -10,13 +10,14 @@ const navItems = [
   { to: '/market', label: '마켓' },
   { to: '/item-dex', label: '물건 도감' },
   { to: '/friends', label: '친구' },
+  { to: '/chat', label: '채팅' },
   { to: '/my-page', label: '마이페이지' },
 ]
 
 const focusStyle =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-strong'
 
-// 마이페이지는 본문에 물건 도감·친구 바로가기가 있어 상단 메뉴를 숨긴다.
+// showNav를 끄면 상단 메뉴 없이 로고와 알림만 남긴다.
 export function Header({ showNav = true }: { showNav?: boolean }) {
   const [activePopover, setActivePopover] = useState<'notifications' | 'profile' | null>(null)
   // 설치한 앱에서는 하단 탭(widgets/bottom-nav)이 메뉴와 마이페이지를 맡으므로 헤더에는 알림만 남긴다

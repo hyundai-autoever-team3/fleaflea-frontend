@@ -19,6 +19,7 @@ import {
   useSendFriendRequest,
   type FriendRequestAction,
 } from '../../../features/friend-manage'
+import { useOpenChatRoom } from '../../../features/chat'
 import { useMyProfile } from '../../../entities/user'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { Avatar } from '../../../shared/ui/avatar'
@@ -126,6 +127,9 @@ export function FriendsPage() {
   const sendRequestMutation = useSendFriendRequest()
   const respondMutation = useRespondToFriendRequest()
   const deleteFriendshipMutation = useDeleteFriendship()
+  const openChatRoom = useOpenChatRoom()
+  // 채팅방을 여는 중인 친구. 그 줄의 버튼만 눌린 상태로 보이게 한다
+  const openingChatId = openChatRoom.isPending ? openChatRoom.variables : null
 
   const pendingId = sendRequestMutation.isPending
     ? sendRequestMutation.variables
@@ -384,6 +388,18 @@ export function FriendsPage() {
                 <ul className="mt-4 flex flex-col gap-2 sm:gap-3">
                   {friends.map((friend) => (
                     <FriendRow key={friend.memberId} friend={friend} caption="친구">
+                      <button
+                        type="button"
+                        disabled={openingChatId === friend.memberId}
+                        onClick={() => {
+                          // 한 방을 여는 동안 다른 친구를 눌러도 겹쳐 열지 않는다
+                          if (openingChatId === null) openChatRoom.mutate(friend.memberId)
+                        }}
+                        style={{ clipPath: pixelBox(2) }}
+                        className={`${ACTION_BUTTON} bg-primary-subtle text-text-muted hover:bg-primary-tint hover:text-text-strong disabled:opacity-50`}
+                      >
+                        채팅
+                      </button>
                       {/* 도감 응답에는 소유자 이름이 없어 제목에 사용할 닉네임을 전달한다. */}
                       <Link
                         to={`/members/${friend.memberId}/item-dex`}

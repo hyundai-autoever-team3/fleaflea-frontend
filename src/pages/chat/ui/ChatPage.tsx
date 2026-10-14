@@ -1,29 +1,71 @@
+import { useParams } from 'react-router'
+
+import { ChatRealtimeSync } from '../../../features/chat'
 import { MASCOTS } from '../../../shared/config/mascots'
 import { isStandalone } from '../../../shared/lib/pwa'
+import { useKeyboardViewportHeight } from '../../../shared/lib/useKeyboardViewportHeight'
+import { ChatRoomView } from '../../../widgets/chat-room'
+import { ChatRoomList } from '../../../widgets/chat-room-list'
 import { Header } from '../../../widgets/header'
 
-// 하단 탭의 채팅 자리. 채팅 화면을 만들기 전까지 준비 중임을 알린다.
+// /chat 은 목록, /chat/:roomId 는 대화방이다.
+// 넓은 화면에서는 둘을 나란히 두고, 좁은 화면과 설치한 앱에서는 주소에 맞는 한쪽만 보여 준다
 export function ChatPage() {
+  const params = useParams()
+  const parsed = Number(params.roomId)
+  const roomId = Number.isInteger(parsed) && parsed > 0 ? parsed : null
+  // 대화방에서 화면 키보드가 올라오면 보이는 영역 높이에 맞춰, 입력창이 키보드 바로 위에 붙게 한다
+  const keyboardHeight = useKeyboardViewportHeight(roomId !== null)
+
   return (
-    // 안내를 헤더와 하단 탭 사이 한가운데에 두려고 페이지 높이를 화면에 맞춘다.
-    // 설치한 앱에서는 AppLayout이 하단 탭만큼 아래 여백을 따로 두므로 그만큼 뺀다
+    // 대화 영역만 스크롤되도록 페이지 높이를 화면에 맞춘다.
+    // 설치한 앱의 채팅 목록에서는 AppLayout이 하단 탭만큼 아래 여백을 따로 두므로 그만큼 뺀다.
+    // 대화방에서는 하단 탭이 없어 화면 전체를 쓴다
     <div
-      className={`flex flex-col ${
-        isStandalone() ? 'min-h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))]' : 'min-h-dvh'
+      data-keyboard={keyboardHeight !== null || undefined}
+      style={keyboardHeight !== null ? { height: keyboardHeight } : undefined}
+      className={`group/chat flex flex-col md:bg-primary-subtle/30 ${
+        isStandalone() && !roomId ? 'h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom))]' : 'h-dvh'
       }`}
     >
       <Header />
-      <main className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-        <img
-          draggable={false}
-          src={MASCOTS.basket}
-          alt=""
-          className="h-24 object-contain [image-rendering:pixelated]"
-        />
-        <h1 className="mt-6 text-body-02 font-bold text-text-strong">채팅은 아직 준비 중이에요</h1>
-        <p className="mt-2 text-body-04 text-text-muted">
-          그동안은 거래 요청과 알림으로 소식을 주고받을 수 있어요.
-        </p>
+      <ChatRealtimeSync />
+
+      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 md:gap-4 md:px-6 md:pb-6 md:pt-2">
+        <section
+          aria-label="채팅 목록"
+          className={`min-h-0 w-full flex-col overflow-hidden bg-bg md:glass-pane md:w-80 md:shrink-0 md:rounded-3xl ${
+            roomId ? 'hidden md:flex' : 'flex'
+          }`}
+        >
+          <h1 className="px-4 pb-2 pt-4 text-body-02 font-bold text-text-strong">채팅</h1>
+          <ChatRoomList activeRoomId={roomId} />
+        </section>
+
+        <section
+          aria-label="대화"
+          className={`min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-bg md:glass-pane md:rounded-3xl ${
+            roomId ? 'flex' : 'hidden md:flex'
+          }`}
+        >
+          {roomId ? (
+            // 방이 바뀌면 입력하던 글과 스크롤 위치를 새로 시작한다
+            <ChatRoomView key={roomId} roomId={roomId} />
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+              <img
+                draggable={false}
+                src={MASCOTS.wink}
+                alt=""
+                className="h-24 object-contain [image-rendering:pixelated]"
+              />
+              <p className="mt-5 text-body-02 font-bold text-text-strong">대화를 골라 주세요</p>
+              <p className="mt-1 text-body-04 text-text-muted">
+                왼쪽 목록에서 친구를 누르면 대화가 열려요.
+              </p>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   )
