@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 import {
   CollectionSlot,
   EmptySlot,
-  useOwnerCollectionItems,
+  useOwnerCollectionItemPage,
 } from '../../../entities/collection-item'
 import { useMyFriends } from '../../../entities/friend'
 import {
@@ -49,16 +49,17 @@ export function MemberItemDexPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const itemsQuery = useOwnerCollectionItems(memberId)
-  const items = itemsQuery.data ?? []
+  // 보고 있는 페이지의 물건만 서버에서 받는다.
+  const [page, setPage] = useState(0)
+  const itemsQuery = useOwnerCollectionItemPage(memberId, page, SLOTS_PER_PAGE)
+  const total = itemsQuery.data?.totalElements ?? 0
+  const pageItems = itemsQuery.data?.content ?? []
 
   // 직접 URL로 진입해 전달받은 닉네임이 없으면 친구 목록에서 보완한다.
   const stateNickname = (location.state as MemberItemDexState | null)?.nickname
   const friendsQuery = useMyFriends()
   const friendNickname = friendsQuery.data?.find((friend) => friend.memberId === memberId)?.nickname
   const nickname = stateNickname ?? friendNickname
-
-  const [page, setPage] = useState(0)
 
   const [pokeError, setPokeError] = useState('')
   // 잔여 횟수 API가 없어 현재 화면의 성공 횟수와 서버의 제한 응답을 함께 사용한다.
@@ -103,12 +104,13 @@ export function MemberItemDexPage() {
     })
   }
 
-  const pageCount = Math.max(1, Math.ceil(items.length / SLOTS_PER_PAGE))
+  const pageCount = Math.max(1, Math.ceil(total / SLOTS_PER_PAGE))
 
   // 공개 물건 수가 줄어 현재 페이지가 사라지면 마지막 페이지로 보정한다.
-  if (page > pageCount - 1) setPage(pageCount - 1)
-
-  const pageItems = items.slice(page * SLOTS_PER_PAGE, (page + 1) * SLOTS_PER_PAGE)
+  // 이전 페이지를 잠시 보여주는 동안에는 개수가 맞지 않으므로 새 응답을 기다린다.
+  if (itemsQuery.data && !itemsQuery.isPlaceholderData && page > pageCount - 1) {
+    setPage(pageCount - 1)
+  }
 
   return (
     <div>
@@ -128,7 +130,7 @@ export function MemberItemDexPage() {
         <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <p className="text-body-04 text-text-muted">
             공개한 물건만 볼 수 있어요
-            {!itemsQuery.isPending && !itemsQuery.isError && ` · ${items.length}개`}
+            {!itemsQuery.isPending && !itemsQuery.isError && ` · ${total}개`}
           </p>
           <button
             type="button"
@@ -256,7 +258,7 @@ export function MemberItemDexPage() {
               </div>
             </div>
 
-            {items.length === 0 && (
+            {total === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
                 <img
                   draggable={false}

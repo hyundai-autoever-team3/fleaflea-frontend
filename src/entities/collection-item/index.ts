@@ -1,12 +1,18 @@
-export type { CollectionItem, CollectionItemDetail, CollectionItemStatus, CollectionItemSummary } from './model/types'
+export type {
+  CollectionItem,
+  CollectionItemDetail,
+  CollectionItemStatus,
+  CollectionItemSummary,
+} from './model/types'
 export {
   collectionKeys,
   getCollectionItem,
   getMyCollectionItems,
   getOwnerCollectionItems,
   useCollectionItem,
+  useMyCollectionItemPage,
   useMyCollectionItems,
-  useOwnerCollectionItems,
+  useOwnerCollectionItemPage,
 } from './api/collection-api'
 export { CollectionCard } from './ui/CollectionCard'
 export { CollectionSlot, EmptySlot } from './ui/CollectionSlot'

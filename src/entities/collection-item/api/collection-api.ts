@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 
 import { api } from '../../../shared/api/axios'
@@ -7,10 +7,15 @@ import type { CollectionItemDetail, CollectionItemSummary } from '../model/types
 
 const LIST_SIZE = 100
 
+// 페이지 키는 mine·owner 키 뒤에 이어 붙여, 물건을 바꾼 뒤 all 키로 무효화하면 함께 새로 받는다
 export const collectionKeys = {
   all: ['collection-items'] as const,
   mine: ['collection-items', 'mine'] as const,
+  minePage: (page: number, size: number) =>
+    [...collectionKeys.mine, 'page', { page, size }] as const,
   owner: (ownerId: number) => [...collectionKeys.all, 'owner', ownerId] as const,
+  ownerPage: (ownerId: number, page: number, size: number) =>
+    [...collectionKeys.owner(ownerId), 'page', { page, size }] as const,
   detail: (collectionItemId: number) =>
     [...collectionKeys.all, 'detail', collectionItemId] as const,
 }
@@ -25,18 +30,23 @@ function retryUnlessClientError(failureCount: number, error: unknown) {
   return failureCount < 3
 }
 
-export function getMyCollectionItems(page = 0, signal?: AbortSignal) {
+export function getMyCollectionItems(page = 0, size = LIST_SIZE, signal?: AbortSignal) {
   return api.get<PageResponse<CollectionItemSummary>>('/api/v1/members/me/collection-items', {
-    params: { page, size: LIST_SIZE },
+    params: { page, size },
     signal,
   })
 }
 
-export function getOwnerCollectionItems(ownerId: number, page = 0, signal?: AbortSignal) {
+export function getOwnerCollectionItems(
+  ownerId: number,
+  page = 0,
+  size = LIST_SIZE,
+  signal?: AbortSignal,
+) {
   return api.get<PageResponse<CollectionItemSummary>>(
     `/api/v1/members/${ownerId}/collection-items`,
     {
-      params: { page, size: LIST_SIZE },
+      params: { page, size },
       signal,
     },
   )
@@ -60,20 +70,31 @@ export function useMyCollectionItems() {
   return useQuery({
     queryKey: collectionKeys.mine,
     queryFn: ({ signal }) =>
-      getAllCollectionItems(async (page) => (await getMyCollectionItems(page, signal)).data),
+      getAllCollectionItems(
+        async (page) => (await getMyCollectionItems(page, LIST_SIZE, signal)).data,
+      ),
     retry: retryUnlessClientError,
   })
 }
 
-export function useOwnerCollectionItems(ownerId: number) {
+// 도감 화면용. 보이는 한 페이지만 받고, 다음 페이지가 올 때까지 이전 페이지를 그대로 보여준다
+export function useMyCollectionItemPage(page: number, size: number) {
   return useQuery({
-    queryKey: collectionKeys.owner(ownerId),
-    queryFn: ({ signal }) =>
-      getAllCollectionItems(
-        async (page) => (await getOwnerCollectionItems(ownerId, page, signal)).data,
-      ),
+    queryKey: collectionKeys.minePage(page, size),
+    queryFn: async ({ signal }) => (await getMyCollectionItems(page, size, signal)).data,
+    retry: retryUnlessClientError,
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useOwnerCollectionItemPage(ownerId: number, page: number, size: number) {
+  return useQuery({
+    queryKey: collectionKeys.ownerPage(ownerId, page, size),
+    queryFn: async ({ signal }) =>
+      (await getOwnerCollectionItems(ownerId, page, size, signal)).data,
     enabled: isValidId(ownerId),
     retry: retryUnlessClientError,
+    placeholderData: keepPreviousData,
   })
 }
 

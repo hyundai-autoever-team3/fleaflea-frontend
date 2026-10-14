@@ -4,7 +4,7 @@ import {
   CollectionSlot,
   EmptySlot,
   useCollectionItem,
-  useMyCollectionItems,
+  useMyCollectionItemPage,
 } from '../../../entities/collection-item'
 import {
   CollectionForm,
@@ -32,19 +32,20 @@ function SummaryLine({ total }: { total: number }) {
 }
 
 export function ItemDexPage() {
-  const itemsQuery = useMyCollectionItems()
-  const items = itemsQuery.data ?? []
-
-  // 훅에서 전체 목록을 받아 화면 단위로 페이지를 나눈다.
+  // 보고 있는 페이지의 물건만 서버에서 받는다.
   const [page, setPage] = useState(0)
+  const itemsQuery = useMyCollectionItemPage(page, SLOTS_PER_PAGE)
+  const total = itemsQuery.data?.totalElements ?? 0
+  const pageItems = itemsQuery.data?.content ?? []
 
   // 등록용 빈 슬롯을 항상 남긴다. 12개라면 빈 페이지를 포함해 총 2페이지이다.
-  const pageCount = Math.floor(items.length / SLOTS_PER_PAGE) + 1
+  const pageCount = Math.floor(total / SLOTS_PER_PAGE) + 1
 
   // 삭제로 현재 페이지가 사라지면 마지막 페이지로 보정한다.
-  if (page > pageCount - 1) setPage(pageCount - 1)
-
-  const pageItems = items.slice(page * SLOTS_PER_PAGE, (page + 1) * SLOTS_PER_PAGE)
+  // 이전 페이지를 잠시 보여주는 동안에는 개수가 맞지 않으므로 새 응답을 기다린다.
+  if (itemsQuery.data && !itemsQuery.isPlaceholderData && page > pageCount - 1) {
+    setPage(pageCount - 1)
+  }
 
   const [modal, setModal] = useState<ModalKind>(null)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -98,10 +99,10 @@ export function ItemDexPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-head-03 font-bold text-text-strong sm:text-head-02">물건 도감</h1>
-            {!itemsQuery.isPending && !itemsQuery.isError && <SummaryLine total={items.length} />}
+            {!itemsQuery.isPending && !itemsQuery.isError && <SummaryLine total={total} />}
           </div>
           {/* 빈 도감에서는 아래의 첫 물건 등록 버튼을 사용한다. */}
-          {items.length > 0 && (
+          {total > 0 && (
             <button
               type="button"
               onClick={() => setModal('create')}
@@ -185,7 +186,7 @@ export function ItemDexPage() {
               </div>
             </div>
 
-            {items.length === 0 && (
+            {total === 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
                 <img
                   draggable={false}
