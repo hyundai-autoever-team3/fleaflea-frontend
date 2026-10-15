@@ -8,6 +8,7 @@ import { AppLayout } from './AppLayout'
 import { RequireAuth, RequireGuest, RequireOnboarded } from './guards'
 import { RootLayout } from './RootLayout'
 import { RouteFallback } from './RouteFallback'
+import { RouterError } from './RouterError'
 
 // 배포 후 이전 청크 주소를 요청한 경우 새로고침으로 복구한다.
 // sessionStorage가 사용 가능하면 재시도를 기록해 연속 새로고침을 막고, 로딩 성공 시 해제한다.
@@ -70,6 +71,7 @@ export const router = createBrowserRouter([
     // 모든 경로에서 초기 대기 화면과 스크롤 복원을 공유한다.
     element: <RootLayout />,
     HydrateFallback: RouteFallback,
+    errorElement: <RouterError />,
     children: [
       {
         path: '/',

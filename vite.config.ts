@@ -1,7 +1,8 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 
 // 설정 문서: https://vite.dev/config/
 // 개발 서버와 미리보기가 같은 규칙을 쓰도록 한곳에 둔다.
@@ -26,61 +27,85 @@ const apiProxy = {
   },
 }
 
-export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    VitePWA({
-      // 새 버전이 와도 쓰던 화면을 바로 바꾸지 않는다. 앱을 닫았다 열 때 교체된다
-      registerType: 'prompt',
+export default defineConfig(({ mode }) => {
+  // SENTRY_로 시작하는 값만 읽는다. 로컬은 .env에서, Vercel은 환경 변수에서 들어온다
+  const sentry = loadEnv(mode, process.cwd(), 'SENTRY_')
 
-      // manifest는 3번에서 만든 public/manifest.webmanifest를 그대로 쓴다
-      manifest: false,
+  return {
+    plugins: [
+      react(),
+      tailwindcss(),
+      VitePWA({
+        // 새 버전이 와도 쓰던 화면을 바로 바꾸지 않는다. 앱을 닫았다 열 때 교체된다
+        registerType: 'prompt',
 
-      // 등록은 src/app/pwa/register.ts가 하므로 플러그인이 등록 코드를 따로 넣지 않게 한다
-      injectRegister: false,
+        // manifest는 3번에서 만든 public/manifest.webmanifest를 그대로 쓴다
+        manifest: false,
 
-      workbox: {
-        // 사전 저장: 설치할 때 미리 받아 둘 파일
-        globPatterns: ['**/*.{js,css,html}', 'fonts/*', 'icons/*.png', 'mascot/flea4.png'],
-        // MSW(API 목업)용 파일은 앱에서 쓰지 않으므로 저장하지 않는다
-        globIgnores: ['mockServiceWorker.js'],
-        // SPA 기본 동작(모든 주소에 index.html)을 끄고, 아래에서 오프라인 화면으로 대신한다
-        navigateFallback: null,
-        runtimeCaching: [
-          {
-            // 페이지 이동: 항상 서버에서 받고, 끊기면 오프라인 화면
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkOnly',
-            options: {
-              precacheFallback: {
-                fallbackURL: '/offline.html',
+        // 등록은 src/app/pwa/register.ts가 하므로 플러그인이 등록 코드를 따로 넣지 않게 한다
+        injectRegister: false,
+
+        workbox: {
+          // 서비스 워커는 Sentry에 올리지 않으므로 소스맵을 만들지 않는다
+          sourcemap: false,
+          // 사전 저장: 설치할 때 미리 받아 둘 파일
+          globPatterns: ['**/*.{js,css,html}', 'fonts/*', 'icons/*.png', 'mascot/flea4.png'],
+          // MSW(API 목업)용 파일은 앱에서 쓰지 않으므로 저장하지 않는다
+          globIgnores: ['mockServiceWorker.js'],
+          // SPA 기본 동작(모든 주소에 index.html)을 끄고, 아래에서 오프라인 화면으로 대신한다
+          navigateFallback: null,
+          runtimeCaching: [
+            {
+              // 페이지 이동: 항상 서버에서 받고, 끊기면 오프라인 화면
+              urlPattern: ({ request }) => request.mode === 'navigate',
+              handler: 'NetworkOnly',
+              options: {
+                precacheFallback: {
+                  fallbackURL: '/offline.html',
+                },
               },
             },
-          },
-          {
-            // 마스코트 이미지: 한 번 받으면 저장해 두고 다음부터 바로 사용한다
-            urlPattern: ({ url }) => url.pathname.startsWith('/mascot/'),
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fleaflea-mascots',
-              expiration: { maxEntries: 20 },
+            {
+              // 마스코트 이미지: 한 번 받으면 저장해 두고 다음부터 바로 사용한다
+              urlPattern: ({ url }) => url.pathname.startsWith('/mascot/'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'fleaflea-mascots',
+                expiration: { maxEntries: 20 },
+              },
             },
-          },
-        ],
-      },
-    }),
-  ],
-  server: {
-    host: true,
-    port: 5175,
-    strictPort: true,
-    // 개발 중에는 프록시를 거쳐 호출해 CORS·혼합 콘텐츠를 신경 쓰지 않아도 되게 함.
-    // 배포에서도 같은 경로를 쓰며 vercel.json의 rewrite가 백엔드로 넘긴다
-    proxy: apiProxy,
-  },
-  preview: {
-    port: 4173,
-    proxy: apiProxy,
-  },
+          ],
+        },
+      }),
+      // 소스맵을 Sentry에 올려서 오류 위치를 원래 코드로 보여 준다.
+      // 토큰이 없는 환경(팀원 로컬 빌드)에서는 업로드를 건너뛴다
+      sentryVitePlugin({
+        org: sentry.SENTRY_ORG,
+        project: sentry.SENTRY_PROJECT,
+        authToken: sentry.SENTRY_AUTH_TOKEN,
+        disable: !sentry.SENTRY_AUTH_TOKEN,
+        telemetry: false,
+        sourcemaps: {
+          // 올린 뒤에는 배포 파일에서 지워 원래 코드가 공개되지 않게 한다
+          filesToDeleteAfterUpload: ['./dist/**/*.map'],
+        },
+      }),
+    ],
+    build: {
+      // 소스맵 파일은 만들되 JS 파일 안에 위치를 적지 않는다. 업로드 후 지우기 때문이다
+      sourcemap: 'hidden',
+    },
+    server: {
+      host: true,
+      port: 5175,
+      strictPort: true,
+      // 개발 중에는 프록시를 거쳐 호출해 CORS·혼합 콘텐츠를 신경 쓰지 않아도 되게 함.
+      // 배포에서도 같은 경로를 쓰며 vercel.json의 rewrite가 백엔드로 넘긴다
+      proxy: apiProxy,
+    },
+    preview: {
+      port: 4173,
+      proxy: apiProxy,
+    },
+  }
 })

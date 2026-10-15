@@ -15,6 +15,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@sentry/react": "^11.7.0",
     "@stomp/stompjs": "^7.4.0",
     "@tanstack/react-query": "^5.102.8",
     "axios": "^1.20.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
+    "@sentry/vite-plugin": "^5.4.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query-devtools": "^5.102.8",
     "@types/node": "^24.13.3",

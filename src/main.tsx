@@ -7,7 +7,9 @@ import { router } from './app/router/router'
 import { registerServiceWorker } from './app/pwa/register'
 import { hideSplash } from './app/pwa/splash'
 import { fitViewportInApp } from './app/pwa/viewport'
+import { initSentry } from './app/monitoring/sentry'
 
+initSentry()
 fitViewportInApp()
 
 createRoot(document.getElementById('root')!).render(

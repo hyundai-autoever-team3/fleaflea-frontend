@@ -5,4 +5,6 @@ export const env = {
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL ?? '',
   // 백엔드 소셜 로그인이 배포되기 전에는 버튼을 눌러도 준비 중 안내만 띄운다.
   socialLoginEnabled: import.meta.env.VITE_SOCIAL_LOGIN_ENABLED === 'true',
+  // Sentry 오류 수집 주소. 비어 있으면 Sentry를 켜지 않는다
+  sentryDsn: import.meta.env.VITE_SENTRY_DSN ?? '',
 }
