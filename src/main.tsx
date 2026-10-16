@@ -8,8 +8,10 @@ import { registerServiceWorker } from './app/pwa/register'
 import { hideSplash } from './app/pwa/splash'
 import { fitViewportInApp } from './app/pwa/viewport'
 import { initSentry } from './app/monitoring/sentry'
+import { initAnalytics } from './app/monitoring/analytics.ts'
 
 initSentry()
+initAnalytics()
 fitViewportInApp()
 
 createRoot(document.getElementById('root')!).render(
