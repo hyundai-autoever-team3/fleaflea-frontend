@@ -27,6 +27,18 @@ export function login(payload: LoginPayload) {
   return api.post('/api/v1/auth/login', payload)
 }
 
+export interface PasswordResetPayload {
+  email: string
+  // PASSWORD_RESET 목적으로 인증 코드를 확인하고 받은 일회용 토큰
+  verificationToken: string
+  newPassword: string
+}
+
+// POST /api/v1/auth/password/reset. 성공하면 204이고 이 브라우저의 리프레시 토큰 쿠키도 지운다
+export function resetPassword(payload: PasswordResetPayload) {
+  return api.post('/api/v1/auth/password/reset', payload)
+}
+
 // 서버 세션과 쿠키를 만료시킨다. 로컬 세션 정리는 호출부에서 처리한다.
 export function logout() {
   return api.delete('/api/v1/auth/logout')
