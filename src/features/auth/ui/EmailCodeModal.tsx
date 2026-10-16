@@ -22,12 +22,13 @@ export function EmailCodeModal({ verification }: { verification: EmailVerificati
       labelledBy={titleId}
       size="sm"
     >
-      <EmailCodeContent verification={verification} titleId={titleId} />
+      <EmailCodeStep verification={verification} titleId={titleId} />
     </Modal>
   )
 }
 
-function EmailCodeContent({
+// 코드 입력 화면. 비밀번호 찾기 창에서는 단계 하나로 그대로 쓴다
+export function EmailCodeStep({
   verification,
   titleId,
 }: {
