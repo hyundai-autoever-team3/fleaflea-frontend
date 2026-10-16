@@ -127,162 +127,185 @@ function PasswordResetContent({
     }
   }
 
-  if (verification.status === 'sent') {
-    return (
-      <>
-        <EmailCodeStep verification={verification} titleId={titleId} />
-        <button
-          type="button"
-          onClick={verification.reset}
-          className="mx-auto mt-1 block text-xs font-bold text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong"
-        >
-          다른 이메일로 받기
-        </button>
-      </>
-    )
+  // 처음 단계는 창이 열리는 움직임과 겹치지 않게 그대로 보여 주고, 단계가 바뀔 때만 다음 화면을 밀어 넣는다
+  const step = verification.status
+  const [prevStep, setPrevStep] = useState(step)
+  const [animateStep, setAnimateStep] = useState(false)
+
+  if (step !== prevStep) {
+    setPrevStep(step)
+    setAnimateStep(true)
   }
 
-  if (verification.status === 'verified') {
+  function renderStep() {
+    if (verification.status === 'sent') {
+      return (
+        <>
+          <EmailCodeStep verification={verification} titleId={titleId} />
+          <button
+            type="button"
+            onClick={verification.reset}
+            className="mx-auto mt-1 block text-xs font-bold text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong"
+          >
+            다른 이메일로 받기
+          </button>
+        </>
+      )
+    }
+
+    if (verification.status === 'verified') {
+      return (
+        <form onSubmit={handleReset} noValidate className="py-4 text-center">
+          <img
+            draggable={false}
+            src={MASCOTS.wink}
+            alt=""
+            className="mx-auto h-20 object-contain [image-rendering:pixelated]"
+          />
+
+          <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">
+            비밀번호를 재설정해 주세요
+          </h2>
+
+          <div className="mt-6 flex flex-col gap-3 text-left">
+            <label htmlFor="reset-password" className="text-body-04 font-bold text-text-strong">
+              새 비밀번호
+            </label>
+            <PixelField invalid={Boolean(error)} className="relative -mt-1">
+              <input
+                id="reset-password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value)
+                  setError('')
+                }}
+                autoComplete="new-password"
+                maxLength={FIELD_LIMITS.password.max}
+                placeholder={`${FIELD_LIMITS.password.min}~${FIELD_LIMITS.password.max}자`}
+                aria-invalid={Boolean(error)}
+                style={pixelInputStyle}
+                className={`${pixelInputClass} h-12 pr-11`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
+              >
+                {showPassword ? (
+                  <EyeSlashIcon className="size-5" />
+                ) : (
+                  <EyeIcon className="size-5" />
+                )}
+              </button>
+            </PixelField>
+
+            <label
+              htmlFor="reset-password-confirm"
+              className="mt-1 text-body-04 font-bold text-text-strong"
+            >
+              새 비밀번호 확인
+            </label>
+            <PixelField invalid={Boolean(error)} className="-mt-1">
+              <input
+                id="reset-password-confirm"
+                type={showPassword ? 'text' : 'password'}
+                value={passwordConfirm}
+                onChange={(event) => {
+                  setPasswordConfirm(event.target.value)
+                  setError('')
+                }}
+                autoComplete="new-password"
+                maxLength={FIELD_LIMITS.password.max}
+                placeholder="한 번 더 입력해 주세요"
+                aria-invalid={Boolean(error)}
+                style={pixelInputStyle}
+                className={`${pixelInputClass} h-12`}
+              />
+            </PixelField>
+          </div>
+
+          {error && (
+            <p role="alert" className="mt-3 text-left text-body-04 text-red-600">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            style={{ clipPath: pixelBox(4) }}
+            className="mt-6 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+          >
+            {isSubmitting ? '변경하는 중' : '비밀번호 변경'}
+          </button>
+        </form>
+      )
+    }
+
     return (
-      <form onSubmit={handleReset} noValidate className="py-4 text-center">
+      <form onSubmit={handleSend} noValidate className="py-4 text-center">
         <img
           draggable={false}
-          src={MASCOTS.wink}
+          src={MASCOTS.surprised}
           alt=""
           className="mx-auto h-20 object-contain [image-rendering:pixelated]"
         />
 
         <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">
-          비밀번호를 재설정해 주세요
+          비밀번호 찾기
         </h2>
+        <p className="mt-2 text-body-04 text-text-muted">
+          가입한 이메일로 인증 코드를 보내 드릴게요.
+          <br />
+          인증하면 새 비밀번호를 정할 수 있어요.
+        </p>
 
-        <div className="mt-6 flex flex-col gap-3 text-left">
-          <label htmlFor="reset-password" className="text-body-04 font-bold text-text-strong">
-            새 비밀번호
+        <div className="mt-6 text-left">
+          <label htmlFor="reset-email" className="text-body-04 font-bold text-text-strong">
+            이메일
           </label>
-          <PixelField invalid={Boolean(error)} className="relative -mt-1">
+          <PixelField invalid={Boolean(verification.error)} className="mt-2">
             <input
-              id="reset-password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
+              id="reset-email"
+              type="email"
+              value={email}
               onChange={(event) => {
-                setPassword(event.target.value)
-                setError('')
+                setEmail(event.target.value)
+                if (verification.error) verification.setError('')
               }}
-              autoComplete="new-password"
-              maxLength={FIELD_LIMITS.password.max}
-              placeholder={`${FIELD_LIMITS.password.min}~${FIELD_LIMITS.password.max}자`}
-              aria-invalid={Boolean(error)}
-              style={pixelInputStyle}
-              className={`${pixelInputClass} h-12 pr-11`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((value) => !value)}
-              aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted"
-            >
-              {showPassword ? <EyeSlashIcon className="size-5" /> : <EyeIcon className="size-5" />}
-            </button>
-          </PixelField>
-
-          <label
-            htmlFor="reset-password-confirm"
-            className="mt-1 text-body-04 font-bold text-text-strong"
-          >
-            새 비밀번호 확인
-          </label>
-          <PixelField invalid={Boolean(error)} className="-mt-1">
-            <input
-              id="reset-password-confirm"
-              type={showPassword ? 'text' : 'password'}
-              value={passwordConfirm}
-              onChange={(event) => {
-                setPasswordConfirm(event.target.value)
-                setError('')
-              }}
-              autoComplete="new-password"
-              maxLength={FIELD_LIMITS.password.max}
-              placeholder="한 번 더 입력해 주세요"
-              aria-invalid={Boolean(error)}
+              autoComplete="email"
+              placeholder="flee@example.com"
+              aria-invalid={Boolean(verification.error)}
               style={pixelInputStyle}
               className={`${pixelInputClass} h-12`}
             />
           </PixelField>
         </div>
 
-        {error && (
+        {verification.error && (
           <p role="alert" className="mt-3 text-left text-body-04 text-red-600">
-            {error}
+            {verification.error}
           </p>
         )}
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={verification.isSending}
           style={{ clipPath: pixelBox(4) }}
           className="mt-6 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
-          {isSubmitting ? '변경하는 중' : '비밀번호 변경'}
+          {verification.isSending ? '보내는 중' : '인증 코드 받기'}
         </button>
       </form>
     )
   }
 
+  // key가 바뀌면 새로 그려져 등장 애니메이션이 다시 재생된다
   return (
-    <form onSubmit={handleSend} noValidate className="py-4 text-center">
-      <img
-        draggable={false}
-        src={MASCOTS.surprised}
-        alt=""
-        className="mx-auto h-20 object-contain [image-rendering:pixelated]"
-      />
-
-      <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">
-        비밀번호 찾기
-      </h2>
-      <p className="mt-2 text-body-04 text-text-muted">
-        가입한 이메일로 인증 코드를 보내 드릴게요.
-        <br />
-        인증하면 새 비밀번호를 정할 수 있어요.
-      </p>
-
-      <div className="mt-6 text-left">
-        <label htmlFor="reset-email" className="text-body-04 font-bold text-text-strong">
-          이메일
-        </label>
-        <PixelField invalid={Boolean(verification.error)} className="mt-2">
-          <input
-            id="reset-email"
-            type="email"
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value)
-              if (verification.error) verification.setError('')
-            }}
-            autoComplete="email"
-            placeholder="flee@example.com"
-            aria-invalid={Boolean(verification.error)}
-            style={pixelInputStyle}
-            className={`${pixelInputClass} h-12`}
-          />
-        </PixelField>
-      </div>
-
-      {verification.error && (
-        <p role="alert" className="mt-3 text-left text-body-04 text-red-600">
-          {verification.error}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        disabled={verification.isSending}
-        style={{ clipPath: pixelBox(4) }}
-        className="mt-6 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
-      >
-        {verification.isSending ? '보내는 중' : '인증 코드 받기'}
-      </button>
-    </form>
+    <div key={step} data-step-in={animateStep ? '' : undefined}>
+      {renderStep()}
+    </div>
   )
 }
