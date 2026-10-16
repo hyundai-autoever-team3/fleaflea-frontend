@@ -75,7 +75,7 @@ export function CommentForm({
               event.currentTarget.form?.requestSubmit()
             }
           }}
-          rows={3}
+          rows={2}
           maxLength={COMMENT_MAX_LENGTH}
           placeholder={placeholder}
           aria-label={placeholder}

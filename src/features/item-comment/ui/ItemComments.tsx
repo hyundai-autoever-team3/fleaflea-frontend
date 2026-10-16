@@ -65,22 +65,26 @@ export function ItemComments({ itemId }: { itemId: number }) {
   }
 
   return (
-    <section
-      aria-labelledby="item-comments-title"
-      className="mt-14 max-w-3xl border-t border-primary-subtle pt-8"
-    >
-      <h2 id="item-comments-title" className="text-head-03 font-bold text-text-strong">
+    // 위 상품 정보와 같은 너비를 쓰고, 제목은 '이 물건을 소개해요'와 같은 크기로 맞춘다
+    <section aria-labelledby="item-comments-title" className="mt-14">
+      <h2 id="item-comments-title" className="text-body-03 font-bold text-text-strong">
         댓글 {total > 0 && <span className="text-primary">{total}</span>}
       </h2>
 
       {commentsQuery.isError ? (
-        <p className="py-8 text-body-04 text-text-muted">댓글을 불러오지 못했어요.</p>
+        <p className="mt-3 border-y border-primary-subtle py-6 text-body-04 text-text-muted">
+          댓글을 불러오지 못했어요.
+        </p>
       ) : commentsQuery.isPending ? (
-        <p className="py-8 text-body-04 text-text-muted">댓글을 불러오는 중이에요...</p>
+        <p className="mt-3 border-y border-primary-subtle py-6 text-body-04 text-text-muted">
+          댓글을 불러오는 중이에요...
+        </p>
       ) : comments.length === 0 ? (
-        <p className="py-8 text-body-04 text-text-muted">아직 댓글이 없어요.</p>
+        <p className="mt-3 border-y border-primary-subtle py-6 text-body-04 text-text-muted">
+          아직 댓글이 없어요.
+        </p>
       ) : (
-        <ul className="mt-6 flex flex-col gap-8">
+        <ul className="mt-3 divide-y divide-primary-subtle border-y border-primary-subtle">
           {comments.map((comment) => (
             <CommentThread key={comment.commentId} comment={comment} onDelete={openDelete} />
           ))}
@@ -93,14 +97,14 @@ export function ItemComments({ itemId }: { itemId: number }) {
           onClick={() => void commentsQuery.fetchNextPage()}
           disabled={commentsQuery.isFetchingNextPage}
           style={{ clipPath: pixelBox(2) }}
-          className="mt-8 h-10 w-full bg-primary-subtle text-body-04 font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong disabled:opacity-60"
+          className="mt-3 h-10 w-full bg-primary-subtle text-body-04 font-bold text-text-muted transition-colors hover:bg-primary-tint hover:text-text-strong disabled:opacity-60"
         >
           {commentsQuery.isFetchingNextPage ? '불러오는 중' : '댓글 더 보기'}
         </button>
       )}
 
       {/* 오래된 순이라 새 댓글이 붙는 맨 아래에 입력 칸을 둔다 */}
-      <div className="mt-8">
+      <div className="mt-4">
         <CommentForm
           placeholder="상품에 대해 궁금한 점을 남겨 보세요"
           submitLabel="등록"
