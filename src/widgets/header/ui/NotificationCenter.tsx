@@ -31,6 +31,7 @@ import {
   useReadNotification,
 } from '../../../features/notification-manage'
 import { MASCOTS } from '../../../shared/config/mascots'
+import { formatFullDateTime, formatRelativeTime } from '../../../shared/lib/date'
 import { isStandalone } from '../../../shared/lib/pwa'
 import { useToastStore } from '../../../shared/ui/toast'
 import { NotificationPermissionBanner } from './NotificationPermissionBanner'
@@ -123,48 +124,6 @@ const DESTINATION: Record<NotificationReferenceType, string> = {
   MEMBER_POKE: '/friends',
 }
 
-function toDate(value: string) {
-  const date = new Date(value)
-
-  return Number.isNaN(date.getTime()) ? null : date
-}
-
-function relativeTime(value: string) {
-  const date = toDate(value)
-  if (!date) return '시간 정보 없음'
-
-  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000))
-  if (seconds < 60) return '방금 전'
-
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}분 전`
-
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}시간 전`
-
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}일 전`
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date)
-}
-
-function fullDate(value: string) {
-  const date = toDate(value)
-  if (!date) return undefined
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date)
-}
-
 function NotificationRow({
   notification,
   busy,
@@ -201,10 +160,10 @@ function NotificationRow({
           <span className={`text-[11px] font-bold ${typeStyle.textClass}`}>{typeStyle.label}</span>
           <time
             dateTime={notification.createdAt}
-            title={fullDate(notification.createdAt)}
+            title={formatFullDateTime(notification.createdAt)}
             className="ml-auto shrink-0 text-[11px] text-glass-ink/58"
           >
-            {relativeTime(notification.createdAt)}
+            {formatRelativeTime(notification.createdAt)}
           </time>
         </div>
 
