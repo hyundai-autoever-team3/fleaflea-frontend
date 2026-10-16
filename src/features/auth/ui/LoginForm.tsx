@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
@@ -8,8 +8,10 @@ import { isStandalone } from '../../../shared/lib/pwa'
 import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { login } from '../api/auth-api'
 import { AuthVisual } from './AuthVisual'
+import { PasswordResetModal } from './PasswordResetModal'
 import { SocialLoginButtons } from './SocialLoginButtons'
 import { useSessionStore } from '../../../entities/session'
+import { useToastStore } from '../../../shared/ui/toast'
 
 // 모달 안에 넣을 때 넘기는 값. 제목 id는 창 이름으로 쓰고, 로그인·회원가입 전환은 주소를 바꾸지 않고 창 안에서 한다
 export interface AuthFormModalOptions {
@@ -25,6 +27,9 @@ export function LoginForm({ modal }: { modal?: AuthFormModalOptions }) {
   const [rememberMe, setRememberMe] = useState(true)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [error, setError] = useState('')
+  const [isResetOpen, setIsResetOpen] = useState(false)
+  const emailInputRef = useRef<HTMLInputElement>(null)
+  const passwordInputRef = useRef<HTMLInputElement>(null)
   // 설치한 앱에서는 카드와 옆 그림 없이 흰 화면 가운데에 로고와 폼만 둔다
   const inApp = !modal && isStandalone()
 
@@ -126,6 +131,7 @@ export function LoginForm({ modal }: { modal?: AuthFormModalOptions }) {
                     이메일
                   </label>
                   <input
+                    ref={emailInputRef}
                     id="email"
                     name="email"
                     type="email"
@@ -149,6 +155,7 @@ export function LoginForm({ modal }: { modal?: AuthFormModalOptions }) {
                     비밀번호
                   </label>
                   <input
+                    ref={passwordInputRef}
                     id="password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
@@ -176,15 +183,24 @@ export function LoginForm({ modal }: { modal?: AuthFormModalOptions }) {
                 )}
               </div>
 
-              <label className="ml-1 flex items-center gap-2 text-body-04 text-text-muted">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) => setRememberMe(event.target.checked)}
-                  className="size-4 rounded border-border"
-                />
-                로그인 상태 유지
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="ml-1 flex items-center gap-2 text-body-04 text-text-muted">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(event) => setRememberMe(event.target.checked)}
+                    className="size-4 rounded border-border"
+                  />
+                  로그인 상태 유지
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsResetOpen(true)}
+                  className="text-body-04 text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong"
+                >
+                  비밀번호를 잊으셨나요?
+                </button>
+              </div>
 
               <button
                 type="submit"
@@ -219,6 +235,21 @@ export function LoginForm({ modal }: { modal?: AuthFormModalOptions }) {
         {/* 오른쪽: 큰 카드 안에 여백을 두고 떠있는 별도 비주얼 카드 */}
         {!inApp && <AuthVisual fill={Boolean(modal)} />}
       </div>
+
+      {/* 창 안에 폼이 있어 로그인 폼 바깥에 둔다. form 안에 form을 넣을 수 없다 */}
+      <PasswordResetModal
+        open={isResetOpen}
+        onClose={() => setIsResetOpen(false)}
+        onDone={(email) => {
+          setIsResetOpen(false)
+          useToastStore.getState().showToast('비밀번호를 바꿨어요. 새 비밀번호로 로그인해 주세요.')
+          // 바꾼 계정으로 바로 로그인할 수 있게 이메일을 채우고 비밀번호 칸으로 옮긴다
+          if (emailInputRef.current) emailInputRef.current.value = email
+          setError('')
+          setFieldErrors({})
+          passwordInputRef.current?.focus()
+        }}
+      />
     </div>
   )
 }
