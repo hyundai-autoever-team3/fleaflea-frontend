@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { isAxiosError } from 'axios'
@@ -9,7 +9,9 @@ import { isStandalone } from '../../../shared/lib/pwa'
 import { readRedirect, withRedirect } from '../../../shared/lib/redirect'
 import { useToastStore } from '../../../shared/ui/toast'
 import { login, signup } from '../api/auth-api'
+import { useEmailVerification } from '../model/useEmailVerification'
 import { AuthVisual } from './AuthVisual'
+import { EmailVerificationField } from './EmailVerificationField'
 import type { AuthFormModalOptions } from './LoginForm'
 import { SocialLoginButtons } from './SocialLoginButtons'
 import { useSessionStore } from '../../../entities/session'
@@ -22,6 +24,8 @@ function getSignupErrorMessage(error: unknown) {
       if (body?.code === 'DUPLICATE_EMAIL') return '이미 가입된 이메일이에요. 로그인해 주세요.'
       return body?.message ?? '이미 사용 중인 정보예요.'
     }
+    if (body?.code === 'INVALID_EMAIL_VERIFICATION_TOKEN')
+      return '이메일 인증 시간이 지났어요. 이메일 인증을 다시 해 주세요.'
     if (status === 400) return '입력 정보를 다시 확인해 주세요.'
   }
   return '회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요.'
@@ -34,12 +38,20 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [error, setError] = useState('')
+  const [email, setEmail] = useState('')
+  // 인증 없이 가입을 누르면 인증 영역 테두리를 빨갛게 해서 어디를 해야 하는지 보여 준다
+  const [verificationMissing, setVerificationMissing] = useState(false)
+  const verification = useEmailVerification('SIGN_UP')
+  const emailInputRef = useRef<HTMLInputElement>(null)
+  const codeInputRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    setVerificationMissing(false)
+
     const formData = new FormData(event.currentTarget)
-    const email = String(formData.get('email') ?? '').trim()
+    const trimmedEmail = email.trim()
     const password = String(formData.get('password') ?? '')
     const nickname = String(formData.get('nickname') ?? '').trim()
     const passwordConfirm = String(formData.get('passwordConfirm') ?? '')
@@ -51,8 +63,21 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
       return
     }
 
-    if (!EMAIL_PATTERN.test(email)) {
+    if (!EMAIL_PATTERN.test(trimmedEmail)) {
       setError('올바른 이메일 형식이 아니에요.')
+      return
+    }
+
+    // 서버가 인증 토큰 없는 가입을 거절하므로 인증을 마치기 전에는 요청하지 않는다
+    if (verification.status !== 'verified' || verification.sentEmail !== trimmedEmail) {
+      setVerificationMissing(true)
+      if (verification.status === 'sent') {
+        setError('메일로 받은 인증 코드를 입력하고 인증 확인을 눌러 주세요.')
+        codeInputRef.current?.focus()
+      } else {
+        setError('이메일 인증을 해야 가입할 수 있어요. 인증 요청을 눌러 주세요.')
+        emailInputRef.current?.focus()
+      }
       return
     }
 
@@ -72,15 +97,26 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
     }
 
     try {
-      await signup({ email, password, nickname })
+      await signup({
+        email: trimmedEmail,
+        password,
+        nickname,
+        verificationToken: verification.token,
+      })
     } catch (signupError) {
       setError(getSignupErrorMessage(signupError))
+      // 토큰은 한 번만 쓸 수 있고 10분이 지나면 사라지므로, 거절되면 인증부터 다시 받게 한다
+      if (
+        isAxiosError<{ code?: string }>(signupError) &&
+        signupError.response?.data?.code === 'INVALID_EMAIL_VERIFICATION_TOKEN'
+      )
+        verification.reset()
       return
     }
 
     try {
       // 회원가입 응답에 토큰이 없으므로 가입 성공 후 별도로 로그인한다.
-      const { data } = await login({ email, password })
+      const { data } = await login({ email: trimmedEmail, password })
       useSessionStore.getState().setSession(data)
       useToastStore.getState().showToast('가입을 환영해요!')
       navigate(redirectTo ?? '/market', { replace: true, viewTransition: true })
@@ -90,6 +126,9 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
       navigate(redirectTo ? withRedirect('/login', redirectTo) : '/login', { replace: true })
     }
   }
+
+  // 인증 안내 문구는 인증을 마치면 더 보여 줄 필요가 없다
+  const shownError = verificationMissing && verification.status === 'verified' ? '' : error
 
   // 설치한 앱에서는 로그인 화면과 같이 카드와 옆 그림 없이 흰 화면 가운데에 로고와 폼만 둔다
   const inApp = !modal && isStandalone()
@@ -174,23 +213,14 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
                 />
               </div>
 
-              <div className="relative">
-                <label
-                  htmlFor="email"
-                  className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
-                >
-                  이메일
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder=" flee@example.com"
-                  required
-                  className="h-14 w-full rounded-lg border border-border px-3 text-body-03 text-text-muted"
-                />
-              </div>
+              <EmailVerificationField
+                verification={verification}
+                email={email}
+                onEmailChange={setEmail}
+                emailInputRef={emailInputRef}
+                codeInputRef={codeInputRef}
+                invalid={verificationMissing && verification.status !== 'verified'}
+              />
 
               <div className="relative">
                 <label
@@ -263,7 +293,11 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
                 회원가입
               </button>
 
-              {error && <p className="text-body-04 text-red-600">{error}</p>}
+              {shownError && (
+                <p role="alert" className="text-body-04 text-red-600">
+                  {shownError}
+                </p>
+              )}
 
               <SocialLoginButtons title="간편 회원가입" redirectTo={redirectTo} />
 
