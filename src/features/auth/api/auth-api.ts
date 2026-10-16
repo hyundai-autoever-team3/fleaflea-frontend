@@ -4,6 +4,8 @@ export interface SignupPayload {
   email: string
   password: string
   nickname: string
+  // 이메일 인증 코드 확인 응답으로 받은 일회용 토큰. 10분 동안 한 번만 쓸 수 있다
+  verificationToken: string
   profileImageUrl?: null
 }
 
