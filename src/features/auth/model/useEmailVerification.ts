@@ -107,9 +107,8 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     setPromptOpen(false)
   }
 
-  // 모달을 다시 열 때 안내 문구를 함께 넣을 수 있다
-  function openPrompt(message = '') {
-    setError(message)
+  function openPrompt() {
+    setError('')
     setPromptOpen(true)
   }
 

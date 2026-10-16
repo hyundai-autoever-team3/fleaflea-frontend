@@ -70,13 +70,11 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
     // 서버가 인증 토큰 없는 가입을 거절하므로 인증을 마치기 전에는 요청하지 않는다
     if (verification.status !== 'verified' || verification.sentEmail !== trimmedEmail) {
       setVerificationMissing(true)
-      if (verification.status === 'sent') {
-        setError('메일로 받은 인증 코드를 입력해야 가입할 수 있어요.')
-        verification.openPrompt('인증 코드를 입력하고 확인을 눌러 주세요.')
-      } else {
-        setError('이메일 인증을 해야 가입할 수 있어요. 인증 요청을 눌러 주세요.')
-        emailInputRef.current?.focus()
-      }
+      setError(
+        verification.status === 'sent'
+          ? '메일로 받은 인증 코드를 입력해야 가입할 수 있어요. 코드 입력을 눌러 주세요.'
+          : '이메일 인증을 해야 가입할 수 있어요. 인증 요청을 눌러 주세요.',
+      )
       return
     }
 
@@ -217,7 +215,7 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
                 email={email}
                 onEmailChange={setEmail}
                 emailInputRef={emailInputRef}
-                invalid={verificationMissing && verification.status === 'idle'}
+                invalid={verificationMissing && verification.status !== 'verified'}
               />
 
               <div className="relative">
