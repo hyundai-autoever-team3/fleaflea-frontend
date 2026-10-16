@@ -54,7 +54,7 @@ export function CodeInput({
         aria-label="인증 코드 6자리"
         aria-invalid={invalid}
         // 글자를 16px보다 작게 하면 아이폰이 포커스할 때 화면을 확대한다
-        className="absolute inset-0 z-10 h-full w-full cursor-text text-[16px] text-transparent caret-transparent opacity-0 disabled:cursor-not-allowed"
+        className="absolute inset-0 z-10 h-full w-full cursor-text text-[16px] text-transparent caret-transparent opacity-0 disabled:cursor-default"
       />
 
       <div aria-hidden="true" className="grid grid-cols-6 gap-2">

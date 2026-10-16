@@ -86,7 +86,7 @@ function EmailCodeContent({
           type="button"
           onClick={() => void verification.send(sentEmail)}
           disabled={verification.isSending || resendSecondsLeft > 0}
-          className="text-xs font-bold text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
+          className="text-xs font-bold text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong disabled:no-underline disabled:opacity-60"
         >
           {verification.isSending ? '보내는 중' : '코드 다시 받기'}
         </button>
@@ -103,7 +103,7 @@ function EmailCodeContent({
         onClick={() => void verification.verify()}
         disabled={verification.isVerifying || expired}
         style={{ clipPath: pixelBox(4) }}
-        className="mt-6 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-6 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
       >
         {verification.isVerifying ? '확인하는 중' : '확인'}
       </button>

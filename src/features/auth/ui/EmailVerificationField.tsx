@@ -92,7 +92,7 @@ export function EmailVerificationField({
           type="button"
           onClick={handleClick}
           disabled={verification.isSending}
-          className="h-14 min-w-[4.5rem] shrink-0 whitespace-nowrap rounded-lg bg-primary-subtle px-3 text-body-04 font-bold text-primary transition-colors hover:bg-primary-tint disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-14 min-w-[4.5rem] shrink-0 whitespace-nowrap rounded-lg bg-primary-subtle px-3 text-body-04 font-bold text-primary transition-colors hover:bg-primary-tint disabled:opacity-60"
         >
           {verified
             ? '변경'
