@@ -60,6 +60,11 @@ function EmailCodeContent({
         <br />
         6자리 코드를 입력해 주세요.
       </p>
+      <p
+        className={`mt-2 text-body-04 font-bold tabular-nums ${secondsLeft <= 60 ? 'text-red-600' : 'text-primary'}`}
+      >
+        남은 시간 {formatTime(secondsLeft)}
+      </p>
 
       <div className="mt-6">
         <CodeInput
@@ -75,24 +80,15 @@ function EmailCodeContent({
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
-        <span
-          className={`text-body-04 font-bold tabular-nums ${secondsLeft <= 60 ? 'text-red-600' : 'text-primary'}`}
-        >
-          남은 시간 {formatTime(secondsLeft)}
-        </span>
-        {/* 확인보다 덜 쓰는 동작이라 남은 시간보다 한 단계 작게 둔다 */}
+      <div className="mt-3 flex justify-end">
+        {/* 확인보다 덜 쓰는 동작이라 한 단계 작게 둔다. 보낸 뒤 60초 동안은 흐리게 막아 둔다 */}
         <button
           type="button"
           onClick={() => void verification.send(sentEmail)}
           disabled={verification.isSending || resendSecondsLeft > 0}
           className="text-xs font-bold text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
         >
-          {resendSecondsLeft > 0
-            ? `${formatTime(resendSecondsLeft)} 후 다시 받기`
-            : verification.isSending
-              ? '보내는 중'
-              : '코드 다시 받기'}
+          {verification.isSending ? '보내는 중' : '코드 다시 받기'}
         </button>
       </div>
 
