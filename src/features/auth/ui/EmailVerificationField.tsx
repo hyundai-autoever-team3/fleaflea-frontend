@@ -56,41 +56,43 @@ export function EmailVerificationField({
 
   return (
     <div className="flex flex-col gap-2">
-      {/* 버튼은 비밀번호 칸의 눈 아이콘처럼 입력칸 안쪽 오른쪽에 둔다 */}
-      <div className="relative">
-        <label
-          htmlFor="email"
-          className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
-        >
-          이메일
-        </label>
-        <input
-          ref={emailInputRef}
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder=" flee@example.com"
-          value={email}
-          onChange={(event) => {
-            onEmailChange(event.target.value)
-            // 코드를 보낸 뒤 주소를 고치면 그 코드는 다른 주소의 것이라 처음부터 다시 받는다
-            if (sent) verification.reset()
-            else if (verification.error) verification.setError('')
-          }}
-          readOnly={verified}
-          required
-          aria-invalid={invalid}
-          className={`h-14 w-full rounded-lg border pl-3 pr-24 text-body-03 text-text-muted read-only:bg-bg-subtle/40 ${
-            invalid ? 'border-red-300' : 'border-border'
-          }`}
-        />
+      <div className="flex gap-2">
+        <div className="relative min-w-0 flex-1">
+          <label
+            htmlFor="email"
+            className="absolute -top-2 left-3 bg-bg px-1 text-body-04 text-text-muted"
+          >
+            이메일
+          </label>
+          <input
+            ref={emailInputRef}
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder=" flee@example.com"
+            value={email}
+            onChange={(event) => {
+              onEmailChange(event.target.value)
+              // 코드를 보낸 뒤 주소를 고치면 그 코드는 다른 주소의 것이라 처음부터 다시 받는다
+              if (sent) verification.reset()
+              else if (verification.error) verification.setError('')
+            }}
+            readOnly={verified}
+            required
+            aria-invalid={invalid}
+            className={`h-14 w-full rounded-lg border px-3 text-body-03 text-text-muted read-only:bg-bg-subtle/40 ${
+              invalid ? 'border-red-300' : 'border-border'
+            }`}
+          />
+        </div>
 
+        {/* 입력칸과 높이를 맞추고, 글자가 바뀌어도 입력칸 너비가 흔들리지 않게 최소 너비를 둔다 */}
         <button
           type="button"
           onClick={handleClick}
           disabled={verification.isSending}
-          className="absolute right-2 top-1/2 h-9 min-w-[4.5rem] -translate-y-1/2 rounded-md bg-primary-subtle px-3 text-body-04 font-bold text-primary transition-colors hover:bg-primary-tint disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-14 min-w-[4.5rem] shrink-0 whitespace-nowrap rounded-lg bg-primary-subtle px-3 text-body-04 font-bold text-primary transition-colors hover:bg-primary-tint disabled:cursor-not-allowed disabled:opacity-60"
         >
           {verified
             ? '변경'
