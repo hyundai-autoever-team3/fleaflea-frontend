@@ -7,4 +7,6 @@ export const env = {
   socialLoginEnabled: import.meta.env.VITE_SOCIAL_LOGIN_ENABLED === 'true',
   // Sentry 오류 수집 주소. 비어 있으면 Sentry를 켜지 않는다
   sentryDsn: import.meta.env.VITE_SENTRY_DSN ?? '',
+  //구글 애널리틱스 설정 추가
+  gaMeasurementId: import.meta.env.VITE_GA_MEASUREMENT_ID ?? '',
 }
