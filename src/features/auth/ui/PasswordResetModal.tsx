@@ -37,7 +37,7 @@ function getResetErrorMessage(error: unknown) {
     const code = error.response?.data?.code
 
     if (code === 'SOCIAL_ACCOUNT_PASSWORD_RESET_NOT_ALLOWED')
-      return '카카오·구글로 가입한 계정은 비밀번호가 없어요. 간편 로그인으로 들어와 주세요.'
+      return '카카오·구글로 가입한 계정은 비밀번호가 없어요.\n간편 로그인으로 들어와 주세요.'
     if (code === 'INVALID_EMAIL_VERIFICATION_TOKEN')
       return '인증 시간이 지났어요. 이메일 인증을 다시 해 주세요.'
     if (error.response?.status === 404) return '가입되지 않은 이메일이에요. 이메일을 확인해 주세요.'
@@ -227,7 +227,10 @@ function PasswordResetContent({
           </div>
 
           {error && (
-            <p role="alert" className="mt-3 text-left text-body-04 text-red-600">
+            <p
+              role="alert"
+              className="mt-3 whitespace-pre-line text-left text-body-04 text-red-600"
+            >
               {error}
             </p>
           )}
@@ -285,7 +288,7 @@ function PasswordResetContent({
         </div>
 
         {verification.error && (
-          <p role="alert" className="mt-3 text-left text-body-04 text-red-600">
+          <p role="alert" className="mt-3 whitespace-pre-line text-left text-body-04 text-red-600">
             {verification.error}
           </p>
         )}
