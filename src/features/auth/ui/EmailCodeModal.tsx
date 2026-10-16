@@ -75,28 +75,18 @@ function EmailCodeContent({
         />
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-body-04">
+      {/* 입력하면서 바로 보이게 남은 시간은 코드 칸 바로 아래에 둔다 */}
+      <p className="mt-3 text-body-04 text-text-muted">
+        남은 시간{' '}
         <span
           className={`font-bold tabular-nums ${secondsLeft <= 60 ? 'text-red-600' : 'text-primary'}`}
         >
-          남은 시간 {formatTime(secondsLeft)}
+          {formatTime(secondsLeft)}
         </span>
-        <button
-          type="button"
-          onClick={() => void verification.send(sentEmail)}
-          disabled={verification.isSending || resendSecondsLeft > 0}
-          className="font-bold text-text-muted underline underline-offset-2 transition-colors hover:text-text-strong disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
-        >
-          {resendSecondsLeft > 0
-            ? `${formatTime(resendSecondsLeft)} 후 다시 받기`
-            : verification.isSending
-              ? '보내는 중'
-              : '코드 다시 받기'}
-        </button>
-      </div>
+      </p>
 
       {message && (
-        <p role="alert" className="mt-3 text-left text-body-04 text-red-600">
+        <p role="alert" className="mt-2 text-body-04 text-red-600">
           {message}
         </p>
       )}
@@ -111,8 +101,21 @@ function EmailCodeContent({
         {verification.isVerifying ? '확인하는 중' : '확인'}
       </button>
 
+      {/* 다시 받기는 확인보다 덜 쓰는 동작이라 버튼 아래 안내 문장 안에 둔다 */}
       <p className="mt-4 text-body-04 text-text-muted">
-        메일이 오지 않으면 스팸함도 확인해 주세요.
+        메일이 안 왔다면 스팸함을 확인하거나{' '}
+        <button
+          type="button"
+          onClick={() => void verification.send(sentEmail)}
+          disabled={verification.isSending || resendSecondsLeft > 0}
+          className="font-bold text-primary underline underline-offset-2 transition-colors hover:text-primary/80 disabled:cursor-not-allowed disabled:text-text-muted disabled:no-underline"
+        >
+          {resendSecondsLeft > 0
+            ? `${formatTime(resendSecondsLeft)} 후 다시 받기`
+            : verification.isSending
+              ? '보내는 중'
+              : '코드 다시 받기'}
+        </button>
       </p>
     </div>
   )
