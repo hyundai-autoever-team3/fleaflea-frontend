@@ -153,14 +153,8 @@ function PasswordResetContent({
         />
 
         <h2 id={titleId} className="mt-6 text-head-03 font-bold text-text-strong">
-          새 비밀번호를 정해 주세요
+          비밀번호를 재설정해 주세요
         </h2>
-        <p className="mt-2 text-body-04 text-text-muted">
-          <span className="break-all font-bold text-text-strong">{verification.sentEmail}</span>{' '}
-          계정의
-          <br />
-          비밀번호를 바꿔요.
-        </p>
 
         <div className="mt-6 flex flex-col gap-3 text-left">
           <label htmlFor="reset-password" className="text-body-04 font-bold text-text-strong">
@@ -229,7 +223,7 @@ function PasswordResetContent({
           style={{ clipPath: pixelBox(4) }}
           className="mt-6 min-h-12 w-full bg-primary py-3 text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
         >
-          {isSubmitting ? '바꾸는 중' : '비밀번호 바꾸기'}
+          {isSubmitting ? '변경하는 중' : '비밀번호 변경'}
         </button>
       </form>
     )
