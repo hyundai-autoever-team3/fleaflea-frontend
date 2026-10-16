@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Ref } from 'react'
 
+import { pixelBox } from '../../../shared/lib/pixel'
 import { CODE_LENGTH } from '../model/useEmailVerification'
 
 interface CodeInputProps {
@@ -61,19 +62,26 @@ export function CodeInput({
           const digit = value[index] ?? ''
           const active = focused && index === activeIndex
 
+          // PixelField와 같은 방식: 바깥 판 색이 테두리가 된다
           return (
             <div
               key={index}
-              className={`flex h-14 items-center justify-center rounded-lg border bg-bg text-head-03 font-bold text-text-strong transition-colors ${
-                active
-                  ? 'border-primary ring-2 ring-primary-subtle'
-                  : invalid
-                    ? 'border-red-300'
-                    : 'border-border'
+              style={{ clipPath: pixelBox() }}
+              className={`p-[2px] transition-colors ${
+                active ? 'bg-primary' : invalid ? 'bg-red-300' : 'bg-primary-subtle'
               } ${disabled ? 'opacity-50' : ''}`}
             >
-              {digit ||
-                (active && <span className="h-6 w-px bg-text-strong motion-safe:animate-pulse" />)}
+              <div
+                style={{ clipPath: pixelBox() }}
+                className={`flex h-12 items-center justify-center text-head-03 font-bold text-text-strong transition-colors ${
+                  active ? 'bg-white' : 'bg-primary-subtle'
+                }`}
+              >
+                {digit ||
+                  (active && (
+                    <span className="h-6 w-0.5 bg-text-strong motion-safe:animate-pulse" />
+                  ))}
+              </div>
             </div>
           )
         })}

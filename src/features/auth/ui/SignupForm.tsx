@@ -43,7 +43,6 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
   const [verificationMissing, setVerificationMissing] = useState(false)
   const verification = useEmailVerification('SIGN_UP')
   const emailInputRef = useRef<HTMLInputElement>(null)
-  const codeInputRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -72,8 +71,8 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
     if (verification.status !== 'verified' || verification.sentEmail !== trimmedEmail) {
       setVerificationMissing(true)
       if (verification.status === 'sent') {
-        setError('메일로 받은 인증 코드를 입력하고 인증 확인을 눌러 주세요.')
-        codeInputRef.current?.focus()
+        setError('메일로 받은 인증 코드를 입력해야 가입할 수 있어요.')
+        verification.openPrompt('인증 코드를 입력하고 확인을 눌러 주세요.')
       } else {
         setError('이메일 인증을 해야 가입할 수 있어요. 인증 요청을 눌러 주세요.')
         emailInputRef.current?.focus()
@@ -218,8 +217,7 @@ export function SignupForm({ modal }: { modal?: AuthFormModalOptions }) {
                 email={email}
                 onEmailChange={setEmail}
                 emailInputRef={emailInputRef}
-                codeInputRef={codeInputRef}
-                invalid={verificationMissing && verification.status !== 'verified'}
+                invalid={verificationMissing && verification.status === 'idle'}
               />
 
               <div className="relative">

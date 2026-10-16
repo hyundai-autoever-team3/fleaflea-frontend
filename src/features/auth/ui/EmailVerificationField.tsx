@@ -1,45 +1,30 @@
-import { useEffect } from 'react'
 import type { RefObject } from 'react'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
 import { EMAIL_PATTERN } from '../../../shared/config/field-limits'
 import type { EmailVerification } from '../model/useEmailVerification'
-import { CodeInput } from './CodeInput'
+import { EmailCodeModal } from './EmailCodeModal'
 
 interface EmailVerificationFieldProps {
   verification: EmailVerification
   email: string
   onEmailChange: (email: string) => void
   emailInputRef: RefObject<HTMLInputElement | null>
-  codeInputRef: RefObject<HTMLInputElement | null>
-  // 인증하지 않고 제출했을 때 어디를 고쳐야 하는지 테두리로 알려 준다
+  // 인증하지 않고 제출했을 때 이메일 칸 테두리로 알려 준다
   invalid?: boolean
 }
 
-function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60)
-  return `${minutes}:${String(seconds % 60).padStart(2, '0')}`
-}
-
-// 이메일 입력, 코드 발송, 6자리 코드 확인을 한 묶음으로 보여 준다
+// 이메일 칸 옆 버튼으로 코드를 보내고, 코드는 모달에서 입력한다
 export function EmailVerificationField({
   verification,
   email,
   onEmailChange,
   emailInputRef,
-  codeInputRef,
   invalid = false,
 }: EmailVerificationFieldProps) {
-  const { status, sentEmail, code, error, secondsLeft, resendSecondsLeft, expired } = verification
+  const { status } = verification
   const verified = status === 'verified'
   const sent = status === 'sent'
-  const waitingResend = sent && resendSecondsLeft > 0
-  const message = error || (expired ? '인증 시간이 지났어요. 코드를 다시 받아 주세요.' : '')
-
-  // 코드를 보내면 바로 입력할 수 있게 코드 칸으로 옮긴다
-  useEffect(() => {
-    if (status === 'sent') codeInputRef.current?.focus()
-  }, [status, sentEmail, codeInputRef])
 
   async function handleSend() {
     const value = email.trim()
@@ -53,13 +38,24 @@ export function EmailVerificationField({
     await verification.send(value)
   }
 
-  function handleChangeEmail() {
-    verification.reset()
-    emailInputRef.current?.focus()
+  function handleClick() {
+    if (verified) {
+      verification.reset()
+      emailInputRef.current?.focus()
+      return
+    }
+
+    // 코드를 이미 보냈으면 다시 보내지 않고 입력 창만 연다
+    if (sent) {
+      verification.openPrompt()
+      return
+    }
+
+    void handleSend()
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <div className="flex gap-2">
         <div className="relative min-w-0 flex-1">
           <label
@@ -80,77 +76,32 @@ export function EmailVerificationField({
               onEmailChange(event.target.value)
               // 코드를 보낸 뒤 주소를 고치면 그 코드는 다른 주소의 것이라 처음부터 다시 받는다
               if (sent) verification.reset()
+              else if (verification.error) verification.setError('')
             }}
             readOnly={verified}
             required
-            aria-invalid={invalid && status === 'idle'}
+            aria-invalid={invalid}
             className={`h-14 w-full rounded-lg border px-3 text-body-03 text-text-muted read-only:bg-bg-subtle/40 ${
-              invalid && status === 'idle' ? 'border-red-300' : 'border-border'
+              invalid ? 'border-red-300' : 'border-border'
             }`}
           />
         </div>
 
         <button
           type="button"
-          onClick={verified ? handleChangeEmail : handleSend}
-          disabled={verification.isSending || waitingResend}
-          className="h-14 w-24 shrink-0 rounded-lg bg-primary-subtle text-body-04 font-bold text-primary transition-colors hover:bg-primary-tint disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary-subtle"
+          onClick={handleClick}
+          disabled={verification.isSending}
+          className="h-14 w-24 shrink-0 rounded-lg bg-primary-subtle text-body-04 font-bold text-primary transition-colors hover:bg-primary-tint disabled:cursor-not-allowed disabled:opacity-60"
         >
           {verified
             ? '변경'
             : verification.isSending
               ? '보내는 중'
-              : waitingResend
-                ? `재발송 ${formatTime(resendSecondsLeft)}`
-                : sent
-                  ? '재발송'
-                  : '인증 요청'}
+              : sent
+                ? '코드 입력'
+                : '인증 요청'}
         </button>
       </div>
-
-      {sent && (
-        <div className="flex flex-col gap-3 rounded-lg bg-primary-subtle/60 p-4">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="min-w-0 text-body-04 text-text-muted">
-              <span className="break-all font-bold text-text-strong">{sentEmail}</span>로 보낸 6자리
-              코드를 입력해 주세요.
-            </p>
-            <span
-              className={`shrink-0 text-body-04 font-bold tabular-nums ${
-                secondsLeft <= 60 ? 'text-red-600' : 'text-primary'
-              }`}
-              aria-label={`남은 시간 ${formatTime(secondsLeft)}`}
-            >
-              {formatTime(secondsLeft)}
-            </span>
-          </div>
-
-          <CodeInput
-            inputRef={codeInputRef}
-            value={code}
-            onChange={(value) => {
-              verification.setCode(value)
-              if (error) verification.setError('')
-            }}
-            onComplete={(value) => void verification.verify(value)}
-            invalid={Boolean(error) || invalid}
-            disabled={verification.isVerifying || expired}
-          />
-
-          <button
-            type="button"
-            onClick={() => void verification.verify()}
-            disabled={verification.isVerifying || expired}
-            className="h-12 rounded-lg bg-primary text-body-04 font-bold text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {verification.isVerifying ? '확인하는 중' : '인증 확인'}
-          </button>
-
-          <p className="text-body-04 text-text-muted">
-            메일이 오지 않으면 스팸함을 확인하거나 재발송해 주세요.
-          </p>
-        </div>
-      )}
 
       {verified && (
         <p className="flex items-center gap-1 text-body-04 font-bold text-status-success">
@@ -159,11 +110,14 @@ export function EmailVerificationField({
         </p>
       )}
 
-      {message && (
+      {/* 모달이 닫혀 있을 때만 여기에 보여 준다. 열려 있으면 모달 안에 나온다 */}
+      {!verification.promptOpen && verification.error && (
         <p role="alert" className="text-body-04 text-red-600">
-          {message}
+          {verification.error}
         </p>
       )}
+
+      <EmailCodeModal verification={verification} />
     </div>
   )
 }

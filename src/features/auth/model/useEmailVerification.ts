@@ -27,6 +27,8 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
   const [expiresAt, setExpiresAt] = useState(0)
   const [resendAt, setResendAt] = useState(0)
   const [now, setNow] = useState(0)
+  // 코드 입력 모달. 코드를 보내면 열리고 인증하면 닫힌다
+  const [promptOpen, setPromptOpen] = useState(false)
 
   // 코드를 기다리는 동안만 1초마다 남은 시간을 갱신한다
   useEffect(() => {
@@ -54,6 +56,7 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
       setExpiresAt(sentAt + CODE_TTL_MS)
       setResendAt(sentAt + RESEND_COOLDOWN_MS)
       setNow(sentAt)
+      setPromptOpen(true)
       return true
     } catch (sendError) {
       setError(getSendCodeErrorMessage(sendError))
@@ -84,6 +87,7 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
 
       setStatus('verified')
       setToken(data.verificationToken ?? '')
+      setPromptOpen(false)
     } catch (verifyError) {
       setError(getVerifyErrorMessage(getVerifyResult(verifyError)))
     } finally {
@@ -100,6 +104,19 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     setError('')
     setExpiresAt(0)
     setResendAt(0)
+    setPromptOpen(false)
+  }
+
+  // 모달을 다시 열 때 안내 문구를 함께 넣을 수 있다
+  function openPrompt(message = '') {
+    setError(message)
+    setPromptOpen(true)
+  }
+
+  // 닫으면 모달 안의 오류는 더 보이지 않으므로 지운다. 입력한 코드는 다시 열 때를 위해 남긴다
+  function closePrompt() {
+    setError('')
+    setPromptOpen(false)
   }
 
   return {
@@ -115,6 +132,9 @@ export function useEmailVerification(purpose: EmailVerificationPurpose) {
     secondsLeft,
     resendSecondsLeft,
     expired,
+    promptOpen,
+    openPrompt,
+    closePrompt,
     send,
     verify,
     reset,
